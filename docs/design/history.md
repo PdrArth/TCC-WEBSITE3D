@@ -1,18 +1,18 @@
 # Abertura e vida nas ilhas v18
 
-Relatório atual: [docs/validation-v18.md](docs/validation-v18.md). Céu inicial em tela inteira, preparação opcional adiada, ponte7→1 e rotina de morador. Ajustes manuais exclusivos do autor; pesquisa preservada. A v17 fica disponível para reversão.
+Relatório atual: [validação v18](../validation/validation-v18.md). Céu inicial em tela inteira, preparação opcional adiada, ponte7→1 e rotina de morador. Ajustes manuais exclusivos do autor; pesquisa preservada. A v17 fica disponível para reversão.
 
 # Histórico: abertura v17
 
-Relatório atual: [docs/validation-v17.md](docs/validation-v17.md). Ajustes limitados à abertura, preparo e início da música. A v16 permanece preservada para reversão.
+Relatório atual: [validação v17](../validation/validation-v17.md). Ajustes limitados à abertura, preparo e início da música. A v16 permanece preservada para reversão.
 
 # Histórico: ajustes v16
 
-Relatório atual: [docs/validation-v16.md](docs/validation-v16.md). A revisão preserva pesquisa e painéis e trata abertura, ciclo de climas entre abas, chuva central e raios. A v15 permanece disponível para reversão.
+Relatório atual: [validação v16](../validation/validation-v16.md). A revisão preserva pesquisa e painéis e trata abertura, ciclo de climas entre abas, chuva central e raios. A v15 permanece disponível para reversão.
 
 # Histórico: acabamento v15
 
-O relatório atual está em [docs/validation-v15.md](docs/validation-v15.md). A [validação v14](docs/validation-v14.md) e o histórico da v13 abaixo ficam preservados. A v15 mantém o painel lateral aprovado e corrige água, nuvens, trovões e preparação gráfica. A v14 hospedada permanece disponível para reversão.
+O relatório atual está em [validação v15](../validation/validation-v15.md). A [validação v14](../validation/validation-v14.md) e o histórico da v13 abaixo ficam preservados. A v15 mantém o painel lateral aprovado e corrige água, nuvens, trovões e preparação gráfica. A v14 hospedada permanece disponível para reversão.
 
 # Histórico: cards da pesquisa — opção 2
 
@@ -20,7 +20,7 @@ Data: 12/10/2026. Projeto: `G:\site-tcc`. Escopo: os sete resumos de ilha e sua 
 
 ## Evidências e normalização
 
-- Verdade visual: `docs/design/cards-v13-option-2.png`, 1513 × 1040 pixels.
+- Verdade visual: `archive/v13/cards-v13-option-2.png`, 1513 × 1040 pixels.
 - Implementação: `.sites-runtime/cards-v13-qa/desktop-final.png`, 1513 × 1040 pixels, viewport CSS 1513 × 1040, DPR aproximadamente 1. Sem moldura de dispositivo ou redimensionamento para comparar.
 - Estado comum: ilha 02, Ferramentas; aba 2 selecionada; primeiro marco, GitHub Copilot; painel no início da rolagem.
 - Comparação integral: referência e captura final foram abertas juntas no mesmo input de comparação. As cinco superfícies obrigatórias foram examinadas nessa dupla. Não foi necessário recorte de detalhe: títulos, abas, link oficial, nota e rodapé são legíveis na resolução integral; estilos calculados e medidas DOM também foram conferidos.
@@ -42,7 +42,7 @@ Data: 12/10/2026. Projeto: `G:\site-tcc`. Escopo: os sete resumos de ilha e sua 
 
 **Cores e tokens:** papel `#fcfaf4`, verde `#315440` e âmbar. Contraste calculado: verde/papel 8,14:1, nota/papel 4,79:1, descrição de aba/papel 4,64:1. O botão escuro mantém texto claro, e o link do caderno permanece verde sobre papel em estado normal.
 
-**Imagem e recursos:** ilustração Gerar produzida por ImageGen a partir da referência escolhida, WebP 720 × 530, 58.524 bytes. Não foi substituída por CSS ou SVG. Os demais temas reutilizam renders próprios existentes. A identificação como ilustração conceitual permanece visível. Origem registrada em `docs/asset-credits.md`.
+**Imagem e recursos:** ilustração Gerar produzida por ImageGen a partir da referência escolhida, WebP 720 × 530, 58.524 bytes. Não foi substituída por CSS ou SVG. Os demais temas reutilizam renders próprios existentes. A identificação como ilustração conceitual permanece visível. Origem registrada em `../credits/assets.md`.
 
 **Texto e conteúdo:** preservados os três parágrafos editoriais de cada tema no cadastro e no caderno, as 11 fontes centrais e 13 complementares e os oito marcos documentais. Eventos conservam tipo e ressalvas, incluindo a reescrita do OpenCode, a prévia pública do Antigravity e a distinção entre o agente Codex e o modelo original. A apresentação curta do Copilot omite somente texto repetido pela data e pelo contexto; a versão completa continua no caderno.
 

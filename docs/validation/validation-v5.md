@@ -2,7 +2,7 @@
 
 ## Entrega
 
-Entrada única por «Entrar na ilha», que inicia a música no gesto do visitante. A playlist local contém Sudo, Boy e Baguira, de Kounine: as mesmas faixas publicadas com licença CC0 no repositório oficial do portfólio de Bruno Simon. Proveniência, commit, hashes e licença estão em asset-credits.md. A faixa inicial varia pela janela de três minutos; o áudio não muda no meio da faixa. Apenas a faixa em uso é transferida. As três somam 18.885.120 bytes. Os navegadores ainda podem impedir áudio anterior ao primeiro gesto.
+Entrada única por «Entrar na ilha», que inicia a música no gesto do visitante. A playlist local contém Sudo, Boy e Baguira, de Kounine: as mesmas faixas publicadas com licença CC0 no repositório oficial do portfólio de Bruno Simon. Proveniência, commit, hashes e licença estão em ../credits/assets.md. A faixa inicial varia pela janela de três minutos; o áudio não muda no meio da faixa. Apenas a faixa em uso é transferida. As três somam 18.885.120 bytes. Os navegadores ainda podem impedir áudio anterior ao primeiro gesto.
 
 O movimento agora começa ativo, com controle visível para reduzi-lo e opção de seguir a preferência do dispositivo. Pássaros, chuva e personagem usam o tempo efetivamente transcorrido, inclusive quando o navegador limita a frequência de quadros. Há três ilhotas de cenário, sem acessos fictícios. Sol, entardecer, chuva, tempestade e tornado distante compõem uma sequência automática: tempestade vem após chuva e tornado é raro após tempestade. Raios e trovões têm intervalos; flashes ficam desativados com movimento reduzido. O clima é uma simulação artística, não meteorologia real.
 

@@ -2,7 +2,7 @@
 
 ## Card Ferramentas — opção visual 2, versão 13
 
-`public/experience/editorial/cards-v13/gerar.webp`: ilustração conceitual gerada pela ferramenta ImageGen a partir da segunda proposta escolhida por Pedro em 12/10/2026. A referência inteira fica em `docs/design/cards-v13-option-2.png`. A imagem foi convertida para WebP de 720 × 530 px, qualidade 87, com 58.524 bytes. Não foi recortada nem redesenhada na conversão. Não é fotografia, captura do ambiente 3D ou evidência dos estudos, e não recebe licença externa de banco de imagens ou atribuição CC0.
+`public/experience/editorial/cards-v13/gerar.webp`: ilustração conceitual gerada pela ferramenta ImageGen a partir da segunda proposta escolhida por Pedro em 12/10/2026. A referência inteira fica em `../design/archive/v13/cards-v13-option-2.png`. A imagem foi convertida para WebP de 720 × 530 px, qualidade 87, com 58.524 bytes. Não foi recortada nem redesenhada na conversão. Não é fotografia, captura do ambiente 3D ou evidência dos estudos, e não recebe licença externa de banco de imagens ou atribuição CC0.
 
 Os outros seis cards reutilizam as imagens renderizadas dos modelos próprios da experiência v9. As ilustrações são identificadas como conceituais na interface; o conteúdo e as referências continuam em HTML.
 
@@ -12,7 +12,7 @@ A entrada “Explorar as ilhas” inicia uma faixa local sorteada entre [Sleep](
 
 Os quatro OGG de aves são trechos da prévia pública de [Bird, Robin Isolated — JohnsonBrandEditing](https://freesound.org/people/JohnsonBrandEditing/sounds/434024/), CC0, com corte e fades. Não representam especificamente aves brasileiras. Os efeitos Kenney permanecem CC0. A experiência v8 não solicita as trilhas anteriores nem gravações extraídas do YouTube.
 
-[audio-v8.md](audio-v8.md) registra arquivos, origem, licença, alterações, duração, hashes e verificação. Música, efeitos e ambiente têm volumes independentes, inicialmente 28%, 10% e 6%. A reprodução pausa com a aba oculta; silenciamento e falhas musicais têm estados próprios. Dados do analisador comprovam sinal digital, sem afirmar audibilidade em alto-falantes físicos.
+[registro de áudio v8](../audio/audio-v8.md) registra arquivos, origem, licença, alterações, duração, hashes e verificação. Música, efeitos e ambiente têm volumes independentes, inicialmente 28%, 10% e 6%. A reprodução pausa com a aba oculta; silenciamento e falhas musicais têm estados próprios. Dados do analisador comprovam sinal digital, sem afirmar audibilidade em alto-falantes físicos.
 
 As seções abaixo documentam escolhas de versões anteriores, preservadas para proveniência e reversão. Elas não descrevem o comportamento ativo da v8.
 

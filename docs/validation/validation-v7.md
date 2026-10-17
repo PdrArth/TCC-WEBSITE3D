@@ -29,7 +29,7 @@ Capturas locais em `.sites-runtime/v7-qa`: comparação v6, visão desktop das s
 ## Preservação
 
 - PDF original mantido: SHA-256 `59d208f910c5cec1bb951025a9d643e11e33f82e8dea86ec7c6e2105b96fe257`, HTTP 200, 710.284 bytes.
-- Biblioteca: 11 fontes centrais e 13 complementares. A conferência editorial e suas ressalvas estão em `docs/reading-v7.md`.
+- Biblioteca: 11 fontes centrais e 13 complementares. A conferência editorial e suas ressalvas estão em `../research/reading-v7.md`.
 - `GET /api/updates`: HTTP 200 com lista pública vazia no banco local. `GET /api/editorial` sem autenticação: HTTP 401. Backend, autenticação, D1, revisão e MCP não foram alterados. Nenhum dado foi gravado em produção nos testes; nenhum agendamento foi ativado.
 - Folha de aprovação, texto acadêmico e arquivos da pasta do TCC não fazem parte desta alteração.
 - Reversão: versão pública anterior `appgprj_6ac10ccda500819197e7ea32de53dae7~appgver_6d17a9f473e08191a9136999ab5c5aae`; fonte base `1e5c7862b1555adec6b3530388807252c8b28a9d`. Manifesto, GLBs e imagens v6 foram preservados.

@@ -18,7 +18,7 @@ O prefixo pequeno de partículas usado na garoa concentrava trajetórias em um c
 
 As oito posições de raio incluem o lago central e as margens. Primeiro evento em 2–4 s; seguintes em 3,5–7 s, com um decaimento contínuo de clarão e sem repetição rápida de flashes. Movimento reduzido não produz clarões. O áudio aceita a cadência nova, limita duas vozes e descarta eventos pendentes antigos. Não há geração ou decodificação no momento do raio.
 
-Música passa de 28% para 52%; efeitos seguem 10% e ambiente 6%. A composição e o cue de 45,65 s permanecem. Não foi encontrada outra faixa oficial com arquivo e origem de uso documentados nessa pesquisa, portanto não se afirma troca de trilha ou adoção de Liyue. Fontes, testes e análise digital estão em [audio-v16.md](audio-v16.md).
+Música passa de 28% para 52%; efeitos seguem 10% e ambiente 6%. A composição e o cue de 45,65 s permanecem. Não foi encontrada outra faixa oficial com arquivo e origem de uso documentados nessa pesquisa, portanto não se afirma troca de trilha ou adoção de Liyue. Fontes, testes e análise digital estão em [registro de áudio v16](../audio/audio-v16.md).
 
 ## Verificação
 

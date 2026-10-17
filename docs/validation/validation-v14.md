@@ -1,6 +1,6 @@
 # Revisão final das ilhas — v14
 
-Validação local em 15/10/2026, no navegador integrado do Codex, em `G:\site-tcc`. Direção aprovada: fluidez primeiro, sete ilhas, estações do Sudeste, painel lateral amplo e entrada direta na trilha existente. O registro visual v13 permanece em `docs/design/qa-v13-option-2.md`; a versão hospedada 13 é a referência de reversão.
+Validação local em 15/10/2026, no navegador integrado do Codex, em `G:\site-tcc`. Direção aprovada: fluidez primeiro, sete ilhas, estações do Sudeste, painel lateral amplo e entrada direta na trilha existente. O registro visual v13 permanece em `../design/archive/v13/qa.md`; a versão hospedada 13 é a referência de reversão.
 
 ## Implementação verificada
 
@@ -10,7 +10,7 @@ O manifesto v14 compartilha contorno real do lago, ilhas, pontes, altura da águ
 
 O painel ocupa 60% da largura no desktop, limitado a 840 px, e toda a largura até 1000 px. Imagem horizontal, resumo contínuo, diagrama ou comparação e fontes substituem as antigas abas. Ferramentas conserva oito marcos e suas ressalvas em lista vertical. Um único rodapé liga ao tema no caderno e à próxima ilha. A câmera desloca a ilha selecionada para o espaço livre. Os rótulos da visão geral ficam ocultos enquanto o painel está aberto, evitando rótulos congelados sobre a câmera de detalhe. ESC fecha, restaura a visão e devolve o foco ao controle de origem. O caderno conserva navegação superior e largura, com redução tipográfica próxima de 8%; corpo principal de 18 px no celular e aproximadamente 22 px no desktop.
 
-O MP3 existente permanece idêntico. O primeiro início usa `startAtSeconds: 45.65` e fade de 150 ms; mudanças de clima, painéis e retorno da aba não reiniciam o cue. O ponto foi identificado por análise de energia PCM e testado digitalmente, sem confirmação por audição humana de uma frase musical completa. A comparação do primeiro segundo passa de -103,70 dBFS no início original para -32,02 dBFS no cue. Detalhes e limites em `docs/audio-v14.md`.
+O MP3 existente permanece idêntico. O primeiro início usa `startAtSeconds: 45.65` e fade de 150 ms; mudanças de clima, painéis e retorno da aba não reiniciam o cue. O ponto foi identificado por análise de energia PCM e testado digitalmente, sem confirmação por audição humana de uma frase musical completa. A comparação do primeiro segundo passa de -103,70 dBFS no início original para -32,02 dBFS no cue. Detalhes e limites em `../audio/audio-v14.md`.
 
 ## Desempenho observado
 

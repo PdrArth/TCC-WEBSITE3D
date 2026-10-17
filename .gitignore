@@ -55,3 +55,6 @@ __pycache__/
 # Local project data that must not be committed to a public repository.
 /editorial/initial-drafts.json
 /public/experience/audio/genshin-official-theme.mp3
+
+# Hosting configuration belongs to the private deployment environment.
+/.openai/

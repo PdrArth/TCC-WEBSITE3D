@@ -14,7 +14,7 @@ A área da ilha fica contida na janela e a abertura conserva fundo neutro e cont
 
 O HTML entrega o elemento de áudio com preload e um script estático pequeno antes da experiência React. A preparação e tentativa de reprodução não esperam React, Three.js ou o cenário. O script tenta autoplay; bloqueado pelo navegador, tenta novamente no gesto real. O volume padrão passa de52% para68%, sem modificar composição ou cue45,65s. O download do modelo recebe prioridade baixa para não anteceder o áudio e os recursos essenciais da interface.
 
-O motor adota o mesmo elemento e posição da música; não cria uma segunda trilha na entrada. Mute, aba, erros de Web Audio, StrictMode, cancelamentos e replay de eventos foram revisados. Detalhes em [audio-v17.md](audio-v17.md). Os datasets antecipados do `<html>` são esperados antes da hidratação; somente esse elemento tem `suppressHydrationWarning`, sem suprimir divergências dos filhos.
+O motor adota o mesmo elemento e posição da música; não cria uma segunda trilha na entrada. Mute, aba, erros de Web Audio, StrictMode, cancelamentos e replay de eventos foram revisados. Detalhes em [registro de áudio v17](../audio/audio-v17.md). Os datasets antecipados do `<html>` são esperados antes da hidratação; somente esse elemento tem `suppressHydrationWarning`, sem suprimir divergências dos filhos.
 
 ## Validação
 

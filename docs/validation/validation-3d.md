@@ -17,7 +17,7 @@ Implementação em G:\site-tcc: quatro pavilhões, personagem com espera/caminha
 
 A sessão apresentou amostras de 83–116 FPS e uma fase próxima de 1 FPS no navegador interno enquanto o chat não estava visível. A qualidade se adapta; lentidão persistente usa o poster e oferece nova tentativa em Créditos. A caminhada mantém seu tempo. Esses dados não garantem desempenho em aparelhos não testados.
 
-Desktop: 1487 × 1058. Celular emulado: 390 × 844. Reflow: 745 × 529. Não houve teste físico de celular, zoom nativo ou avaliação auditiva de uma volta completa da trilha. Detalhes e histórico: design-qa.md.
+Desktop: 1487 × 1058. Celular emulado: 390 × 844. Reflow: 745 × 529. Não houve teste físico de celular, zoom nativo ou avaliação auditiva de uma volta completa da trilha. Detalhes e histórico: ../design/history.md.
 
 Capturas em .sites-runtime/design-qa: comparison-final.png, comparison-typography.png, island-final-desktop.jpg, island-final-mobile.jpg e island-panel-mobile-fallback.jpg.
 

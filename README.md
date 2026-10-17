@@ -1,71 +1,45 @@
 # Do código à supervisão
 
-**Uma pesquisa sobre IA generativa e o trabalho de quem desenvolve software, apresentada como um arquipélago interativo.**
+## Se a IA escreve código, o que muda no trabalho de quem desenvolve?
 
-[Explorar o site publicado](https://do-codigo-a-supervisao-pedro.pdrarth.chatgpt.site/) · [Baixar o TCC em PDF](https://do-codigo-a-supervisao-pedro.pdrarth.chatgpt.site/tcc-pedro-arthur.pdf)
+Este repositório contém o site que apresenta o TCC de Pedro Arthur Oliveira Januário e o PDF do trabalho. A pesquisa analisa o que estudos acadêmicos e documentos técnicos dizem sobre produtividade, erros, retrabalho e mudanças na prática de desenvolvimento de software.
 
-![Visão do arquipélago de pesquisa](docs/assets/preview.png)
+A resposta não é igual em todos os cenários. Os estudos avaliam tarefas, participantes e métricas diferentes; por isso, o site preserva essas diferenças e não transforma um resultado isolado em regra geral. A pesquisa também discute por que especificar o problema, revisar o código e validar a solução continuam sendo parte central do trabalho.
 
-## Sobre o projeto
+[Explorar as sete ilhas](https://do-codigo-a-supervisao-pedro.pdrarth.chatgpt.site/) · [Ler o TCC em PDF](https://do-codigo-a-supervisao-pedro.pdrarth.chatgpt.site/tcc-pedro-arthur.pdf)
 
-Este site apresenta o TCC de Pedro Arthur Oliveira Januário sobre os efeitos da inteligência artificial generativa no desenvolvimento de software. A pesquisa discute produtividade, limites e retrabalho, qualidade, especificação e a transformação do papel do desenvolvedor. O conteúdo parte de uma revisão narrativa da literatura com apoio documental; a experiência visual é uma forma de apresentar a pesquisa, não um experimento que mede produtividade.
+![Captura atual do arquipélago interativo, com as sete ilhas da pesquisa](docs/assets/site-overview.png)
 
-O visitante pode explorar sete ilhas — **Pesquisa, Ferramentas, Produtividade, Validação, Especificação, Profissão e Perspectivas** — ou ler o caderno completo. Os temas preservam diferenças de método, tarefa e métrica entre os estudos. A cena também mostra um pequeno ecossistema com morador, aves, peixes, clima e estações.
+## Sete temas, uma pergunta
 
-## O que você encontra
+1. **A pesquisa** — problema, hipótese e percurso da revisão.
+2. **Ferramentas** — como as ferramentas de programação com IA ampliaram o que pode ser delegado.
+3. **Produtividade** — ganhos observados e diferenças entre velocidade percebida e resultado real.
+4. **Validação** — revisão, testes, qualidade e custo do retrabalho.
+5. **Especificação** — critérios, contexto e *Spec-Driven Development*.
+6. **Profissão** — o que muda na atuação e nas responsabilidades de quem desenvolve.
+7. **Perspectivas** — conclusões do TCC e perguntas para trabalhos futuros.
 
-- Mapa 3D navegável com sete temas e uma leitura direta equivalente.
-- Resumos editoriais, comparações e referências ligadas às fontes.
-- Caderno completo e PDF do trabalho acadêmico.
-- Clima e estações como recursos visuais, com acessos por teclado e suporte a movimento reduzido.
-- Área privada de revisão de novidades, protegida pela autenticação do serviço de hospedagem.
+O arquipélago é uma forma de percorrer os capítulos, não um experimento de produtividade. Cada ilha apresenta uma síntese e suas fontes; a leitura completa e o PDF preservam o desenvolvimento acadêmico.
 
-## Tecnologias
+## Organização do repositório
 
-React 19, TypeScript, Vinext, Three.js, React Three Fiber, Tailwind CSS, Cloudflare Workers, D1 e Drizzle ORM.
-
-## Executar localmente
-
-Requer Node.js 22.13 ou superior e npm. Na raiz do projeto:
-
-```bash
-npm ci
-npm run dev
-```
-
-O comando informa o endereço local. Algumas rotas dependem do ambiente compatível com Cloudflare e de variáveis locais; credenciais de produção não fazem parte deste repositório. Para validar o código, os comandos disponíveis são:
-
-```bash
-npm test
-npm run lint
-node node_modules/typescript/bin/tsc --noEmit
-npm run build
-```
-
-O teste de integração editorial grava somente quando recebe explicitamente um banco isolado e um servidor em `127.0.0.1`; consulte o próprio teste antes de executá-lo manualmente.
-
-## Organização
-
-| Pasta | Conteúdo |
+| Caminho | O que reúne |
 | --- | --- |
 | `app/` | Páginas e rotas da aplicação. |
-| `components/` | Interface, caderno, ilha e experiência 3D. |
-| `lib/` | Conteúdo editorial, contratos, clima, áudio e navegação. |
-| `db/` e `drizzle/` | Acesso ao banco e migrações. |
-| `assets/world/` | Cenas editáveis do Blender, texturas, proveniência e instruções de reconstrução. |
-| `public/` | PDF, modelos, imagens, fontes e recursos estáticos. |
-| `scripts/` | Preparação de recursos e tarefas de desenvolvimento. |
-| `test/` | Testes automatizados e dados sintéticos de teste. |
-| `docs/` | Créditos, decisões visuais, validação e evidências do projeto. |
+| `components/` | Interface, caderno de leitura e cena 3D. |
+| `lib/` | Conteúdo, contratos e regras compartilhadas. |
+| `assets/world/` | Arquivos editáveis do mundo, texturas e manifestos de origem. |
+| `public/` | Recursos servidos pelo site, incluindo o PDF do TCC. |
+| `scripts/world/` | Preparação e validação dos recursos 3D. |
+| `db/`, `drizzle/`, `examples/` | Esquema, migrações e integração de banco. |
+| `test/` | Testes e dados sintéticos usados por eles. |
+| `docs/` | Índice da documentação, registros de pesquisa, áudio, design, créditos e validações. |
 
-## Créditos e arquivos de mídia
+O mapa da documentação está em [`docs/README.md`](docs/README.md), e o fluxo entre a cena autoral, os arquivos públicos e a aplicação está em [`docs/architecture.md`](docs/architecture.md). A aplicação combina React e TypeScript com Three.js e React Three Fiber; as páginas e serviços usam Vinext e Cloudflare.
 
-A autoria e as condições dos recursos de terceiros estão documentadas em [`docs/asset-credits.md`](docs/asset-credits.md) e nos manifestos junto aos recursos. As fontes tipográficas, texturas, efeitos de interface e sons ambientais têm seus créditos ou licenças registrados nesses arquivos.
+## Créditos e direitos
 
-O MP3 de Genshin Impact usado pela versão atualmente publicada **não está incluído neste repositório**: a música tem direitos reservados e as condições consultadas não autorizam espelhar o arquivo. O manifesto ainda espera esse arquivo no caminho `/experience/audio/genshin-official-theme.mp3`; para rodar uma cópia local com música, forneça um recurso para o qual você tenha autorização e atualize o manifesto e o áudio inicial. A versão pública do site permanece disponível no link acima.
+Créditos, licenças e proveniência dos recursos visuais e sonoros estão separados em [`docs/credits/`](docs/credits/README.md). Os arquivos de imagem e evidência ficam em [`docs/assets/`](docs/assets/README.md), e os registros técnicos da trilha ficam em [`docs/audio/`](docs/audio/README.md).
 
-Sugestões ainda não aprovadas e configurações locais também não são versionadas. Os testes usam registros fictícios em `test/fixtures/`.
-
-## Direitos de uso
-
-Este repositório é público para consulta. Não há uma licença geral concedendo reutilização do código, do texto acadêmico ou dos modelos autorais. Recursos de terceiros permanecem sujeitos às licenças indicadas em seus créditos.
+O repositório não concede uma licença geral para reutilizar o código, o texto acadêmico ou os modelos autorais. Recursos de terceiros permanecem sujeitos às condições registradas em seus créditos.

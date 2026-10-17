@@ -4,7 +4,7 @@
 
 Os quatro pavilhões passam a ocupar ilhas separadas. A seleção abre imediatamente a síntese do TCC e a câmera faz uma aproximação curta; não há caminhada nem personagem ativo. A barra inferior, os questionários e o contador de descobertas foram removidos. O mapa oferece quatro acessos diretos.
 
-As ilhas mostram resumos com fontes e aprofundamento opcional. A leitura contínua usa corpo de 20px no desktop e 18px no celular, com ilustrações renderizadas da própria cena. A metodologia, os contextos dos estudos, as âncoras antigas e a biblioteca de 11 fontes centrais e 13 documentos complementares são preservados. As decisões editoriais e as referências de legibilidade estão em `reading-v6.md`.
+As ilhas mostram resumos com fontes e aprofundamento opcional. A leitura contínua usa corpo de 20px no desktop e 18px no celular, com ilustrações renderizadas da própria cena. A metodologia, os contextos dos estudos, as âncoras antigas e a biblioteca de 11 fontes centrais e 13 documentos complementares são preservados. As decisões editoriais e as referências de legibilidade estão em `../research/reading-v6.md`.
 
 O cenário tem rotas variadas de aves, recolhimento durante a chuva, raios localizados nas tempestades e iluminação de entardecer. O tornado foi removido. As estações seguem trimestres meteorológicos do hemisfério sul, com paleta inspirada em Minas Gerais e no interior do Sudeste. A representação é artística, sem dados meteorológicos ao vivo. A transição entre tempo seco e chuvoso usa como referência contextual a [publicação do INMET sobre a primavera de 2026](https://portal.inmet.gov.br/noticias/primavera-2026-confira-a-previsao-para-a-estacao); as probabilidades da simulação não são medidas climatológicas.
 
