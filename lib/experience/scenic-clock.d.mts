@@ -1,0 +1,10 @@
+import type { Weather, WeatherPhase } from "./weather.mjs";
+import type { Season } from "./seasons.mjs";
+export const DAY_SECONDS: number;
+export function wrapHour(value: number): number;
+export function advanceHour(hour: number, seconds: number): number;
+export function phaseAtHour(hour: number): WeatherPhase;
+export function clockLabel(hour: number): string;
+export function initialFront(random?: () => number, season?: Season): Weather;
+export function nextFront(current: Weather, random?: () => number): Weather;
+export function frontDuration(random?: () => number): number;

@@ -1,0 +1,35 @@
+{
+  "island.glb": {
+    "bytes": 4854116,
+    "triangles": 404120,
+    "meshes": 24,
+    "textures": 11,
+    "animations": []
+  },
+  "island-low.glb": {
+    "bytes": 2110920,
+    "triangles": 120723,
+    "meshes": 24,
+    "textures": 11,
+    "animations": []
+  },
+  "avatar.glb": {
+    "bytes": 301648,
+    "triangles": 4372,
+    "meshes": 1,
+    "textures": 0,
+    "animations": [
+      "Idle",
+      "Walk"
+    ]
+  },
+  "navigation": {
+    "nodes": 31,
+    "edges": 33,
+    "allDestinationsReachable": true,
+    "centreGardenAvoided": true
+  },
+  "poster": {
+    "exists": true
+  }
+}

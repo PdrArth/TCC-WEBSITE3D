@@ -1,0 +1,55 @@
+.island-experience[data-experience-version="20"][data-scene-state="ready"] {
+  background:radial-gradient(ellipse at 45% 24%,color-mix(in srgb,var(--world-sky,#dce9e5) 85%,white),var(--world-sky,#dce9e5))!important;
+}
+.island-experience[data-experience-version="20"].is-intro .island-landing:after {
+  background:linear-gradient(90deg,#f3eee3f2 0%,#f3eee3dc 28%,#f3eee350 45%,#f3eee300 64%);
+}
+.island-experience[data-experience-version="20"] .island-label {
+  contain:layout style;
+}
+.island-experience[data-experience-version="20"][data-panel-open="true"] .island-pavilions {
+  display:none;
+}
+.island-experience[data-experience-version="20"]:not(.is-reading):not(.is-intro):is([data-weather="storm"],[data-weather="hail"],[data-phase="night"]) .island-header nav :is(a,button),
+.island-experience[data-experience-version="20"]:not(.is-reading):not(.is-intro):is([data-weather="storm"],[data-weather="hail"],[data-phase="night"]) :is(.island-brand,.island-world-caption,.island-world-caption>span,.island-season-status,.island-world-caption small,.island-status){
+  color:#faf7ec!important;
+}
+@media(max-width:900px){
+ .island-experience[data-experience-version="20"].is-intro .island-landing:after{background:linear-gradient(180deg,#f3eee3f2 0%,#f3eee3e8 32%,#f3eee300 60%,#f3eee3a6 100%)}
+}
+.island-experience[data-experience-version="20"] .island-poster {
+  opacity:1;visibility:visible;transition:opacity .45s ease,visibility 0s .45s;
+}
+.island-experience[data-experience-version="20"] .island-poster.is-hidden {
+  opacity:0;visibility:hidden;
+}
+.island-experience[data-experience-version="20"] .island-canvas {
+  opacity:0;transition:opacity .45s ease,transform 1s cubic-bezier(.22,1,.36,1);
+}
+.island-experience[data-experience-version="20"][data-scene-state="ready"] .island-canvas { opacity:1; }
+
+/* Keep the welcome composition inside the viewport while the world prepares. */
+.island-experience[data-experience-version="20"].is-intro .island-stage { inset:0; }
+.island-experience[data-experience-version="20"].is-intro .island-poster { inset:90px 2vw 24px 38vw;width:60vw;height:calc(100% - 114px); }
+.island-experience[data-experience-version="20"].is-intro { background:radial-gradient(ellipse at 70% 28%,color-mix(in srgb,var(--world-sky,#dce9e5) 45%,#f3eee3),#f3eee3)!important; }
+.island-experience[data-experience-version="20"].is-intro .island-landing:after { display:block; }
+.island-experience[data-experience-version="20"].is-intro .island-header { background:linear-gradient(#f3eee3e8,#f3eee300); }
+.island-experience[data-experience-version="20"].is-intro .island-header,
+.island-experience[data-experience-version="20"].is-intro .island-header nav :is(a,button),
+.island-experience[data-experience-version="20"].is-intro .island-introduction { color:#294338!important; }
+.island-experience[data-experience-version="20"].is-intro .island-welcome-detail,
+.island-experience[data-experience-version="20"].is-intro .island-loading-note { color:#697365!important; }
+.island-inline-audio .island-audio-playing-icon { display:none; }
+.island-experience[data-audio="on"] .island-audio-playing-icon,
+html[data-entry-audio-status="playing"] .island-experience[data-audio-initialized="false"] .island-audio-playing-icon { display:inline-flex; }
+.island-experience[data-audio="on"] .island-audio-muted-icon,
+html[data-entry-audio-status="playing"] .island-experience[data-audio-initialized="false"] .island-audio-muted-icon { display:none; }
+@media(max-width:900px){
+  .island-experience[data-experience-version="20"].is-intro .island-poster { inset:294px 2vw 24px;width:96vw;height:calc(100% - 318px); }
+}
+@media(max-width:600px){
+  .island-experience[data-experience-version="20"].is-intro .island-poster { inset:310px 0 146px;width:100%;height:calc(100% - 456px); }
+}
+@media(max-height:570px) and (min-width:601px){
+  .island-experience[data-experience-version="20"].is-intro .island-poster { inset:70px 2vw 10px 40vw;width:58vw;height:calc(100% - 80px); }
+}

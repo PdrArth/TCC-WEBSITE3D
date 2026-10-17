@@ -1,0 +1,242 @@
+[
+  {
+    "id": "peng2023impact",
+    "title": "The Impact of AI on Developer Productivity: Evidence from GitHub Copilot",
+    "author": "Peng et al.",
+    "year": "2023",
+    "url": "https://arxiv.org/abs/2302.06590",
+    "group": "academic",
+    "nature": "Experimento controlado · preprint",
+    "contribution": "Aceleração em uma tarefa delimitada."
+  },
+  {
+    "id": "becker2025impact",
+    "title": "Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity",
+    "author": "Becker et al.",
+    "year": "2025",
+    "url": "https://arxiv.org/abs/2507.09089",
+    "group": "academic",
+    "nature": "Experimento em projetos maduros · preprint",
+    "contribution": "Aumento do tempo em um contexto específico."
+  },
+  {
+    "id": "vasilescu2025copilot",
+    "title": "Developer Productivity With and Without GitHub Copilot: A Longitudinal Mixed-Methods Case Study",
+    "author": "Stray et al.",
+    "year": "2026",
+    "url": "https://arxiv.org/abs/2509.20353",
+    "group": "academic",
+    "nature": "Estudo longitudinal · HICSS-59",
+    "contribution": "Atividade registrada e produtividade percebida."
+  },
+  {
+    "id": "chen2026beyond",
+    "title": "Beyond the Commit: Developer Perspectives on Productivity with AI Coding Assistants",
+    "author": "Chen et al.",
+    "year": "2026",
+    "url": "https://arxiv.org/abs/2602.03593",
+    "group": "academic",
+    "nature": "Métodos mistos · versão em preprint",
+    "contribution": "Dimensões humanas da produtividade."
+  },
+  {
+    "id": "piskala2026sdd",
+    "title": "Spec-Driven Development: From Code to Contract in the Age of AI Coding Assistants",
+    "author": "Piskala",
+    "year": "2026",
+    "url": "https://arxiv.org/abs/2602.00180",
+    "group": "academic",
+    "nature": "Proposta conceitual · preprint",
+    "contribution": "Especificação como referência para implementação e verificação."
+  },
+  {
+    "id": "delimarsky2025speckit",
+    "title": "Spec-driven development with AI: Get started with a new open source toolkit",
+    "author": "Delimarsky",
+    "year": "2025",
+    "url": "https://github.blog/ai-and-ml/generative-ai/spec-driven-development-with-ai-get-started-with-a-new-open-source-toolkit/",
+    "group": "technical",
+    "nature": "Publicação oficial · GitHub",
+    "contribution": "Organização do trabalho com o Spec Kit."
+  },
+  {
+    "id": "bockeler2025sddtools",
+    "title": "Understanding Spec-Driven-Development: Kiro, spec-kit, and Tessl",
+    "author": "Böckeler",
+    "year": "2025",
+    "url": "https://martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html",
+    "group": "technical",
+    "nature": "Análise técnica",
+    "contribution": "Interpretações de SDD e seus limites."
+  },
+  {
+    "id": "thoughtworks2025sdd",
+    "title": "Spec-driven development",
+    "author": "Thoughtworks",
+    "year": "2025",
+    "url": "https://www.thoughtworks.com/en-us/radar/techniques/spec-driven-development",
+    "group": "technical",
+    "nature": "Avaliação técnica · Technology Radar",
+    "contribution": "SDD como técnica emergente a avaliar."
+  },
+  {
+    "id": "fowler2026fragments",
+    "title": "Fragments: January 8",
+    "author": "Fowler",
+    "year": "2026",
+    "url": "https://martinfowler.com/fragments/2026-01-08.html",
+    "group": "technical",
+    "nature": "Comentário crítico",
+    "contribution": "Aprendizagem e ciclos de feedback."
+  },
+  {
+    "id": "gomescortiz2026tilt",
+    "title": "IA revive medo da demissão: como dev é afetado por tecnologia feita por ele",
+    "author": "Gomes e Cortiz",
+    "year": "2026",
+    "url": "https://www.uol.com.br/tilt/noticias/redacao/2026/03/24/deu-tilt-2403.ghtm",
+    "group": "technical",
+    "nature": "Coluna jornalística · UOL Tilt",
+    "contribution": "Expectativas e mudanças no mercado brasileiro."
+  },
+  {
+    "id": "bockeler2026harness",
+    "title": "Harness engineering for coding agent users",
+    "author": "Böckeler",
+    "year": "2026",
+    "url": "https://martinfowler.com/articles/harness-engineering.html",
+    "group": "technical",
+    "nature": "Artigo técnico conceitual",
+    "contribution": "Orientação, verificação e feedback ao redor dos agentes."
+  },
+  {
+    "id": "dohmke2022copilot",
+    "title": "GitHub Copilot is generally available to all developers",
+    "author": "Dohmke, Thomas",
+    "year": "2022",
+    "url": "https://github.blog/news-insights/product-news/github-copilot-is-generally-available-to-all-developers/",
+    "group": "complementary",
+    "nature": "Documento oficial · contextualização",
+    "contribution": "Contextualização histórica ou objeto de investigação futura."
+  },
+  {
+    "id": "kelly2024augment",
+    "title": "Meet Augment Code: Developer AI for teams",
+    "author": "Kelly, Chris",
+    "year": "2024",
+    "url": "https://www.augmentcode.com/blog/meet-augment-code-developer-ai-for-teams",
+    "group": "complementary",
+    "nature": "Documento oficial · contextualização",
+    "contribution": "Contextualização histórica ou objeto de investigação futura."
+  },
+  {
+    "id": "trae2025review",
+    "title": "TRAE 2025 Unwrapped",
+    "author": "The TRAE Team",
+    "year": "2025",
+    "url": "https://www.trae.ai/blog/trae_2025_yearly_review",
+    "group": "complementary",
+    "nature": "Documento oficial · contextualização",
+    "contribution": "Contextualização histórica ou objeto de investigação futura."
+  },
+  {
+    "id": "anthropic2025claudecodega",
+    "title": "Introducing Claude 4",
+    "author": "Anthropic",
+    "year": "2025",
+    "url": "https://www.anthropic.com/news/claude-4",
+    "group": "complementary",
+    "nature": "Documento oficial · contextualização",
+    "contribution": "Contextualização histórica ou objeto de investigação futura."
+  },
+  {
+    "id": "raad2025opencode",
+    "title": "Opencode rewrite is done and ready for general use",
+    "author": "Raad, Dax",
+    "year": "2025",
+    "url": "https://x.com/thdxr/status/1935801226362302730",
+    "group": "complementary",
+    "nature": "Documento oficial · contextualização",
+    "contribution": "Contextualização histórica ou objeto de investigação futura."
+  },
+  {
+    "id": "openai2025codexga",
+    "title": "Codex is now generally available",
+    "author": "OpenAI",
+    "year": "2025",
+    "url": "https://openai.com/index/codex-now-generally-available/",
+    "group": "complementary",
+    "nature": "Documento oficial · contextualização",
+    "contribution": "Contextualização histórica ou objeto de investigação futura."
+  },
+  {
+    "id": "swaminathan2025kiroga",
+    "title": "Kiro is generally available: Build with your team in the IDE and terminal",
+    "author": "Swaminathan, Nikhil, Ilinca, Dragos",
+    "year": "2025",
+    "url": "https://kiro.dev/blog/general-availability/",
+    "group": "complementary",
+    "nature": "Documento oficial · contextualização",
+    "contribution": "Contextualização histórica ou objeto de investigação futura."
+  },
+  {
+    "id": "google2025antigravity",
+    "title": "Introducing Google Antigravity, a New Era in AI-Assisted Software Development",
+    "author": "The Antigravity Team",
+    "year": "2025",
+    "url": "https://www.antigravity.google/blog/introducing-google-antigravity",
+    "group": "complementary",
+    "nature": "Documento oficial · contextualização",
+    "contribution": "Contextualização histórica ou objeto de investigação futura."
+  },
+  {
+    "id": "cursor2023inline",
+    "title": "New inline edits",
+    "author": "Cursor",
+    "year": "2023",
+    "url": "https://cursor.com/changelog/0-2-39",
+    "group": "complementary",
+    "nature": "Documento oficial · contextualização",
+    "contribution": "Contextualização histórica ou objeto de investigação futura."
+  },
+  {
+    "id": "opencodeDocs",
+    "title": "Intro",
+    "author": "OpenCode",
+    "year": "s.d.",
+    "url": "https://opencode.ai/docs/",
+    "group": "complementary",
+    "nature": "Documento oficial · contextualização",
+    "contribution": "Contextualização histórica ou objeto de investigação futura."
+  },
+  {
+    "id": "augmentDocs",
+    "title": "Introduction",
+    "author": "Augment Code",
+    "year": "s.d.",
+    "url": "https://docs.augmentcode.com/introduction",
+    "group": "complementary",
+    "nature": "Documento oficial · contextualização",
+    "contribution": "Contextualização histórica ou objeto de investigação futura."
+  },
+  {
+    "id": "cobalt2026introducing",
+    "title": "Introducing Cobalt: an AI developer with its own computer",
+    "author": "Cobalt Team",
+    "year": "2026",
+    "url": "https://cobaltcode.ai/blog/introducing-cobalt",
+    "group": "complementary",
+    "nature": "Documento oficial · contextualização",
+    "contribution": "Contextualização histórica ou objeto de investigação futura."
+  },
+  {
+    "id": "codemote2026flightdeck",
+    "title": "Introducing Flightdeck",
+    "author": "CodeMote",
+    "year": "2026",
+    "url": "https://www.codemote.dev/whats-new",
+    "group": "complementary",
+    "nature": "Documento oficial · contextualização",
+    "contribution": "Contextualização histórica ou objeto de investigação futura."
+  }
+]

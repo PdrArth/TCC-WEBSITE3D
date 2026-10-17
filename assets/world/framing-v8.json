@@ -1,0 +1,168 @@
+{
+  "version": 8,
+  "source": "assets/world/archipelago-v8.blend",
+  "camera": {
+    "position": [
+      1.8,
+      29.2,
+      43.5
+    ],
+    "target": [
+      0,
+      0.8,
+      -1.6
+    ],
+    "fov": 38
+  },
+  "projections": {
+    "1280x720": {
+      "fov": 38,
+      "distanceScale": 1,
+      "focusPoints": {
+        "pesquisa": [
+          0.28345,
+          0.58227
+        ],
+        "gerar": [
+          0.27823,
+          0.41704
+        ],
+        "comparar": [
+          0.36896,
+          0.30165
+        ],
+        "validar": [
+          0.50658,
+          0.27632
+        ],
+        "especificar": [
+          0.64303,
+          0.3098
+        ],
+        "evoluir": [
+          0.72532,
+          0.43255
+        ],
+        "perspectivas": [
+          0.70658,
+          0.57444
+        ]
+      },
+      "contentBounds": [
+        0.18499,
+        0.20942,
+        0.80851,
+        0.83587
+      ],
+      "lakeBounds": [
+        0.00122,
+        0.27905,
+        1.0099,
+        1.04892
+      ],
+      "allFocusVisible": true,
+      "allContentVisible": true,
+      "passed": true
+    },
+    "390x844": {
+      "fov": 64,
+      "distanceScale": 1.31176,
+      "focusPoints": {
+        "pesquisa": [
+          0.16885,
+          0.5327
+        ],
+        "gerar": [
+          0.14442,
+          0.46543
+        ],
+        "comparar": [
+          0.28254,
+          0.41444
+        ],
+        "validar": [
+          0.511,
+          0.40277
+        ],
+        "especificar": [
+          0.73677,
+          0.41816
+        ],
+        "evoluir": [
+          0.85963,
+          0.47202
+        ],
+        "perspectivas": [
+          0.81335,
+          0.52935
+        ]
+      },
+      "contentBounds": [
+        0.01711,
+        0.37303,
+        0.99454,
+        0.63193
+      ],
+      "lakeBounds": [
+        -0.22535,
+        0.40114,
+        1.23174,
+        0.70572
+      ],
+      "allFocusVisible": true,
+      "allContentVisible": true,
+      "passed": true
+    },
+    "1800x1350": {
+      "fov": 38,
+      "distanceScale": 1,
+      "focusPoints": {
+        "pesquisa": [
+          0.21126,
+          0.58227
+        ],
+        "gerar": [
+          0.2043,
+          0.41704
+        ],
+        "comparar": [
+          0.32528,
+          0.30165
+        ],
+        "validar": [
+          0.50877,
+          0.27632
+        ],
+        "especificar": [
+          0.6907,
+          0.3098
+        ],
+        "evoluir": [
+          0.80043,
+          0.43255
+        ],
+        "perspectivas": [
+          0.77544,
+          0.57444
+        ]
+      },
+      "contentBounds": [
+        0.07998,
+        0.20942,
+        0.91135,
+        0.83587
+      ],
+      "lakeBounds": [
+        -0.16503,
+        0.27905,
+        1.17987,
+        1.04892
+      ],
+      "allFocusVisible": true,
+      "allContentVisible": true,
+      "passed": true
+    }
+  },
+  "passed": true,
+  "note": "Actual geometry projection; runtime CSS/labels require separate browser QA"
+}

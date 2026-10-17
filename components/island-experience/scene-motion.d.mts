@@ -1,0 +1,66 @@
+import type * as THREE from "three";
+import type { CameraPose, PavilionId, WorldManifest, WorldEnvironmentManifest } from "@/lib/experience-contract";
+import type { Weather, WeatherPhase } from "@/lib/experience/weather.mjs";
+export function mayAdaptQuality(active: boolean, panelOpen: boolean, reducedMotion: boolean, visible: boolean, hasFocus: boolean, frameSeconds?: number): boolean;
+export function fieldOfView(fov: number, width: number, height: number, detail?: boolean): number;
+export function overviewDistanceScale(fov: number, width: number, height: number): number;
+export function clampZoom(value: number, bounds?: { minZoom: number; maxZoom: number }): number;
+export function wheelZoom(value: number, delta: number, bounds?: { minZoom: number; maxZoom: number }): number;
+export class CameraOrbit { yaw: number; pitch: number; dragging: boolean; suppressClick: boolean; pauseRemaining: number; autoMode: "paused" | "gesture" | "cooldown" | "rotating"; reset(pauseSeconds?: number): void; pause(seconds?: number): void; advanceAuto(seconds: number,enabled?: boolean): boolean; begin(x: number,y: number): void; beginPinch(): void; move(x: number,y: number,width?: number,height?: number): boolean; end(): boolean; consumeClick(): boolean; }
+export function orbitPosition(position: number[], target: number[], yaw?: number, pitch?: number, zoom?: number): [number,number,number];
+export function environmentSeconds(seconds: number, reduced?: boolean): number;
+export type WeatherVisualProfile = { cloudClusters: number; cloudScale: number; rainRatio: number; dropWidthPx: number; dropLengthPx: number; dropOpacity: number; rainSpeed: number };
+export function weatherVisualProfile(weather: Weather): WeatherVisualProfile;
+export function rainDropScale(profile: WeatherVisualProfile,distance: number,fov: number,viewportHeight: number): [number,number,number];
+export const fishColors: string[];
+export function faunaCount(kind:"birds"|"fish",quality:"high"|"low"):number;
+export function fishAppearance(index:number):{color:string;scale:number};
+export type FishRoutes = {routes:{points:[number,number][];cumulative:number[];headings:number[];length:number;speed:number;phase:number;color:string;scale:number}[];waterHeight:number;seed:number};
+export function fishSegmentIsClear(a:[number,number],b:[number,number],environment:WorldEnvironmentManifest,clearance?:number):boolean;
+export function createFishRoutes(environment:WorldEnvironmentManifest,count?:number,seed?:number):FishRoutes;
+export function writeFishPose(pose: {x:number;y:number;z:number;heading:number;tail:number},index:number,seconds:number,prepared?:FishRoutes): {x:number;y:number;z:number;heading:number;tail:number};
+export type RainImpacts = { positions: Float32Array; ages: Float32Array; next: number; count: number };
+export function createRainImpacts(count?: number): RainImpacts;
+export function createRainSprayGeometry(): THREE.BufferGeometry;
+export type RainImpactPose = {ring:number;opacity:number;sprayY:number;sprayXZ:number;lift:number};
+export function writeRainImpactPose(pose:RainImpactPose,age:number,life?:number):RainImpactPose;
+export type CloudAnchor = {x:number;y:number;width:number;height:number};
+export function writeCloudAnchor(pose:CloudAnchor,cluster:number,lobe:number,seconds:number,coverage:number,volume?:number):CloudAnchor;
+export function advanceRainImpacts(field: RainField, impacts: RainImpacts, seconds: number, wind?: number, options?: {count?: number; speed?: number; life?: number; span?:number; environment?:WorldEnvironmentManifest}): void;
+export type HailField = { positions: Float32Array; velocities: Float32Array; bounces: Uint8Array; sinking:Uint8Array; totalBounces: number; waterHits:number; respawns: number };
+export function createHailField(count: number): HailField;
+export function advanceHail(field: HailField, seconds: number, environment?:WorldEnvironmentManifest): void;
+export function writeBranchedLightning(positions: Float32Array,target: [number,number,number],variant?: number): Float32Array;
+export function restingPose(manifest: WorldManifest, pavilionId: PavilionId | null, intro?: boolean): CameraPose;
+export function easeCamera(camera: THREE.Camera, target: THREE.Vector3, desiredPosition: THREE.Vector3, desiredTarget: THREE.Vector3, desiredFov: number, seconds: number, immediate?: boolean, damping?: number): boolean;
+export function motionSeconds(seconds: number): number;
+export function easeHeading(current: number, desired: number, seconds: number, immediate?: boolean): number;
+export type BirdPose = { x: number; y: number; z: number; heading: number; bank: number; flap: number; mode?: number; fold?: number };
+export const birdFlightPaths: number[][][];
+export function birdsMayFly(weather: Weather, phase?: string): boolean;
+export function birdFlightShare(weather:Weather,hour?:number,phase?:string):number;
+export function writeBirdPose(pose: BirdPose, index: number, seconds: number, startled?: number, flying?: boolean, refuge?: number, perches?: { position: [number,number,number]; island: string }[], shelters?: { position: [number,number,number]; island: string }[]): BirdPose;
+export function createSnowField(count: number): RainField;
+export function advanceSnow(field: RainField, seconds: number, hail?: boolean, wind?: number): void;
+export const lightningTargets: [number, number, number][];
+export function writeLightningBolt(positions: Float32Array, target: [number, number, number], variant?: number): Float32Array;
+export class ThunderClock {
+  remaining: number;
+  glow: number;
+  soundRemaining:number;
+  soundReady:boolean;
+  constructor(random?: () => number);
+  reset(random?: () => number,first?:boolean): void;
+  cancel():void;
+  takeThunder():boolean;
+  advance(seconds: number, enabled: boolean, random?: () => number): boolean;
+}
+export type RainField = { positions: Float32Array; speeds: Float32Array; span?:number; cycles?:Uint32Array; center?:[number,number] };
+export function createRainField(count: number,span?:number,environment?:WorldEnvironmentManifest): RainField;
+export function advanceRain(field: RainField, seconds: number): void;
+
+export function createBirdGeometry(): { bodies: THREE.BufferGeometry; beak: THREE.BufferGeometry; wing: THREE.BufferGeometry };
+
+export type LightPalette = {sky:string;upper:string;lower:string;sun:string;fill:string;cloudColor:string;ambient:number;intensity:number;fillIntensity:number;exposure:number;rain:number;cloud:number;sunPosition:[number,number,number]};
+export function daylightPalette(timeOfDay:number,day:LightPalette,dawn:LightPalette,dusk:LightPalette,night:LightPalette):LightPalette;
+export function atmospherePalette(weather:Weather,phase?:WeatherPhase,timeOfDay?:number):LightPalette;

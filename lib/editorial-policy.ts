@@ -1,0 +1,9 @@
+import { z } from "zod";
+const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(value => { const d = new Date(value); return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value && value <= new Date().toISOString().slice(0, 10); }, "Data inválida ou futura");
+const sourceUrl = z.string().url().max(1500).refine(value => new URL(value).protocol === "https:", "Use uma fonte HTTPS").transform(value => { const u = new URL(value); for (const key of [...u.searchParams.keys()]) if (key.startsWith("utm_") || key === "fbclid") u.searchParams.delete(key); return u.href; });
+export const draftSchema = z.object({ title: z.string().trim().min(8).max(240), summary: z.string().trim().min(30).max(2200), relevance: z.string().trim().min(20).max(1800), limitations: z.string().trim().min(15).max(1400), sourceUrl, organization: z.string().trim().min(2).max(250), type: z.enum(["announcement", "research", "company_case"]), eventDate: date.nullable(), publicationDate: date, checkedDate: date }).strict().refine(d => d.publicationDate > "2026-09-08" && d.publicationDate <= d.checkedDate && (!d.eventDate || d.eventDate <= d.checkedDate), "A publicação deve ser posterior à versão do TCC e anterior à verificação");
+export const draftBatchSchema = z.object({ drafts: z.array(draftSchema).min(1).max(5) }).strict();
+export const runSchema = z.object({ id: z.string().min(1).max(100).regex(/^[a-zA-Z0-9_-]+$/), checkedAt: z.string().datetime().refine(value => new Date(value).getTime() <= Date.now() + 60000, "Verificação futura"), status: z.enum(["success", "partial", "failed"]), summary: z.string().trim().min(10).max(2000) }).strict();
+export function isOwnerEmail(email: string | null | undefined, owner: string | null | undefined) { return !!email && !!owner && email.trim().toLowerCase() === owner.trim().toLowerCase(); }
+export function canUpdateDraft(status: string) { return status === "draft"; }
+export type DraftInput = z.infer<typeof draftSchema>;

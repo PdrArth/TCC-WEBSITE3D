@@ -1,0 +1,456 @@
+{
+  "version": 8,
+  "passed": true,
+  "source": "assets/world/archipelago-v8.blend",
+  "pavilions": {
+    "pavilion_pesquisa": {
+      "sha256": "5a2e6c65a5ab3b1d3ace657dd97d8b1bd4d4fc0ab4e6b22d3983b13d185d850c",
+      "vertices": 11646,
+      "polygons": 10817,
+      "identicalToV7": true
+    },
+    "pavilion_gerar": {
+      "sha256": "bc0941379a51425c70d40388aa63570d2d96dab5ee6243aa86124c475b85ef88",
+      "vertices": 21944,
+      "polygons": 19981,
+      "identicalToV7": true
+    },
+    "pavilion_comparar": {
+      "sha256": "f59a336f1ae2c232f1eecad0a706945b3ece083076c6b973613e68bae7f24acf",
+      "vertices": 16730,
+      "polygons": 15773,
+      "identicalToV7": true
+    },
+    "pavilion_validar": {
+      "sha256": "d94d8797cc5f4f6e5333031268f63ef864504075fd90e585f45f1d1b37b63e21",
+      "vertices": 15616,
+      "polygons": 14715,
+      "identicalToV7": true
+    },
+    "pavilion_especificar": {
+      "sha256": "6b55c79702f7e931a1124ce6657dc1a6206422227760c19a67fd65bb650a1743",
+      "vertices": 16650,
+      "polygons": 15110,
+      "identicalToV7": true
+    },
+    "pavilion_evoluir": {
+      "sha256": "379ed5466a9d1806313d797315872641b1b8fbf7e5d8abb40208abd74d1ceba5",
+      "vertices": 21172,
+      "polygons": 19425,
+      "identicalToV7": true
+    },
+    "pavilion_perspectivas": {
+      "sha256": "a6f9586b67216425d5dc03e6d8820fa947368f70c36f4d9d1c25a845a4e403ed",
+      "vertices": 7804,
+      "polygons": 6930,
+      "identicalToV7": true
+    }
+  },
+  "bridges": [
+    {
+      "from": "pesquisa",
+      "to": "gerar",
+      "minimumDistanceToAnyPavilionCenter": 3.93417,
+      "outsideEveryPavilionTerrace": true
+    },
+    {
+      "from": "gerar",
+      "to": "comparar",
+      "minimumDistanceToAnyPavilionCenter": 3.93502,
+      "outsideEveryPavilionTerrace": true
+    },
+    {
+      "from": "comparar",
+      "to": "validar",
+      "minimumDistanceToAnyPavilionCenter": 3.93501,
+      "outsideEveryPavilionTerrace": true
+    },
+    {
+      "from": "validar",
+      "to": "especificar",
+      "minimumDistanceToAnyPavilionCenter": 3.93501,
+      "outsideEveryPavilionTerrace": true
+    },
+    {
+      "from": "especificar",
+      "to": "evoluir",
+      "minimumDistanceToAnyPavilionCenter": 3.93502,
+      "outsideEveryPavilionTerrace": true
+    },
+    {
+      "from": "evoluir",
+      "to": "perspectivas",
+      "minimumDistanceToAnyPavilionCenter": 3.93417,
+      "outsideEveryPavilionTerrace": true
+    }
+  ],
+  "ambient": {
+    "ambient_leaves_pesquisa_grasses_0": {
+      "positionBlender": [
+        -14.1,
+        -9.55,
+        0.07
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_pesquisa_grasses_1": {
+      "positionBlender": [
+        -7.96,
+        -8.1,
+        0.07
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_flowers_pesquisa_3": {
+      "positionBlender": [
+        -13.43,
+        -11.57,
+        0.08
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_flowers_pesquisa_4": {
+      "positionBlender": [
+        -8.61,
+        -11.65,
+        0.08
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_pesquisa_ipe_amarelo": {
+      "positionBlender": [
+        -13.93,
+        -7.39,
+        2.7
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_flowers_pesquisa_ipe_amarelo": {
+      "positionBlender": [
+        -13.93,
+        -7.39,
+        3.0
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_pesquisa_jabuticabeira": {
+      "positionBlender": [
+        -8.01,
+        -7.38,
+        1.998
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_gerar_grasses_0": {
+      "positionBlender": [
+        -17.1,
+        0.45,
+        0.07
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_gerar_grasses_1": {
+      "positionBlender": [
+        -10.96,
+        1.9,
+        0.07
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_flowers_gerar_3": {
+      "positionBlender": [
+        -16.43,
+        -1.57,
+        0.08
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_flowers_gerar_4": {
+      "positionBlender": [
+        -11.61,
+        -1.65,
+        0.08
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_gerar_palmeira": {
+      "positionBlender": [
+        -16.77043,
+        2.50732,
+        5.75
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_gerar_pitangueira": {
+      "positionBlender": [
+        -11.0,
+        2.64,
+        2.106
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_comparar_grasses_0": {
+      "positionBlender": [
+        -13.1,
+        10.45,
+        0.07
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_comparar_grasses_1": {
+      "positionBlender": [
+        -6.96,
+        11.9,
+        0.07
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_flowers_comparar_3": {
+      "positionBlender": [
+        -12.43,
+        8.43,
+        0.08
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_flowers_comparar_4": {
+      "positionBlender": [
+        -7.61,
+        8.35,
+        0.08
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_comparar_quaresmeira": {
+      "positionBlender": [
+        -12.99,
+        12.46,
+        2.646
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_flowers_comparar_quaresmeira": {
+      "positionBlender": [
+        -12.99,
+        12.46,
+        2.94
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_comparar_pau_brasil": {
+      "positionBlender": [
+        -7.02,
+        12.77,
+        2.268
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_validar_grasses_0": {
+      "positionBlender": [
+        -3.1,
+        13.45,
+        0.07
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_validar_grasses_1": {
+      "positionBlender": [
+        3.04,
+        14.9,
+        0.07
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_flowers_validar_3": {
+      "positionBlender": [
+        -2.43,
+        11.43,
+        0.08
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_flowers_validar_4": {
+      "positionBlender": [
+        2.39,
+        11.35,
+        0.08
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_validar_araucaria": {
+      "positionBlender": [
+        -3.02,
+        15.53,
+        3.051
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_validar_jabuticabeira": {
+      "positionBlender": [
+        2.98,
+        15.69,
+        2.052
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_especificar_grasses_0": {
+      "positionBlender": [
+        6.9,
+        10.45,
+        0.07
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_especificar_grasses_1": {
+      "positionBlender": [
+        13.04,
+        11.9,
+        0.07
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_flowers_especificar_3": {
+      "positionBlender": [
+        7.57,
+        8.43,
+        0.08
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_flowers_especificar_4": {
+      "positionBlender": [
+        12.39,
+        8.35,
+        0.08
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_especificar_pau_brasil": {
+      "positionBlender": [
+        7.01,
+        12.56,
+        2.592
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_especificar_palmeira_jovem": {
+      "positionBlender": [
+        13.21957,
+        12.58732,
+        4.5
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_evoluir_grasses_0": {
+      "positionBlender": [
+        10.9,
+        0.45,
+        0.07
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_evoluir_grasses_1": {
+      "positionBlender": [
+        17.04,
+        1.9,
+        0.07
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_flowers_evoluir_3": {
+      "positionBlender": [
+        11.57,
+        -1.57,
+        0.08
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_flowers_evoluir_4": {
+      "positionBlender": [
+        16.39,
+        -1.65,
+        0.08
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_evoluir_banana": {
+      "positionBlender": [
+        10.97,
+        2.64,
+        3.564
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_evoluir_pitangueira": {
+      "positionBlender": [
+        17.01,
+        2.54,
+        2.241
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_perspectivas_grasses_0": {
+      "positionBlender": [
+        7.9,
+        -9.55,
+        0.07
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_perspectivas_grasses_1": {
+      "positionBlender": [
+        14.04,
+        -8.1,
+        0.07
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_flowers_perspectivas_3": {
+      "positionBlender": [
+        8.57,
+        -11.57,
+        0.08
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_flowers_perspectivas_4": {
+      "positionBlender": [
+        13.39,
+        -11.65,
+        0.08
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_perspectivas_ipe_roxo": {
+      "positionBlender": [
+        8.01,
+        -7.34,
+        2.7
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_flowers_perspectivas_ipe_roxo": {
+      "positionBlender": [
+        8.01,
+        -7.34,
+        3.0
+      ],
+      "leavesOrFlowersOnly": true
+    },
+    "ambient_leaves_perspectivas_palmeira": {
+      "positionBlender": [
+        14.16957,
+        -7.31268,
+        5.1
+      ],
+      "leavesOrFlowersOnly": true
+    }
+  },
+  "water": {
+    "planar": true,
+    "sourceLocalPlane": "XY",
+    "gltfLocalPlane": "XZ",
+    "height": -0.16
+  },
+  "botanicalModelsIllustrative": true
+}

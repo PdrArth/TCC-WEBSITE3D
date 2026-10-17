@@ -1,0 +1,120 @@
+{
+  "version": 9,
+  "models": {
+    "world": {
+      "bytes": 5190640,
+      "budgetBytes": 8000000,
+      "meshes": 95,
+      "primitives": 335,
+      "materials": 55,
+      "triangles": 630554,
+      "sha256": "bf46a10111c55a02c7c9a5f046a1909a140648fbdfc89c9a6abbaa8035ffc046",
+      "true3D": true,
+      "vertexColorEveryPrimitive": true,
+      "sameSevenHitNodes": true,
+      "sixBridges": true,
+      "waterGridVertices": 3221,
+      "noStaticDuplicateFish": true
+    },
+    "worldLow": {
+      "bytes": 2767416,
+      "budgetBytes": 4000000,
+      "meshes": 95,
+      "primitives": 335,
+      "materials": 55,
+      "triangles": 318787,
+      "sha256": "75a9924cb21059a86791bcfa62e32c494f39eed778c73c0664be868cb53d1ee8",
+      "true3D": true,
+      "vertexColorEveryPrimitive": true,
+      "sameSevenHitNodes": true,
+      "sixBridges": true,
+      "waterGridVertices": 3221,
+      "noStaticDuplicateFish": true
+    }
+  },
+  "images": {
+    "pesquisa": {
+      "bytes": 43974,
+      "dimensions": [
+        1200,
+        780
+      ],
+      "sha256": "a9f732052b886d80c06b66c8ce8e9249ec81e71045dae6f294ac6f42a3334f79",
+      "realFreshRender": true
+    },
+    "gerar": {
+      "bytes": 46206,
+      "dimensions": [
+        1200,
+        780
+      ],
+      "sha256": "7cedf5b54b80fe472960360821a896f0c492e7e3c90dba9e136c8247d8c487ac",
+      "realFreshRender": true
+    },
+    "comparar": {
+      "bytes": 46964,
+      "dimensions": [
+        1200,
+        780
+      ],
+      "sha256": "d50612e84d97e79cd34576fe880c2c3e62d4eb7ac2b7ca1cc0b2f7a8a3ab4121",
+      "realFreshRender": true
+    },
+    "validar": {
+      "bytes": 50936,
+      "dimensions": [
+        1200,
+        780
+      ],
+      "sha256": "f9024b88051b9900bf127a52b81ec8a1c4e09532c6630477586b8cb50d836408",
+      "realFreshRender": true
+    },
+    "especificar": {
+      "bytes": 50016,
+      "dimensions": [
+        1200,
+        780
+      ],
+      "sha256": "4032e2b3e30f43ea6f8553e0f10a4cd74aa575036666076fd6246ecd61e4226a",
+      "realFreshRender": true
+    },
+    "evoluir": {
+      "bytes": 47018,
+      "dimensions": [
+        1200,
+        780
+      ],
+      "sha256": "c8dd4739ead3fd1045cae9fa8d1b9163f038426b7b7d2e5d290c4eb14a14d3df",
+      "realFreshRender": true
+    },
+    "perspectivas": {
+      "bytes": 50554,
+      "dimensions": [
+        1200,
+        780
+      ],
+      "sha256": "917cced4f48b2218b95a7d7e44214bef98d8c714ac7a9651026d19adc72f4262",
+      "realFreshRender": true
+    },
+    "poster": {
+      "bytes": 112394,
+      "dimensions": [
+        1800,
+        1350
+      ],
+      "sha256": "31ed6284e9518994b40b9488a586fc50dfd03f05ccd317d6ea77e52b263bc9df",
+      "realFreshRender": true
+    }
+  },
+  "passed": true,
+  "framing": true,
+  "sourceGeometry": true,
+  "layoutPreserved": true,
+  "ambientNodes": 24,
+  "primitives": {
+    "v8": 339,
+    "v9": 335,
+    "improvedOrPreserved": true
+  },
+  "limits": "Static Blender/GLB checks; animated fish/weather/audio verified by runtime owner"
+}

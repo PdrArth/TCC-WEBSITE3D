@@ -1,0 +1,86 @@
+{
+  "music": {
+    "url": "/experience/audio/genshin-official-theme.mp3",
+    "title": "Genshin Impact · tema instrumental oficial",
+    "author": "HOYO-MiX / COGNOSPHERE",
+    "source": "https://genshin.hoyoverse.com/en/home",
+    "assetSource": "https://genshin.hoyoverse.com/_nuxt/medias/video-bgm.532ef479.mp3",
+    "license": "Uso pessoal nao comercial conforme FAQ oficial; direitos reservados, revogavel",
+    "licenseSource": "https://www.hoyolab.com/article/143107",
+    "attribution": "© All rights reserved by COGNOSPHERE. Other properties belong to their respective owners.",
+    "volume": 0.68,
+    "startAtSeconds": 45.65,
+    "sha256": "c901aa711353f467a392db4cb95f66a708779808973eca87018b36ba3ca23cf6",
+    "verifiedAt": "2026-10-15"
+  },
+  "playlist": [
+    {
+      "url": "/experience/audio/genshin-official-theme.mp3",
+      "title": "Genshin Impact · tema instrumental oficial",
+      "author": "HOYO-MiX / COGNOSPHERE",
+      "source": "https://genshin.hoyoverse.com/en/home",
+      "assetSource": "https://genshin.hoyoverse.com/_nuxt/medias/video-bgm.532ef479.mp3",
+      "license": "Uso pessoal nao comercial conforme FAQ oficial; direitos reservados, revogavel",
+      "licenseSource": "https://www.hoyolab.com/article/143107",
+      "attribution": "© All rights reserved by COGNOSPHERE. Other properties belong to their respective owners.",
+      "volume": 0.68,
+      "startAtSeconds": 45.65,
+      "sha256": "c901aa711353f467a392db4cb95f66a708779808973eca87018b36ba3ca23cf6",
+      "verifiedAt": "2026-10-15"
+    }
+  ],
+  "selection": {
+    "url": "/experience/audio/selection.ogg",
+    "volume": 0.08
+  },
+  "arrival": {
+    "url": "/experience/audio/arrival.ogg",
+    "volume": 0.08
+  },
+  "birds": [
+    {
+      "url": "/experience/audio/bird-1.ogg",
+      "title": "Robin isolated - excerpt 1",
+      "author": "JohnsonBrandEditing",
+      "source": "https://freesound.org/people/JohnsonBrandEditing/sounds/434024/",
+      "license": "CC0 1.0",
+      "attribution": "Bird, Robin Isolated by JohnsonBrandEditing on Freesound.org (CC0). Public HQ preview, trimmed and faded.",
+      "volume": 0.18
+    },
+    {
+      "url": "/experience/audio/bird-2.ogg",
+      "title": "Robin isolated - excerpt 2",
+      "author": "JohnsonBrandEditing",
+      "source": "https://freesound.org/people/JohnsonBrandEditing/sounds/434024/",
+      "license": "CC0 1.0",
+      "attribution": "Bird, Robin Isolated by JohnsonBrandEditing on Freesound.org (CC0). Public HQ preview, trimmed and faded.",
+      "volume": 0.18
+    },
+    {
+      "url": "/experience/audio/bird-3.ogg",
+      "title": "Robin isolated - excerpt 3",
+      "author": "JohnsonBrandEditing",
+      "source": "https://freesound.org/people/JohnsonBrandEditing/sounds/434024/",
+      "license": "CC0 1.0",
+      "attribution": "Bird, Robin Isolated by JohnsonBrandEditing on Freesound.org (CC0). Public HQ preview, trimmed and faded.",
+      "volume": 0.18
+    },
+    {
+      "url": "/experience/audio/bird-4.ogg",
+      "title": "Robin isolated - excerpt 4",
+      "author": "JohnsonBrandEditing",
+      "source": "https://freesound.org/people/JohnsonBrandEditing/sounds/434024/",
+      "license": "CC0 1.0",
+      "attribution": "Bird, Robin Isolated by JohnsonBrandEditing on Freesound.org (CC0). Public HQ preview, trimmed and faded.",
+      "volume": 0.18
+    }
+  ],
+  "thunder": {
+    "url": "/experience/audio/thunder-v15.wav",
+    "volume": 0.55,
+    "author": "site-tcc — síntese procedural própria",
+    "generatedBy": "scripts/audio/generate-thunder.mjs",
+    "source": "Síntese original determinística; nenhum sample de terceiros",
+    "sha256": "2950b2e40c4eaf8600eb81bcd2f7e115c2981d63024cc250bfb73f85b6086ace"
+  }
+}

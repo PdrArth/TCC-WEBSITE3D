@@ -1,0 +1,296 @@
+{
+  "schemaVersion": 1,
+  "units": "meters",
+  "upAxis": "Y",
+  "assets": {
+    "world": "/experience/world/archipelago-v6.glb",
+    "worldLow": "/experience/world/archipelago-v6-low.glb",
+    "avatar": "/experience/world/avatar.glb",
+    "poster": "/experience/world/poster-v6.webp"
+  },
+  "initialCamera": {
+    "position": [
+      3.3,
+      19.5,
+      28
+    ],
+    "target": [
+      0,
+      0.25,
+      0
+    ],
+    "fov": 34
+  },
+  "movingCamera": {
+    "offset": [
+      4.5,
+      5.6,
+      8.2
+    ],
+    "targetOffset": [
+      0,
+      1.1,
+      0
+    ],
+    "damping": 0.095,
+    "azimuthLock": true
+  },
+  "spawn": [
+    0,
+    0.04,
+    7.4
+  ],
+  "pavilions": {
+    "especificar": {
+      "entry": [
+        -5.05,
+        0.62,
+        -2.92
+      ],
+      "focus": [
+        -5.05,
+        3.7,
+        -4.75
+      ],
+      "hitNode": "pavilion_especificar",
+      "camera": {
+        "position": [
+          -0.34999999999999964,
+          6.0,
+          5.1000000000000005
+        ],
+        "target": [
+          -5.05,
+          1.25,
+          -4.7
+        ],
+        "fov": 42
+      },
+      "posterPoint": [
+        0.35046,
+        0.23877
+      ]
+    },
+    "gerar": {
+      "entry": [
+        5.05,
+        0.62,
+        -2.92
+      ],
+      "focus": [
+        5.05,
+        3.7,
+        -4.75
+      ],
+      "hitNode": "pavilion_gerar",
+      "camera": {
+        "position": [
+          9.75,
+          6.0,
+          5.1000000000000005
+        ],
+        "target": [
+          5.05,
+          1.25,
+          -4.7
+        ],
+        "fov": 42
+      },
+      "posterPoint": [
+        0.69195,
+        0.26223
+      ]
+    },
+    "validar": {
+      "entry": [
+        -5.05,
+        0.62,
+        6.48
+      ],
+      "focus": [
+        -5.05,
+        3.7,
+        4.65
+      ],
+      "hitNode": "pavilion_validar",
+      "camera": {
+        "position": [
+          -0.34999999999999964,
+          6.0,
+          14.5
+        ],
+        "target": [
+          -5.05,
+          1.25,
+          4.7
+        ],
+        "fov": 42
+      },
+      "posterPoint": [
+        0.26378,
+        0.46723
+      ]
+    },
+    "evoluir": {
+      "entry": [
+        5.05,
+        0.62,
+        6.48
+      ],
+      "focus": [
+        5.05,
+        3.7,
+        4.65
+      ],
+      "hitNode": "pavilion_evoluir",
+      "camera": {
+        "position": [
+          9.75,
+          6.0,
+          14.5
+        ],
+        "target": [
+          5.05,
+          1.25,
+          4.7
+        ],
+        "fov": 42
+      },
+      "posterPoint": [
+        0.69662,
+        0.50517
+      ]
+    }
+  },
+  "navigation": {
+    "mode": "direct",
+    "nodes": {
+      "spawn": {
+        "position": [
+          0,
+          0.04,
+          7.4
+        ]
+      },
+      "especificar_entry": {
+        "position": [
+          -5.05,
+          0.62,
+          -2.92
+        ]
+      },
+      "gerar_entry": {
+        "position": [
+          5.05,
+          0.62,
+          -2.92
+        ]
+      },
+      "validar_entry": {
+        "position": [
+          -5.05,
+          0.62,
+          6.48
+        ]
+      },
+      "evoluir_entry": {
+        "position": [
+          5.05,
+          0.62,
+          6.48
+        ]
+      }
+    },
+    "edges": [
+      [
+        "spawn",
+        "especificar_entry"
+      ],
+      [
+        "spawn",
+        "gerar_entry"
+      ],
+      [
+        "spawn",
+        "validar_entry"
+      ],
+      [
+        "spawn",
+        "evoluir_entry"
+      ]
+    ],
+    "destinations": {
+      "especificar": "especificar_entry",
+      "gerar": "gerar_entry",
+      "validar": "validar_entry",
+      "evoluir": "evoluir_entry"
+    }
+  },
+  "islands": {
+    "especificar": {
+      "center": [
+        -5.05,
+        0,
+        -4.7
+      ],
+      "radius": 3.8,
+      "foundationNode": "island_especificar_foundation"
+    },
+    "gerar": {
+      "center": [
+        5.05,
+        0,
+        -4.7
+      ],
+      "radius": 3.8,
+      "foundationNode": "island_gerar_foundation"
+    },
+    "validar": {
+      "center": [
+        -5.05,
+        0,
+        4.7
+      ],
+      "radius": 3.8,
+      "foundationNode": "island_validar_foundation"
+    },
+    "evoluir": {
+      "center": [
+        5.05,
+        0,
+        4.7
+      ],
+      "radius": 3.8,
+      "foundationNode": "island_evoluir_foundation"
+    }
+  },
+  "weatherScenery": {
+    "lightningTargets": [
+      [
+        -15.2,
+        3.42,
+        -5.8
+      ],
+      [
+        15.7,
+        2.58,
+        -9.8
+      ],
+      [
+        3.6,
+        0.2,
+        -19.3
+      ]
+    ]
+  },
+  "avatar": {
+    "speed": 1.6,
+    "scale": 1
+  },
+  "ambientNodes": [
+    "ambient_canopy_especificar_garden_tree",
+    "ambient_canopy_gerar_garden_tree",
+    "ambient_canopy_validar_garden_tree",
+    "ambient_canopy_evoluir_garden_tree"
+  ]
+}

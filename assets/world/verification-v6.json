@@ -1,0 +1,41 @@
+{
+  "archipelago-v6.glb": {
+    "bytes": 4029128,
+    "triangles": 321670,
+    "meshes": 28,
+    "textures": 11,
+    "animations": []
+  },
+  "archipelago-v6-low.glb": {
+    "bytes": 1860932,
+    "triangles": 97882,
+    "meshes": 28,
+    "textures": 11,
+    "animations": []
+  },
+  "avatar.glb": {
+    "bytes": 301648,
+    "triangles": 4372,
+    "meshes": 1,
+    "textures": 0,
+    "animations": [
+      "Idle",
+      "Walk"
+    ]
+  },
+  "navigation": {
+    "nodes": 5,
+    "edges": 4,
+    "allDestinationsReachable": true,
+    "mode": "direct",
+    "noAvatarLoaded": true
+  },
+  "islands": {
+    "count": 4,
+    "allSeparated": true,
+    "lightningOutsideContent": true
+  },
+  "poster": {
+    "exists": true
+  }
+}

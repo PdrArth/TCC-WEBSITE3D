@@ -1,0 +1,130 @@
+{
+  "version": 8,
+  "models": {
+    "world": {
+      "filename": "archipelago-v8.glb",
+      "bytes": 7770016,
+      "budgetBytes": 8000000,
+      "triangles": 560940,
+      "meshes": 111,
+      "primitives": 339,
+      "vertexColoredPrimitives": 339,
+      "materials": 50,
+      "textures": 11,
+      "sha256": "a9dcc446a1712a4670bb0e9765c68696ec50b4409af8f3f099ac1f00a1c9dd9f",
+      "noAvatar": true,
+      "allSevenHitNodes": true,
+      "allSixBridges": true,
+      "lakeWater": true
+    },
+    "worldLow": {
+      "filename": "archipelago-v8-low.glb",
+      "bytes": 3413380,
+      "budgetBytes": 4000000,
+      "triangles": 189977,
+      "meshes": 111,
+      "primitives": 339,
+      "vertexColoredPrimitives": 339,
+      "materials": 50,
+      "textures": 11,
+      "sha256": "c2f3c80bdb5ef50a700e921e3e00d2861c1c576bb54485c8496c374ebbfea12a",
+      "noAvatar": true,
+      "allSevenHitNodes": true,
+      "allSixBridges": true,
+      "lakeWater": true
+    }
+  },
+  "images": {
+    "pesquisa": {
+      "url": "/experience/editorial/v8/pesquisa.webp",
+      "bytes": 49820,
+      "sha256": "dff06e05ba110858ceedaff8ac8883cf07b71ad50e003d821187ce28344b245c",
+      "realRender": true,
+      "authoringScene": "assets/world/archipelago-v8.blend"
+    },
+    "gerar": {
+      "url": "/experience/editorial/v8/gerar.webp",
+      "bytes": 51438,
+      "sha256": "a91bb8fe1e9a5c51c322e46b6380594b4ce2850c15514e87506ce4b714559202",
+      "realRender": true,
+      "authoringScene": "assets/world/archipelago-v8.blend"
+    },
+    "comparar": {
+      "url": "/experience/editorial/v8/comparar.webp",
+      "bytes": 50398,
+      "sha256": "dfbd61a9a017a5c00af82adfbf80490fb57e794033211c0719a3556075832ba6",
+      "realRender": true,
+      "authoringScene": "assets/world/archipelago-v8.blend"
+    },
+    "validar": {
+      "url": "/experience/editorial/v8/validar.webp",
+      "bytes": 52624,
+      "sha256": "4ec304600e150cb81f8f73500895b5e51eed0bf6cfdf08ac85bc48211fc4433a",
+      "realRender": true,
+      "authoringScene": "assets/world/archipelago-v8.blend"
+    },
+    "especificar": {
+      "url": "/experience/editorial/v8/especificar.webp",
+      "bytes": 53274,
+      "sha256": "7a7ed0c90fa8de911406a9154f4f5ebd8fa7147c8815db28d2ce5369bda96579",
+      "realRender": true,
+      "authoringScene": "assets/world/archipelago-v8.blend"
+    },
+    "evoluir": {
+      "url": "/experience/editorial/v8/evoluir.webp",
+      "bytes": 52790,
+      "sha256": "9359a940f893369258b57e713f852188282185ba3d7a960c30c1cce761cf5670",
+      "realRender": true,
+      "authoringScene": "assets/world/archipelago-v8.blend"
+    },
+    "perspectivas": {
+      "url": "/experience/editorial/v8/perspectivas.webp",
+      "bytes": 57194,
+      "sha256": "304e022a8e35a75c14f1bcefe53ce97b29ea71f5bef03efd4eac442de72aecfa",
+      "realRender": true,
+      "authoringScene": "assets/world/archipelago-v8.blend"
+    },
+    "poster": {
+      "url": "/experience/world/poster-v8.webp",
+      "bytes": 153910,
+      "sha256": "fac4353d8cb462ce6fa407e77cc5b168089e2328662824d2491e43252b8c9595",
+      "realRender": true,
+      "authoringScene": "assets/world/archipelago-v8.blend"
+    }
+  },
+  "passed": true,
+  "framing": {
+    "passed": true,
+    "viewports": [
+      "1280x720",
+      "390x844",
+      "1800x1350"
+    ],
+    "source": "assets/world/framing-v8.json"
+  },
+  "navigation": {
+    "mode": "direct",
+    "nodes": 8,
+    "allSevenDestinationsReachable": true,
+    "noAvatarLoaded": true
+  },
+  "islands": {
+    "count": 7,
+    "minimumPhysicalGap": 1.70031,
+    "continuousReadingSequence": true
+  },
+  "bridges": {
+    "count": 6,
+    "allPairsConsecutive": true,
+    "centerlinesOutsideBuildingTerraces": true
+  },
+  "ambient": {
+    "nodes": 45,
+    "leavesAndFlowersIndependent": true,
+    "staticTrunks": true
+  },
+  "birdPerches": {
+    "count": 14,
+    "allSevenIslands": true
+  }
+}

@@ -1,0 +1,16 @@
+import type { Season } from "./seasons.mjs";
+export type Weather = "clear" | "partly-cloudy" | "overcast" | "fog" | "drizzle" | "rain" | "freezing-rain" | "snow" | "storm" | "hail" | "dusk";
+export type WeatherPhase = "dawn" | "day" | "dusk" | "night";
+export type Coordinates = { latitude: number; longitude: number };
+export type RegionalWeather = { weather: Weather; code: number; phase: WeatherPhase; temperature: number; windSpeed: number; precipitation: number; snowfall: number; cloudCover: number; season: Season; observedAt: string; fetchedAt: string; timezone: string; source: string; sourceUrl: string; approximate: boolean; stale: boolean };
+export const weatherKinds: Weather[];
+export const weatherNames: Record<Weather, string>;
+export function weatherFromCode(code: number): Weather | null;
+export function roundCoordinates(latitude: number, longitude: number): Coordinates;
+export function forecastUrl(coordinates: Coordinates): string;
+export function weatherPhase(time: string, sunrise?: string, sunset?: string, isDay?: boolean): WeatherPhase;
+export function seasonAtLocation(time: string, latitude?: number): Season;
+export function normalizeForecast(data: unknown, coordinates: Coordinates, fetchedAt?: string): RegionalWeather;
+export function initialWeather(random?: () => number, season?: Season): Weather;
+export function nextWeather(current: Weather, random?: () => number, season?: Season): Weather;
+export function weatherDuration(weather: Weather, random?: () => number): number;

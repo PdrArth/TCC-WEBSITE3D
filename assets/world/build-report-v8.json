@@ -1,0 +1,459 @@
+{
+  "version": 8,
+  "blender": "4.5.14 LTS",
+  "worldBytes": 7770016,
+  "lowBytes": 3413380,
+  "worldMeshes": 111,
+  "worldPolygons": 319552,
+  "lowPolygons": 172111,
+  "islands": 7,
+  "bridges": 6,
+  "layout": "Continuous U; research front-left; perspectives front-right",
+  "source": "assets/world/archipelago-v8.blend",
+  "baseSource": "assets/world/archipelago-v7.blend",
+  "pavilionFurniture": "Original v7 meshes preserved intact",
+  "botany": "Illustrative models inspired by Brazilian gardens; not botanical reconstructions",
+  "trees": [
+    {
+      "island": "pesquisa",
+      "kind": "ipe_amarelo",
+      "height": 5.0,
+      "canopy": "ambient_leaves_pesquisa_ipe_amarelo",
+      "wood": "island_pesquisa_ipe_amarelo_wood",
+      "illustrative": true
+    },
+    {
+      "island": "pesquisa",
+      "kind": "jabuticabeira",
+      "height": 3.7,
+      "canopy": "ambient_leaves_pesquisa_jabuticabeira",
+      "wood": "island_pesquisa_jabuticabeira_wood",
+      "illustrative": true
+    },
+    {
+      "island": "gerar",
+      "kind": "palmeira",
+      "height": 5.75,
+      "canopy": "ambient_leaves_gerar_palmeira",
+      "wood": "island_gerar_palmeira_wood",
+      "illustrative": true
+    },
+    {
+      "island": "gerar",
+      "kind": "pitangueira",
+      "height": 3.9,
+      "canopy": "ambient_leaves_gerar_pitangueira",
+      "wood": "island_gerar_pitangueira_wood",
+      "illustrative": true
+    },
+    {
+      "island": "comparar",
+      "kind": "quaresmeira",
+      "height": 4.9,
+      "canopy": "ambient_leaves_comparar_quaresmeira",
+      "wood": "island_comparar_quaresmeira_wood",
+      "illustrative": true
+    },
+    {
+      "island": "comparar",
+      "kind": "pau_brasil",
+      "height": 4.2,
+      "canopy": "ambient_leaves_comparar_pau_brasil",
+      "wood": "island_comparar_pau_brasil_wood",
+      "illustrative": true
+    },
+    {
+      "island": "validar",
+      "kind": "araucaria",
+      "height": 5.65,
+      "canopy": "ambient_leaves_validar_araucaria",
+      "wood": "island_validar_araucaria_wood",
+      "illustrative": true
+    },
+    {
+      "island": "validar",
+      "kind": "jabuticabeira",
+      "height": 3.8,
+      "canopy": "ambient_leaves_validar_jabuticabeira",
+      "wood": "island_validar_jabuticabeira_wood",
+      "illustrative": true
+    },
+    {
+      "island": "especificar",
+      "kind": "pau_brasil",
+      "height": 4.8,
+      "canopy": "ambient_leaves_especificar_pau_brasil",
+      "wood": "island_especificar_pau_brasil_wood",
+      "illustrative": true
+    },
+    {
+      "island": "especificar",
+      "kind": "palmeira_jovem",
+      "height": 4.5,
+      "canopy": "ambient_leaves_especificar_palmeira_jovem",
+      "wood": "island_especificar_palmeira_jovem_wood",
+      "illustrative": true
+    },
+    {
+      "island": "evoluir",
+      "kind": "banana",
+      "height": 4.05,
+      "canopy": "ambient_leaves_evoluir_banana",
+      "wood": "island_evoluir_banana_wood",
+      "illustrative": true
+    },
+    {
+      "island": "evoluir",
+      "kind": "pitangueira",
+      "height": 4.15,
+      "canopy": "ambient_leaves_evoluir_pitangueira",
+      "wood": "island_evoluir_pitangueira_wood",
+      "illustrative": true
+    },
+    {
+      "island": "perspectivas",
+      "kind": "ipe_roxo",
+      "height": 5.0,
+      "canopy": "ambient_leaves_perspectivas_ipe_roxo",
+      "wood": "island_perspectivas_ipe_roxo_wood",
+      "illustrative": true
+    },
+    {
+      "island": "perspectivas",
+      "kind": "palmeira",
+      "height": 5.1,
+      "canopy": "ambient_leaves_perspectivas_palmeira",
+      "wood": "island_perspectivas_palmeira_wood",
+      "illustrative": true
+    }
+  ],
+  "ambientNodes": 45,
+  "ownership": {
+    "pavilion_pesquisa": "pesquisa",
+    "pavilion_gerar": "gerar",
+    "pavilion_comparar": "comparar",
+    "pavilion_validar": "validar",
+    "pavilion_especificar": "especificar",
+    "pavilion_evoluir": "evoluir",
+    "pavilion_perspectivas": "perspectivas",
+    "island_pesquisa_foundation": "pesquisa",
+    "island_pesquisa_shore_rocks": "pesquisa",
+    "island_pesquisa_garden_path": "pesquisa",
+    "island_pesquisa_entry_paving": "pesquisa",
+    "Garden organic planting earth": "perspectivas",
+    "Garden pebble edging": "perspectivas",
+    "ambient_leaves_pesquisa_grasses_0": "pesquisa",
+    "Garden organic planting earth.001": "perspectivas",
+    "Garden pebble edging.001": "perspectivas",
+    "ambient_leaves_pesquisa_grasses_1": "pesquisa",
+    "Garden organic planting earth.002": "perspectivas",
+    "Garden pebble edging.002": "perspectivas",
+    "Garden organic planting earth.003": "perspectivas",
+    "Garden pebble edging.003": "perspectivas",
+    "ambient_flowers_pesquisa_3": "pesquisa",
+    "Garden organic planting earth.004": "perspectivas",
+    "Garden pebble edging.004": "perspectivas",
+    "ambient_flowers_pesquisa_4": "pesquisa",
+    "island_pesquisa_planted_garden": "pesquisa",
+    "island_pesquisa_ipe_amarelo_wood": "pesquisa",
+    "ambient_leaves_pesquisa_ipe_amarelo": "pesquisa",
+    "ambient_flowers_pesquisa_ipe_amarelo": "pesquisa",
+    "island_pesquisa_jabuticabeira_wood": "pesquisa",
+    "ambient_leaves_pesquisa_jabuticabeira": "pesquisa",
+    "island_gerar_foundation": "gerar",
+    "island_gerar_shore_rocks": "gerar",
+    "island_gerar_garden_path": "gerar",
+    "island_gerar_entry_paving": "gerar",
+    "ambient_leaves_gerar_grasses_0": "gerar",
+    "ambient_leaves_gerar_grasses_1": "gerar",
+    "ambient_flowers_gerar_3": "gerar",
+    "ambient_flowers_gerar_4": "gerar",
+    "island_gerar_planted_garden": "gerar",
+    "island_gerar_palmeira_wood": "gerar",
+    "ambient_leaves_gerar_palmeira": "gerar",
+    "island_gerar_pitangueira_wood": "gerar",
+    "ambient_leaves_gerar_pitangueira": "gerar",
+    "island_comparar_foundation": "comparar",
+    "island_comparar_shore_rocks": "comparar",
+    "island_comparar_garden_path": "comparar",
+    "island_comparar_entry_paving": "comparar",
+    "ambient_leaves_comparar_grasses_0": "comparar",
+    "ambient_leaves_comparar_grasses_1": "comparar",
+    "ambient_flowers_comparar_3": "comparar",
+    "ambient_flowers_comparar_4": "comparar",
+    "island_comparar_planted_garden": "comparar",
+    "island_comparar_quaresmeira_wood": "comparar",
+    "ambient_leaves_comparar_quaresmeira": "comparar",
+    "ambient_flowers_comparar_quaresmeira": "comparar",
+    "island_comparar_pau_brasil_wood": "comparar",
+    "ambient_leaves_comparar_pau_brasil": "comparar",
+    "island_validar_foundation": "validar",
+    "island_validar_shore_rocks": "validar",
+    "island_validar_garden_path": "validar",
+    "island_validar_entry_paving": "validar",
+    "ambient_leaves_validar_grasses_0": "validar",
+    "ambient_leaves_validar_grasses_1": "validar",
+    "ambient_flowers_validar_3": "validar",
+    "ambient_flowers_validar_4": "validar",
+    "island_validar_planted_garden": "validar",
+    "island_validar_araucaria_wood": "validar",
+    "ambient_leaves_validar_araucaria": "validar",
+    "island_validar_jabuticabeira_wood": "validar",
+    "ambient_leaves_validar_jabuticabeira": "validar",
+    "island_especificar_foundation": "especificar",
+    "island_especificar_shore_rocks": "especificar",
+    "island_especificar_garden_path": "especificar",
+    "island_especificar_entry_paving": "especificar",
+    "ambient_leaves_especificar_grasses_0": "especificar",
+    "ambient_leaves_especificar_grasses_1": "especificar",
+    "ambient_flowers_especificar_3": "especificar",
+    "ambient_flowers_especificar_4": "especificar",
+    "island_especificar_planted_garden": "especificar",
+    "island_especificar_pau_brasil_wood": "especificar",
+    "ambient_leaves_especificar_pau_brasil": "especificar",
+    "island_especificar_palmeira_jovem_wood": "especificar",
+    "ambient_leaves_especificar_palmeira_jovem": "especificar",
+    "island_evoluir_foundation": "evoluir",
+    "island_evoluir_shore_rocks": "evoluir",
+    "island_evoluir_garden_path": "evoluir",
+    "island_evoluir_entry_paving": "evoluir",
+    "ambient_leaves_evoluir_grasses_0": "evoluir",
+    "ambient_leaves_evoluir_grasses_1": "evoluir",
+    "ambient_flowers_evoluir_3": "evoluir",
+    "ambient_flowers_evoluir_4": "evoluir",
+    "island_evoluir_planted_garden": "evoluir",
+    "island_evoluir_banana_wood": "evoluir",
+    "ambient_leaves_evoluir_banana": "evoluir",
+    "island_evoluir_pitangueira_wood": "evoluir",
+    "ambient_leaves_evoluir_pitangueira": "evoluir",
+    "island_perspectivas_foundation": "perspectivas",
+    "island_perspectivas_shore_rocks": "perspectivas",
+    "island_perspectivas_garden_path": "perspectivas",
+    "island_perspectivas_entry_paving": "perspectivas",
+    "ambient_leaves_perspectivas_grasses_0": "perspectivas",
+    "ambient_leaves_perspectivas_grasses_1": "perspectivas",
+    "ambient_flowers_perspectivas_3": "perspectivas",
+    "ambient_flowers_perspectivas_4": "perspectivas",
+    "island_perspectivas_planted_garden": "perspectivas",
+    "island_perspectivas_ipe_roxo_wood": "perspectivas",
+    "ambient_leaves_perspectivas_ipe_roxo": "perspectivas",
+    "ambient_flowers_perspectivas_ipe_roxo": "perspectivas",
+    "island_perspectivas_palmeira_wood": "perspectivas",
+    "ambient_leaves_perspectivas_palmeira": "perspectivas"
+  },
+  "camera": {
+    "position": [
+      1.8,
+      29.2,
+      43.5
+    ],
+    "target": [
+      0,
+      0.8,
+      -1.6
+    ],
+    "fov": 38
+  },
+  "render": "Blender EEVEE / 96 samples / actual archipelago-v8.blend scene",
+  "navigation": "legacy direct graph retained",
+  "avatarLoaded": false,
+  "budgets": {
+    "world": 8000000,
+    "worldLow": 4000000
+  },
+  "vertexShading": "COLOR_0 light continuous multiplier; pavilion shading preserved",
+  "assetSha256": {
+    "archipelago-v8.glb": "a9dcc446a1712a4670bb0e9765c68696ec50b4409af8f3f099ac1f00a1c9dd9f",
+    "archipelago-v8-low.glb": "c2f3c80bdb5ef50a700e921e3e00d2861c1c576bb54485c8496c374ebbfea12a"
+  },
+  "lod": "All closed crown cores retained; evenly sampled whole leaves; simplified garden pebbles and furniture bevels",
+  "compression": {
+    "high": "Draco 13/8/10/7; same full source geometry",
+    "low": "Draco 11/7/9/6; reduced small details"
+  },
+  "renders": {
+    "pesquisa": {
+      "url": "/experience/editorial/v8/pesquisa.webp",
+      "dimensions": [
+        1200,
+        780
+      ],
+      "bytes": 49820,
+      "sha256": "dff06e05ba110858ceedaff8ac8883cf07b71ad50e003d821187ce28344b245c",
+      "source": "assets/world/editorial-v8-pesquisa.png",
+      "authoringScene": "assets/world/archipelago-v8.blend",
+      "thumbnail": {
+        "url": "/experience/world/thumb-v8-pesquisa.webp",
+        "bytes": 12952,
+        "dimensions": [
+          512,
+          333
+        ],
+        "sha256": "4c920408143d18fe6f767ab3b311053867f8cacab5c35ff3dfbc142f30da7d8c"
+      }
+    },
+    "gerar": {
+      "url": "/experience/editorial/v8/gerar.webp",
+      "dimensions": [
+        1200,
+        780
+      ],
+      "bytes": 51438,
+      "sha256": "a91bb8fe1e9a5c51c322e46b6380594b4ce2850c15514e87506ce4b714559202",
+      "source": "assets/world/editorial-v8-gerar.png",
+      "authoringScene": "assets/world/archipelago-v8.blend",
+      "thumbnail": {
+        "url": "/experience/world/thumb-v8-gerar.webp",
+        "bytes": 13142,
+        "dimensions": [
+          512,
+          333
+        ],
+        "sha256": "ebc02d08f84550458f3c5d4580135909c5b99b22059260226c1178659cc04bed"
+      }
+    },
+    "comparar": {
+      "url": "/experience/editorial/v8/comparar.webp",
+      "dimensions": [
+        1200,
+        780
+      ],
+      "bytes": 50398,
+      "sha256": "dfbd61a9a017a5c00af82adfbf80490fb57e794033211c0719a3556075832ba6",
+      "source": "assets/world/editorial-v8-comparar.png",
+      "authoringScene": "assets/world/archipelago-v8.blend",
+      "thumbnail": {
+        "url": "/experience/world/thumb-v8-comparar.webp",
+        "bytes": 13364,
+        "dimensions": [
+          512,
+          333
+        ],
+        "sha256": "44450b2cdefbe56e5b47aec90e856b7727d673a9b095566a5b4327cf1cc1aeae"
+      }
+    },
+    "validar": {
+      "url": "/experience/editorial/v8/validar.webp",
+      "dimensions": [
+        1200,
+        780
+      ],
+      "bytes": 52624,
+      "sha256": "4ec304600e150cb81f8f73500895b5e51eed0bf6cfdf08ac85bc48211fc4433a",
+      "source": "assets/world/editorial-v8-validar.png",
+      "authoringScene": "assets/world/archipelago-v8.blend",
+      "thumbnail": {
+        "url": "/experience/world/thumb-v8-validar.webp",
+        "bytes": 14472,
+        "dimensions": [
+          512,
+          333
+        ],
+        "sha256": "5e35dedc1366365fd02c3bc00bd0cc0a7096ebd2b6d46c11277087e1209ce958"
+      }
+    },
+    "especificar": {
+      "url": "/experience/editorial/v8/especificar.webp",
+      "dimensions": [
+        1200,
+        780
+      ],
+      "bytes": 53274,
+      "sha256": "7a7ed0c90fa8de911406a9154f4f5ebd8fa7147c8815db28d2ce5369bda96579",
+      "source": "assets/world/editorial-v8-especificar.png",
+      "authoringScene": "assets/world/archipelago-v8.blend",
+      "thumbnail": {
+        "url": "/experience/world/thumb-v8-especificar.webp",
+        "bytes": 14234,
+        "dimensions": [
+          512,
+          333
+        ],
+        "sha256": "2b41b7d4d6f36dab2560cf1369f8ae789213117f3c62f350b1a5f67d2bd89af4"
+      }
+    },
+    "evoluir": {
+      "url": "/experience/editorial/v8/evoluir.webp",
+      "dimensions": [
+        1200,
+        780
+      ],
+      "bytes": 52790,
+      "sha256": "9359a940f893369258b57e713f852188282185ba3d7a960c30c1cce761cf5670",
+      "source": "assets/world/editorial-v8-evoluir.png",
+      "authoringScene": "assets/world/archipelago-v8.blend",
+      "thumbnail": {
+        "url": "/experience/world/thumb-v8-evoluir.webp",
+        "bytes": 14600,
+        "dimensions": [
+          512,
+          333
+        ],
+        "sha256": "dee2cc2da8cd33167c0c4eac156790cda5fed5372cfc70daa93bbc408f26344a"
+      }
+    },
+    "perspectivas": {
+      "url": "/experience/editorial/v8/perspectivas.webp",
+      "dimensions": [
+        1200,
+        780
+      ],
+      "bytes": 57194,
+      "sha256": "304e022a8e35a75c14f1bcefe53ce97b29ea71f5bef03efd4eac442de72aecfa",
+      "source": "assets/world/editorial-v8-perspectivas.png",
+      "authoringScene": "assets/world/archipelago-v8.blend",
+      "thumbnail": {
+        "url": "/experience/world/thumb-v8-perspectivas.webp",
+        "bytes": 15782,
+        "dimensions": [
+          512,
+          333
+        ],
+        "sha256": "81f58fd3cce6bbc0847e7da157196d4470d78e89b64cd3455a18c29e570b4a9f"
+      }
+    },
+    "poster": {
+      "url": "/experience/world/poster-v8.webp",
+      "dimensions": [
+        1800,
+        1350
+      ],
+      "bytes": 153910,
+      "sha256": "fac4353d8cb462ce6fa407e77cc5b168089e2328662824d2491e43252b8c9595",
+      "source": "assets/world/poster-v8-render.png",
+      "authoringScene": "assets/world/archipelago-v8.blend"
+    }
+  },
+  "visualRefinement": [
+    {
+      "node": "ambient_flowers_pesquisa_ipe_amarelo",
+      "flowerMaterial": "Flower ipe gold"
+    },
+    {
+      "node": "ambient_leaves_gerar_palmeira",
+      "wholeLeafletsWidened": 286,
+      "factor": 2.4,
+      "polygonsAdded": 0
+    },
+    {
+      "node": "ambient_flowers_comparar_quaresmeira",
+      "flowerMaterial": "Flower quaresmeira"
+    },
+    {
+      "node": "ambient_leaves_especificar_palmeira_jovem",
+      "wholeLeafletsWidened": 286,
+      "factor": 2.4,
+      "polygonsAdded": 0
+    },
+    {
+      "node": "ambient_flowers_perspectivas_ipe_roxo",
+      "flowerMaterial": "Flower ipe rose"
+    },
+    {
+      "node": "ambient_leaves_perspectivas_palmeira",
+      "wholeLeafletsWidened": 286,
+      "factor": 2.4,
+      "polygonsAdded": 0
+    }
+  ]
+}

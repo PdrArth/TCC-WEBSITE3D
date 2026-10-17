@@ -1,0 +1,36 @@
+{
+  "worldBytes": 4854116,
+  "lowBytes": 2110920,
+  "avatarBytes": 301648,
+  "worldMeshes": 24,
+  "worldPolygons": 328336,
+  "blender": "4.5.14 LTS",
+  "camera": {
+    "position": [
+      3.5,
+      16.5,
+      23.5
+    ],
+    "target": [
+      0,
+      0,
+      0
+    ],
+    "fov": 34
+  },
+  "render": "Blender EEVEE / 96 samples / same island.blend scene",
+  "poster": {
+    "dimensions": [
+      1600,
+      1200
+    ],
+    "bytes": 173414,
+    "sha256": "7ebdc70fa286db821fc42e03ef413ad335be5e3c4b0b4adb20dd702b0d65876e",
+    "source": "assets/world/poster-render.png"
+  },
+  "assetSha256": {
+    "island.glb": "91df0e9a9d170e7cdcabb6d0236cf61288afa2c28c054fe626f69c5929122d34",
+    "island-low.glb": "97483072af1fd6c54b11f3f8a332959ff9bcd5449cc2524860ad667e830ccaef",
+    "avatar.glb": "4a561a51ddd007adad1c15181e8c690c6e985fe94c7230a3f02c263ba294beb7"
+  }
+}

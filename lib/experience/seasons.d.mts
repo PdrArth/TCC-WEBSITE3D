@@ -1,0 +1,21 @@
+export type Season = "spring" | "summer" | "autumn" | "winter";
+export type VegetationGroup = "evergreen" | "semiDeciduous" | "deciduous" | "understory";
+export type SeasonMetadata = {
+  name: string;
+  description: string;
+  months: number[];
+  leafDensity: number;
+  flowerDensity: number;
+  dryness: number;
+  foliage: Record<VegetationGroup, number>;
+  litterDensity: number;
+  fallingLeaves: number;
+  waterColor: string;
+  palette: { dark: string; sage: string; light: string; deep: string; dry: string; ivory: string; flower: string; sky: string; ground: string };
+};
+export const seasonCalendar: string;
+export const seasonRegion: string;
+export const seasonInfo: Record<Season, SeasonMetadata>;
+export function getSeason(date?: Date): Season;
+export function vegetationGroup(nodeName?: string): VegetationGroup;
+export function vegetationDensity(season: Season, nodeName?: string, flower?: boolean): number;

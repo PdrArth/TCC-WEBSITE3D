@@ -1,0 +1,671 @@
+{
+  "schemaVersion": 2,
+  "units": "meters",
+  "upAxis": "Y",
+  "version": 9,
+  "assets": {
+    "world": "/experience/world/archipelago-v9.glb",
+    "worldLow": "/experience/world/archipelago-v9-low.glb",
+    "avatar": "/experience/world/avatar.glb",
+    "poster": "/experience/world/poster-v9.webp"
+  },
+  "initialCamera": {
+    "position": [
+      1.8,
+      29.2,
+      43.5
+    ],
+    "target": [
+      0,
+      0.8,
+      -1.6
+    ],
+    "fov": 38
+  },
+  "movingCamera": {
+    "offset": [
+      4.8,
+      6.6,
+      10.6
+    ],
+    "targetOffset": [
+      0,
+      1.12,
+      0
+    ],
+    "damping": 0.095,
+    "azimuthLock": true
+  },
+  "spawn": [
+    -11.0,
+    0.629,
+    10.75
+  ],
+  "pavilions": {
+    "pesquisa": {
+      "entry": [
+        -11.0,
+        0.629,
+        10.74
+      ],
+      "focus": [
+        -11.0,
+        4.22,
+        8.86
+      ],
+      "hitNode": "pavilion_pesquisa",
+      "camera": {
+        "position": [
+          -5.55,
+          7.05,
+          20.9
+        ],
+        "target": [
+          -11.0,
+          1.34,
+          9.0
+        ],
+        "fov": 45
+      },
+      "posterPoint": [
+        0.2102,
+        0.56462
+      ],
+      "order": 1,
+      "editorial": "/experience/editorial/v9/pesquisa.webp",
+      "thumbnail": "/experience/world/thumb-v9-pesquisa.webp"
+    },
+    "gerar": {
+      "entry": [
+        -14.0,
+        0.629,
+        0.74
+      ],
+      "focus": [
+        -14.0,
+        4.22,
+        -1.14
+      ],
+      "hitNode": "pavilion_gerar",
+      "camera": {
+        "position": [
+          -8.55,
+          7.05,
+          10.9
+        ],
+        "target": [
+          -14.0,
+          1.34,
+          -1.0
+        ],
+        "fov": 45
+      },
+      "posterPoint": [
+        0.20987,
+        0.39454
+      ],
+      "order": 2,
+      "editorial": "/experience/editorial/v9/gerar.webp",
+      "thumbnail": "/experience/world/thumb-v9-gerar.webp"
+    },
+    "comparar": {
+      "entry": [
+        -10.0,
+        0.629,
+        -9.26
+      ],
+      "focus": [
+        -10.0,
+        4.22,
+        -11.14
+      ],
+      "hitNode": "pavilion_comparar",
+      "camera": {
+        "position": [
+          -4.55,
+          7.05,
+          0.9
+        ],
+        "target": [
+          -10.0,
+          1.34,
+          -11.0
+        ],
+        "fov": 45
+      },
+      "posterPoint": [
+        0.33383,
+        0.27707
+      ],
+      "order": 3,
+      "editorial": "/experience/editorial/v9/comparar.webp",
+      "thumbnail": "/experience/world/thumb-v9-comparar.webp"
+    },
+    "validar": {
+      "entry": [
+        0.0,
+        0.629,
+        -12.26
+      ],
+      "focus": [
+        0.0,
+        4.22,
+        -14.14
+      ],
+      "hitNode": "pavilion_validar",
+      "camera": {
+        "position": [
+          5.45,
+          7.05,
+          -2.1
+        ],
+        "target": [
+          0.0,
+          1.34,
+          -14.0
+        ],
+        "fov": 45
+      },
+      "posterPoint": [
+        0.51764,
+        0.25403
+      ],
+      "order": 4,
+      "editorial": "/experience/editorial/v9/validar.webp",
+      "thumbnail": "/experience/world/thumb-v9-validar.webp"
+    },
+    "especificar": {
+      "entry": [
+        10.0,
+        0.629,
+        -9.26
+      ],
+      "focus": [
+        10.0,
+        4.22,
+        -11.14
+      ],
+      "hitNode": "pavilion_especificar",
+      "camera": {
+        "position": [
+          15.45,
+          7.05,
+          0.9
+        ],
+        "target": [
+          10.0,
+          1.34,
+          -11.0
+        ],
+        "fov": 45
+      },
+      "posterPoint": [
+        0.69857,
+        0.29285
+      ],
+      "order": 5,
+      "editorial": "/experience/editorial/v9/especificar.webp",
+      "thumbnail": "/experience/world/thumb-v9-especificar.webp"
+    },
+    "evoluir": {
+      "entry": [
+        14.0,
+        0.629,
+        0.74
+      ],
+      "focus": [
+        14.0,
+        4.22,
+        -1.14
+      ],
+      "hitNode": "pavilion_evoluir",
+      "camera": {
+        "position": [
+          19.45,
+          7.05,
+          10.9
+        ],
+        "target": [
+          14.0,
+          1.34,
+          -1.0
+        ],
+        "fov": 45
+      },
+      "posterPoint": [
+        0.80208,
+        0.42428
+      ],
+      "order": 6,
+      "editorial": "/experience/editorial/v9/evoluir.webp",
+      "thumbnail": "/experience/world/thumb-v9-evoluir.webp"
+    },
+    "perspectivas": {
+      "entry": [
+        11.0,
+        0.629,
+        10.74
+      ],
+      "focus": [
+        11.0,
+        5.12,
+        8.86
+      ],
+      "hitNode": "pavilion_perspectivas",
+      "camera": {
+        "position": [
+          16.45,
+          7.55,
+          20.9
+        ],
+        "target": [
+          11.0,
+          1.62,
+          9.0
+        ],
+        "fov": 45
+      },
+      "posterPoint": [
+        0.76702,
+        0.57322
+      ],
+      "order": 7,
+      "editorial": "/experience/editorial/v9/perspectivas.webp",
+      "thumbnail": "/experience/world/thumb-v9-perspectivas.webp"
+    }
+  },
+  "navigation": {
+    "mode": "direct",
+    "nodes": {
+      "spawn": {
+        "position": [
+          -11.0,
+          0.629,
+          10.75
+        ]
+      },
+      "pesquisa_entry": {
+        "position": [
+          -11.0,
+          0.629,
+          10.74
+        ]
+      },
+      "gerar_entry": {
+        "position": [
+          -14.0,
+          0.629,
+          0.74
+        ]
+      },
+      "comparar_entry": {
+        "position": [
+          -10.0,
+          0.629,
+          -9.26
+        ]
+      },
+      "validar_entry": {
+        "position": [
+          0.0,
+          0.629,
+          -12.26
+        ]
+      },
+      "especificar_entry": {
+        "position": [
+          10.0,
+          0.629,
+          -9.26
+        ]
+      },
+      "evoluir_entry": {
+        "position": [
+          14.0,
+          0.629,
+          0.74
+        ]
+      },
+      "perspectivas_entry": {
+        "position": [
+          11.0,
+          0.629,
+          10.74
+        ]
+      }
+    },
+    "edges": [
+      [
+        "spawn",
+        "pesquisa_entry"
+      ],
+      [
+        "spawn",
+        "gerar_entry"
+      ],
+      [
+        "spawn",
+        "comparar_entry"
+      ],
+      [
+        "spawn",
+        "validar_entry"
+      ],
+      [
+        "spawn",
+        "especificar_entry"
+      ],
+      [
+        "spawn",
+        "evoluir_entry"
+      ],
+      [
+        "spawn",
+        "perspectivas_entry"
+      ]
+    ],
+    "destinations": {
+      "pesquisa": "pesquisa_entry",
+      "gerar": "gerar_entry",
+      "comparar": "comparar_entry",
+      "validar": "validar_entry",
+      "especificar": "especificar_entry",
+      "evoluir": "evoluir_entry",
+      "perspectivas": "perspectivas_entry"
+    }
+  },
+  "islands": {
+    "pesquisa": {
+      "center": [
+        -11.0,
+        0,
+        9.0
+      ],
+      "radius": 4.4399999999999995,
+      "foundationNode": "island_pesquisa_foundation"
+    },
+    "gerar": {
+      "center": [
+        -14.0,
+        0,
+        -1.0
+      ],
+      "radius": 4.3,
+      "foundationNode": "island_gerar_foundation"
+    },
+    "comparar": {
+      "center": [
+        -10.0,
+        0,
+        -11.0
+      ],
+      "radius": 4.3,
+      "foundationNode": "island_comparar_foundation"
+    },
+    "validar": {
+      "center": [
+        0.0,
+        0,
+        -14.0
+      ],
+      "radius": 4.3,
+      "foundationNode": "island_validar_foundation"
+    },
+    "especificar": {
+      "center": [
+        10.0,
+        0,
+        -11.0
+      ],
+      "radius": 4.3,
+      "foundationNode": "island_especificar_foundation"
+    },
+    "evoluir": {
+      "center": [
+        14.0,
+        0,
+        -1.0
+      ],
+      "radius": 4.3,
+      "foundationNode": "island_evoluir_foundation"
+    },
+    "perspectivas": {
+      "center": [
+        11.0,
+        0,
+        9.0
+      ],
+      "radius": 4.4399999999999995,
+      "foundationNode": "island_perspectivas_foundation"
+    }
+  },
+  "weatherScenery": {
+    "lightningTargets": [
+      [
+        -19.0,
+        0.3144,
+        -7.0
+      ],
+      [
+        19.0,
+        0.3144,
+        -7.0
+      ],
+      [
+        0.0,
+        0.3466,
+        17.5
+      ]
+    ]
+  },
+  "avatar": {
+    "speed": 1.6,
+    "scale": 1
+  },
+  "ambientNodes": [
+    "ambient_leaves_pesquisa_ipe_amarelo",
+    "ambient_flowers_pesquisa_ipe_amarelo",
+    "ambient_leaves_pesquisa_jabuticabeira",
+    "ambient_leaves_gerar_palmeira",
+    "ambient_leaves_gerar_pitangueira",
+    "ambient_leaves_comparar_quaresmeira",
+    "ambient_flowers_comparar_quaresmeira",
+    "ambient_leaves_comparar_pau_brasil",
+    "ambient_leaves_validar_araucaria",
+    "ambient_leaves_validar_jabuticabeira",
+    "ambient_leaves_especificar_pau_brasil",
+    "ambient_leaves_especificar_palmeira_jovem",
+    "ambient_leaves_evoluir_banana",
+    "ambient_leaves_evoluir_pitangueira",
+    "ambient_leaves_perspectivas_ipe_roxo",
+    "ambient_flowers_perspectivas_ipe_roxo",
+    "ambient_leaves_perspectivas_palmeira",
+    "ambient_leaves_pesquisa_understory",
+    "ambient_leaves_gerar_understory",
+    "ambient_leaves_comparar_understory",
+    "ambient_leaves_validar_understory",
+    "ambient_leaves_especificar_understory",
+    "ambient_leaves_evoluir_understory",
+    "ambient_leaves_perspectivas_understory"
+  ],
+  "foliagePalette": {
+    "Garden olive dark": "477246",
+    "Garden sage": "668852",
+    "Garden olive light": "91A76B",
+    "Garden leaf deep": "2D563B",
+    "Garden dry tip": "B6A578",
+    "Flower ivory": "E9DFCC",
+    "Flower blue": "8BAFCE",
+    "Flower ipe gold": "EAC251",
+    "Flower quaresmeira": "9C6AB1",
+    "Flower ipe rose": "CF8FAF",
+    "Flower coral": "D9957D",
+    "Fruit pitanga": "C97742",
+    "Fruit jabuticaba": "453C48",
+    "Palm leaf": "5B7D4C",
+    "Banana leaf": "7D9957",
+    "Grass reed": "72845C"
+  },
+  "bridges": [
+    {
+      "from": "pesquisa",
+      "to": "gerar",
+      "nodes": [
+        "bridge_pesquisa_gerar"
+      ]
+    },
+    {
+      "from": "gerar",
+      "to": "comparar",
+      "nodes": [
+        "bridge_gerar_comparar"
+      ]
+    },
+    {
+      "from": "comparar",
+      "to": "validar",
+      "nodes": [
+        "bridge_comparar_validar"
+      ]
+    },
+    {
+      "from": "validar",
+      "to": "especificar",
+      "nodes": [
+        "bridge_validar_especificar"
+      ]
+    },
+    {
+      "from": "especificar",
+      "to": "evoluir",
+      "nodes": [
+        "bridge_especificar_evoluir"
+      ]
+    },
+    {
+      "from": "evoluir",
+      "to": "perspectivas",
+      "nodes": [
+        "bridge_evoluir_perspectivas"
+      ]
+    }
+  ],
+  "birdPerches": [
+    {
+      "position": [
+        -14.0013,
+        4.5527,
+        8.1306
+      ],
+      "island": "pesquisa"
+    },
+    {
+      "position": [
+        -7.9201,
+        2.9055,
+        8.2442
+      ],
+      "island": "pesquisa"
+    },
+    {
+      "position": [
+        -16.780000686645508,
+        5.744999790191651,
+        -2.5799999237060547
+      ],
+      "island": "gerar"
+    },
+    {
+      "position": [
+        -11.0125,
+        3.369,
+        -1.9562
+      ],
+      "island": "gerar"
+    },
+    {
+      "position": [
+        -12.9372,
+        3.518,
+        -11.847
+      ],
+      "island": "comparar"
+    },
+    {
+      "position": [
+        -7.0369,
+        3.2823,
+        -11.7169
+      ],
+      "island": "comparar"
+    },
+    {
+      "position": [
+        -3.306,
+        3.412,
+        -16.9844
+      ],
+      "island": "validar"
+    },
+    {
+      "position": [
+        3.0584,
+        3.483,
+        -14.8255
+      ],
+      "island": "validar"
+    },
+    {
+      "position": [
+        7.1699,
+        4.1904,
+        -11.8153
+      ],
+      "island": "especificar"
+    },
+    {
+      "position": [
+        13.15999984741211,
+        4.494999790191651,
+        -12.579999923706055
+      ],
+      "island": "especificar"
+    },
+    {
+      "position": [
+        10.97,
+        4.0,
+        -2.6399999999999997
+      ],
+      "island": "evoluir"
+    },
+    {
+      "position": [
+        17.092,
+        3.2322,
+        -1.9857
+      ],
+      "island": "evoluir"
+    },
+    {
+      "position": [
+        8.1342,
+        4.2981,
+        8.1102
+      ],
+      "island": "perspectivas"
+    },
+    {
+      "position": [
+        14.15999984741211,
+        5.095000171661377,
+        7.420000076293945
+      ],
+      "island": "perspectivas"
+    }
+  ],
+  "cameraBounds": {
+    "minZoom": 0.8,
+    "maxZoom": 2
+  }
+}

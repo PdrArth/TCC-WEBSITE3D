@@ -1,0 +1,35 @@
+[
+  {
+    "id": "white_plaster_02",
+    "name": "White Plaster 02",
+    "authors": {
+      "Rob Tuytel": "All"
+    },
+    "source": "https://polyhaven.com/a/white_plaster_02",
+    "license": "CC0",
+    "diffuse": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/white_plaster_02/white_plaster_02_diff_1k.jpg",
+    "normal": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/white_plaster_02/white_plaster_02_nor_gl_1k.jpg"
+  },
+  {
+    "id": "oak_veneer_01",
+    "name": "Oak Veneer 01",
+    "authors": {
+      "Jenelle van Heerden": "All"
+    },
+    "source": "https://polyhaven.com/a/oak_veneer_01",
+    "license": "CC0",
+    "diffuse": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/oak_veneer_01/oak_veneer_01_diff_1k.jpg",
+    "normal": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/oak_veneer_01/oak_veneer_01_nor_gl_1k.jpg"
+  },
+  {
+    "id": "stone_tiles_02",
+    "name": "Stone Tiles 02",
+    "authors": {
+      "Charlotte Baglioni": "All"
+    },
+    "source": "https://polyhaven.com/a/stone_tiles_02",
+    "license": "CC0",
+    "diffuse": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/stone_tiles_02/stone_tiles_02_diff_1k.jpg",
+    "normal": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/stone_tiles_02/stone_tiles_02_nor_gl_1k.jpg"
+  }
+]

@@ -1,0 +1,86 @@
+{
+  "worldBytes": 4029128,
+  "lowBytes": 1860932,
+  "avatarBytes": 301648,
+  "worldMeshes": 28,
+  "worldPolygons": 246027,
+  "blender": "4.5.14 LTS",
+  "camera": {
+    "position": [
+      3.3,
+      19.5,
+      28
+    ],
+    "target": [
+      0,
+      0.25,
+      0
+    ],
+    "fov": 34
+  },
+  "render": "Blender EEVEE / 64 samples / actual archipelago-v6.blend scene",
+  "islands": 4,
+  "navigation": "direct",
+  "source": "assets/world/archipelago-v6.blend",
+  "renders": {
+    "especificar": {
+      "url": "/experience/editorial/especificar.webp",
+      "dimensions": [
+        1000,
+        650
+      ],
+      "bytes": 29620,
+      "sha256": "327241208a98c2c9278bd9154fb82c34d8e0d9f6301c5f2a74035d66d05e6f93",
+      "source": "assets/world/editorial-especificar.png",
+      "authoringScene": "assets/world/archipelago-v6.blend"
+    },
+    "gerar": {
+      "url": "/experience/editorial/gerar.webp",
+      "dimensions": [
+        1000,
+        650
+      ],
+      "bytes": 29702,
+      "sha256": "d94c851161878b3c95dcd509b073cc8b2122e50e4254f38b1a25a5cd0c497717",
+      "source": "assets/world/editorial-gerar.png",
+      "authoringScene": "assets/world/archipelago-v6.blend"
+    },
+    "validar": {
+      "url": "/experience/editorial/validar.webp",
+      "dimensions": [
+        1000,
+        650
+      ],
+      "bytes": 29396,
+      "sha256": "684770ceb7e8158411fcb90fc32f303d18aba990d711c59cde3efa1a052446f9",
+      "source": "assets/world/editorial-validar.png",
+      "authoringScene": "assets/world/archipelago-v6.blend"
+    },
+    "evoluir": {
+      "url": "/experience/editorial/evoluir.webp",
+      "dimensions": [
+        1000,
+        650
+      ],
+      "bytes": 35344,
+      "sha256": "efda164002815692bc20bd2dde29bcac6fede5b0e76a48313dcb2a7f8f2c4561",
+      "source": "assets/world/editorial-evoluir.png",
+      "authoringScene": "assets/world/archipelago-v6.blend"
+    },
+    "poster": {
+      "url": "/experience/world/poster-v6.webp",
+      "dimensions": [
+        1600,
+        1200
+      ],
+      "bytes": 93686,
+      "sha256": "4d558ae4d15c15866181e69c834cece35268384de1c735afa781a3d809d8a7be",
+      "source": "assets/world/poster-v6-render.png",
+      "authoringScene": "assets/world/archipelago-v6.blend"
+    }
+  },
+  "assetSha256": {
+    "archipelago-v6.glb": "a8fbc32cd2d31d6359eba5e33b8d561c428a9bf3a0c4dbe5beff9eea0640c549",
+    "archipelago-v6-low.glb": "4ca7b8f702fc8b704a2a96ec43afe78cd0720b31d99f8e87e543a80759e20037"
+  }
+}

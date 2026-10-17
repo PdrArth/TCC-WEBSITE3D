@@ -1,0 +1,196 @@
+{
+  "version": 7,
+  "worldBytes": 7202772,
+  "lowBytes": 3142656,
+  "worldMeshes": 49,
+  "worldPolygons": 345828,
+  "blender": "4.5.14 LTS",
+  "camera": {
+    "position": [
+      3.2,
+      30.5,
+      43.0
+    ],
+    "target": [
+      0,
+      0.8,
+      -0.45
+    ],
+    "fov": 38
+  },
+  "render": "Blender EEVEE / 96 samples / actual archipelago-v7.blend scene",
+  "islands": 7,
+  "navigation": "direct",
+  "avatarLoaded": false,
+  "source": "assets/world/archipelago-v7.blend",
+  "baseSource": "scripts/world/build_world.py",
+  "foliagePalette": {
+    "Garden olive dark": "467446",
+    "Garden sage": "668B50",
+    "Garden olive light": "86A559",
+    "Garden leaf deep": "244E35",
+    "Garden dry tip": "C2AF77",
+    "Flower ivory": "F3E2BC",
+    "Flower blue": "A4B2D0"
+  },
+  "vertexShading": "COLOR_0, mild per-face cavity and crown shade; both LODs",
+  "lowPolygons": 173920,
+  "lod": "All crown cores preserved; evenly distributed whole leaves; reduced furniture bevels; Draco 12/8/10/7",
+  "renders": {
+    "pesquisa": {
+      "url": "/experience/editorial/v7/pesquisa.webp",
+      "dimensions": [
+        1200,
+        780
+      ],
+      "bytes": 39538,
+      "sha256": "805b442f245ddac857da4901ff29b88d226497e9321a98fd29a4252837e593f0",
+      "source": "assets/world/editorial-v7-pesquisa.png",
+      "authoringScene": "assets/world/archipelago-v7.blend",
+      "thumbnail": {
+        "url": "/experience/world/thumb-v7-pesquisa.webp",
+        "bytes": 10802,
+        "dimensions": [
+          512,
+          333
+        ],
+        "sha256": "b373c030cca35ba2f101008aeaa6d6070eb762184f225339784697394e7824c1"
+      }
+    },
+    "gerar": {
+      "url": "/experience/editorial/v7/gerar.webp",
+      "dimensions": [
+        1200,
+        780
+      ],
+      "bytes": 40744,
+      "sha256": "c6850e84884a521a9b37e7a03fc6ff4bde00a720a0fb0208d7f7936061380de8",
+      "source": "assets/world/editorial-v7-gerar.png",
+      "authoringScene": "assets/world/archipelago-v7.blend",
+      "thumbnail": {
+        "url": "/experience/world/thumb-v7-gerar.webp",
+        "bytes": 10930,
+        "dimensions": [
+          512,
+          333
+        ],
+        "sha256": "e3edd4cb3bf0f26d71c934ffad970c07e71eca48108f5ba1ca7c329be26a4571"
+      }
+    },
+    "comparar": {
+      "url": "/experience/editorial/v7/comparar.webp",
+      "dimensions": [
+        1200,
+        780
+      ],
+      "bytes": 42988,
+      "sha256": "713330a0498d98302dc0736c1cc2e134d115e8351dd858b6cd46a553ee6123c0",
+      "source": "assets/world/editorial-v7-comparar.png",
+      "authoringScene": "assets/world/archipelago-v7.blend",
+      "thumbnail": {
+        "url": "/experience/world/thumb-v7-comparar.webp",
+        "bytes": 11710,
+        "dimensions": [
+          512,
+          333
+        ],
+        "sha256": "9ae6b4ec6179261fa93b72cd5357dc9b1e50b06827073e2af0b222b81f12b6d0"
+      }
+    },
+    "validar": {
+      "url": "/experience/editorial/v7/validar.webp",
+      "dimensions": [
+        1200,
+        780
+      ],
+      "bytes": 44122,
+      "sha256": "44315daaa95935e1dc74e931b8305b667da62b0eb122ef5981978870273a467c",
+      "source": "assets/world/editorial-v7-validar.png",
+      "authoringScene": "assets/world/archipelago-v7.blend",
+      "thumbnail": {
+        "url": "/experience/world/thumb-v7-validar.webp",
+        "bytes": 12146,
+        "dimensions": [
+          512,
+          333
+        ],
+        "sha256": "94f805f2cc53fd5632c67de0b63e4c85c1bef0c7a4d01c921086d6bd798ff7ee"
+      }
+    },
+    "especificar": {
+      "url": "/experience/editorial/v7/especificar.webp",
+      "dimensions": [
+        1200,
+        780
+      ],
+      "bytes": 44298,
+      "sha256": "8b743b79ce869ee9e573cce7a3094b6d81c7fedeab8e189e04694b6f4faa9a23",
+      "source": "assets/world/editorial-v7-especificar.png",
+      "authoringScene": "assets/world/archipelago-v7.blend",
+      "thumbnail": {
+        "url": "/experience/world/thumb-v7-especificar.webp",
+        "bytes": 11920,
+        "dimensions": [
+          512,
+          333
+        ],
+        "sha256": "6c06a665bc37370d91351d258630c8e8798385c48c3cb16a0b7774e2862d0424"
+      }
+    },
+    "evoluir": {
+      "url": "/experience/editorial/v7/evoluir.webp",
+      "dimensions": [
+        1200,
+        780
+      ],
+      "bytes": 44348,
+      "sha256": "4e0823e805caa020b09e2646c9be89b2a4651d6d6322ecb365b3b463a433edd0",
+      "source": "assets/world/editorial-v7-evoluir.png",
+      "authoringScene": "assets/world/archipelago-v7.blend",
+      "thumbnail": {
+        "url": "/experience/world/thumb-v7-evoluir.webp",
+        "bytes": 11886,
+        "dimensions": [
+          512,
+          333
+        ],
+        "sha256": "047f548a128537a04a32af61c46772fc9fad92ed9032897f0c3e0b12840dc4f6"
+      }
+    },
+    "perspectivas": {
+      "url": "/experience/editorial/v7/perspectivas.webp",
+      "dimensions": [
+        1200,
+        780
+      ],
+      "bytes": 38858,
+      "sha256": "f3ea1c5172cab7f943fdb5b653d8857884d7372fe5908422db537e824eda46e8",
+      "source": "assets/world/editorial-v7-perspectivas.png",
+      "authoringScene": "assets/world/archipelago-v7.blend",
+      "thumbnail": {
+        "url": "/experience/world/thumb-v7-perspectivas.webp",
+        "bytes": 10670,
+        "dimensions": [
+          512,
+          333
+        ],
+        "sha256": "91bcafed24a27c4ab0419d9a095b1031b52eb144d2f28ca7cd255d96fa4d5906"
+      }
+    },
+    "poster": {
+      "url": "/experience/world/poster-v7.webp",
+      "dimensions": [
+        1800,
+        1350
+      ],
+      "bytes": 98998,
+      "sha256": "5173a990a3b5c60722b5b785b8bd3a5ca25d679e97d1453ce4a030e0362ebe7c",
+      "source": "assets/world/poster-v7-render.png",
+      "authoringScene": "assets/world/archipelago-v7.blend"
+    }
+  },
+  "assetSha256": {
+    "archipelago-v7.glb": "3203ca1192778830b9d894c680aa12bf2f5c42e309bc3f11a003549fc6e97323",
+    "archipelago-v7-low.glb": "02c7f2a1e3ba8c7250101420e7cd6acd9198f8ebb61e6d218c46751909c4eb0c"
+  }
+}

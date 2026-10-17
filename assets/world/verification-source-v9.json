@@ -1,0 +1,435 @@
+{
+  "version": 9,
+  "passed": true,
+  "source": "assets/world/archipelago-v9.blend",
+  "sourceSha256": "142c01fc04e146d0f26559c17ed658ec531bebb95049dcde5d2d7b936ac047ac",
+  "preserved": {
+    "pavilion_pesquisa": {
+      "sha256": "5a2e6c65a5ab3b1d3ace657dd97d8b1bd4d4fc0ab4e6b22d3983b13d185d850c",
+      "vertices": 11646,
+      "polygons": 10817,
+      "geometryAndTransformIdenticalToV8": true
+    },
+    "pavilion_gerar": {
+      "sha256": "bc0941379a51425c70d40388aa63570d2d96dab5ee6243aa86124c475b85ef88",
+      "vertices": 21944,
+      "polygons": 19981,
+      "geometryAndTransformIdenticalToV8": true
+    },
+    "pavilion_comparar": {
+      "sha256": "f59a336f1ae2c232f1eecad0a706945b3ece083076c6b973613e68bae7f24acf",
+      "vertices": 16730,
+      "polygons": 15773,
+      "geometryAndTransformIdenticalToV8": true
+    },
+    "pavilion_validar": {
+      "sha256": "d94d8797cc5f4f6e5333031268f63ef864504075fd90e585f45f1d1b37b63e21",
+      "vertices": 15616,
+      "polygons": 14715,
+      "geometryAndTransformIdenticalToV8": true
+    },
+    "pavilion_especificar": {
+      "sha256": "6b55c79702f7e931a1124ce6657dc1a6206422227760c19a67fd65bb650a1743",
+      "vertices": 16650,
+      "polygons": 15110,
+      "geometryAndTransformIdenticalToV8": true
+    },
+    "pavilion_evoluir": {
+      "sha256": "379ed5466a9d1806313d797315872641b1b8fbf7e5d8abb40208abd74d1ceba5",
+      "vertices": 21172,
+      "polygons": 19425,
+      "geometryAndTransformIdenticalToV8": true
+    },
+    "pavilion_perspectivas": {
+      "sha256": "a6f9586b67216425d5dc03e6d8820fa947368f70c36f4d9d1c25a845a4e403ed",
+      "vertices": 7804,
+      "polygons": 6930,
+      "geometryAndTransformIdenticalToV8": true
+    },
+    "bridge_pesquisa_gerar": {
+      "sha256": "9998d2ba8f682da43dcded46d5f0377150fe285f5a88380243b3ccee9fe50cfa",
+      "vertices": 1432,
+      "polygons": 1178,
+      "geometryAndTransformIdenticalToV8": true
+    },
+    "bridge_gerar_comparar": {
+      "sha256": "4a02ef3059cf977f2daea9650e588e87f557da2b02c24d279e087f3dc434f34c",
+      "vertices": 1600,
+      "polygons": 1340,
+      "geometryAndTransformIdenticalToV8": true
+    },
+    "bridge_comparar_validar": {
+      "sha256": "a5b85481732b3738f5e2f9301e7556f1211ab2cc81dd78c20147a1cb315b6d21",
+      "vertices": 1488,
+      "polygons": 1232,
+      "geometryAndTransformIdenticalToV8": true
+    },
+    "bridge_validar_especificar": {
+      "sha256": "ee91de50bafb0d0b8507199b2e967d8aea9ed334e49749618531d10e7d39e47e",
+      "vertices": 1488,
+      "polygons": 1232,
+      "geometryAndTransformIdenticalToV8": true
+    },
+    "bridge_especificar_evoluir": {
+      "sha256": "b138d0b07b6f1cd1571b42cd1bdde8902a344f21b51667a57441ea11406a6495",
+      "vertices": 1600,
+      "polygons": 1340,
+      "geometryAndTransformIdenticalToV8": true
+    },
+    "bridge_evoluir_perspectivas": {
+      "sha256": "600ffd854b61aa67e9fae6f2aefacf635d6645b36e5b96728c49491781695c90",
+      "vertices": 1432,
+      "polygons": 1178,
+      "geometryAndTransformIdenticalToV8": true
+    }
+  },
+  "bridges": [
+    {
+      "from": "pesquisa",
+      "to": "gerar",
+      "minimumDistanceToAnyPavilionCenter": 3.93417,
+      "outsideEveryPavilionTerrace": true
+    },
+    {
+      "from": "gerar",
+      "to": "comparar",
+      "minimumDistanceToAnyPavilionCenter": 3.93502,
+      "outsideEveryPavilionTerrace": true
+    },
+    {
+      "from": "comparar",
+      "to": "validar",
+      "minimumDistanceToAnyPavilionCenter": 3.93501,
+      "outsideEveryPavilionTerrace": true
+    },
+    {
+      "from": "validar",
+      "to": "especificar",
+      "minimumDistanceToAnyPavilionCenter": 3.93501,
+      "outsideEveryPavilionTerrace": true
+    },
+    {
+      "from": "especificar",
+      "to": "evoluir",
+      "minimumDistanceToAnyPavilionCenter": 3.93502,
+      "outsideEveryPavilionTerrace": true
+    },
+    {
+      "from": "evoluir",
+      "to": "perspectivas",
+      "minimumDistanceToAnyPavilionCenter": 3.93417,
+      "outsideEveryPavilionTerrace": true
+    }
+  ],
+  "ambient": {
+    "ambient_leaves_pesquisa_ipe_amarelo": {
+      "positionBlender": [
+        -13.99,
+        -7.4,
+        2.7552
+      ],
+      "leavesOrFlowersOnly": true,
+      "wholeLeafLodGroups": true
+    },
+    "ambient_flowers_pesquisa_ipe_amarelo": {
+      "positionBlender": [
+        -13.99,
+        -7.4,
+        2.952
+      ],
+      "leavesOrFlowersOnly": true,
+      "wholeLeafLodGroups": true
+    },
+    "ambient_leaves_pesquisa_jabuticabeira": {
+      "positionBlender": [
+        -8.02,
+        -7.4,
+        2.0272
+      ],
+      "leavesOrFlowersOnly": true,
+      "wholeLeafLodGroups": true
+    },
+    "ambient_leaves_gerar_palmeira": {
+      "positionBlender": [
+        -16.78,
+        2.58,
+        5.72
+      ],
+      "leavesOrFlowersOnly": true,
+      "wholeLeafLodGroups": true
+    },
+    "ambient_leaves_gerar_pitangueira": {
+      "positionBlender": [
+        -11.02,
+        2.6,
+        2.1392
+      ],
+      "leavesOrFlowersOnly": true,
+      "wholeLeafLodGroups": true
+    },
+    "ambient_leaves_comparar_quaresmeira": {
+      "positionBlender": [
+        -12.99,
+        12.6,
+        2.6992
+      ],
+      "leavesOrFlowersOnly": true,
+      "wholeLeafLodGroups": true
+    },
+    "ambient_flowers_comparar_quaresmeira": {
+      "positionBlender": [
+        -12.99,
+        12.6,
+        2.892
+      ],
+      "leavesOrFlowersOnly": true,
+      "wholeLeafLodGroups": true
+    },
+    "ambient_leaves_comparar_pau_brasil": {
+      "positionBlender": [
+        -7.02,
+        12.6,
+        2.3072
+      ],
+      "leavesOrFlowersOnly": true,
+      "wholeLeafLodGroups": true
+    },
+    "ambient_leaves_validar_araucaria": {
+      "positionBlender": [
+        -2.99,
+        15.6,
+        3.1192
+      ],
+      "leavesOrFlowersOnly": true,
+      "wholeLeafLodGroups": true
+    },
+    "ambient_leaves_validar_jabuticabeira": {
+      "positionBlender": [
+        2.98,
+        15.6,
+        2.0832
+      ],
+      "leavesOrFlowersOnly": true,
+      "wholeLeafLodGroups": true
+    },
+    "ambient_leaves_especificar_pau_brasil": {
+      "positionBlender": [
+        7.01,
+        12.6,
+        2.6432
+      ],
+      "leavesOrFlowersOnly": true,
+      "wholeLeafLodGroups": true
+    },
+    "ambient_leaves_especificar_palmeira_jovem": {
+      "positionBlender": [
+        13.16,
+        12.58,
+        4.47
+      ],
+      "leavesOrFlowersOnly": true,
+      "wholeLeafLodGroups": true
+    },
+    "ambient_leaves_evoluir_banana": {
+      "positionBlender": [
+        10.97,
+        2.64,
+        3.4
+      ],
+      "leavesOrFlowersOnly": true,
+      "wholeLeafLodGroups": true
+    },
+    "ambient_leaves_evoluir_pitangueira": {
+      "positionBlender": [
+        16.98,
+        2.6,
+        2.2792
+      ],
+      "leavesOrFlowersOnly": true,
+      "wholeLeafLodGroups": true
+    },
+    "ambient_leaves_perspectivas_ipe_roxo": {
+      "positionBlender": [
+        8.01,
+        -7.4,
+        2.7552
+      ],
+      "leavesOrFlowersOnly": true,
+      "wholeLeafLodGroups": true
+    },
+    "ambient_flowers_perspectivas_ipe_roxo": {
+      "positionBlender": [
+        8.01,
+        -7.4,
+        2.952
+      ],
+      "leavesOrFlowersOnly": true,
+      "wholeLeafLodGroups": true
+    },
+    "ambient_leaves_perspectivas_palmeira": {
+      "positionBlender": [
+        14.16,
+        -7.42,
+        5.07
+      ],
+      "leavesOrFlowersOnly": true,
+      "wholeLeafLodGroups": true
+    },
+    "ambient_leaves_pesquisa_understory": {
+      "positionBlender": [
+        -11.0,
+        -9.0,
+        0.08
+      ],
+      "leavesOrFlowersOnly": true,
+      "wholeLeafLodGroups": true
+    },
+    "ambient_leaves_gerar_understory": {
+      "positionBlender": [
+        -14.0,
+        1.0,
+        0.08
+      ],
+      "leavesOrFlowersOnly": true,
+      "wholeLeafLodGroups": true
+    },
+    "ambient_leaves_comparar_understory": {
+      "positionBlender": [
+        -10.0,
+        11.0,
+        0.08
+      ],
+      "leavesOrFlowersOnly": true,
+      "wholeLeafLodGroups": true
+    },
+    "ambient_leaves_validar_understory": {
+      "positionBlender": [
+        0.0,
+        14.0,
+        0.08
+      ],
+      "leavesOrFlowersOnly": true,
+      "wholeLeafLodGroups": true
+    },
+    "ambient_leaves_especificar_understory": {
+      "positionBlender": [
+        10.0,
+        11.0,
+        0.08
+      ],
+      "leavesOrFlowersOnly": true,
+      "wholeLeafLodGroups": true
+    },
+    "ambient_leaves_evoluir_understory": {
+      "positionBlender": [
+        14.0,
+        1.0,
+        0.08
+      ],
+      "leavesOrFlowersOnly": true,
+      "wholeLeafLodGroups": true
+    },
+    "ambient_leaves_perspectivas_understory": {
+      "positionBlender": [
+        11.0,
+        -9.0,
+        0.08
+      ],
+      "leavesOrFlowersOnly": true,
+      "wholeLeafLodGroups": true
+    }
+  },
+  "water": {
+    "vertices": 3221,
+    "planar": true,
+    "sourceLocalPlane": "XY",
+    "gltfLocalPlane": "XZ",
+    "height": -0.16,
+    "centralFishArea": {
+      "x": [
+        -6,
+        6
+      ],
+      "z": [
+        -7,
+        5
+      ],
+      "y": -0.2
+    }
+  },
+  "lightning": [
+    {
+      "node": "scenic_lightning_rock_left",
+      "point": [
+        -19.0,
+        0.3144,
+        -7.0
+      ],
+      "matchesActualRockPeak": true
+    },
+    {
+      "node": "scenic_lightning_rock_right",
+      "point": [
+        19.0,
+        0.3144,
+        -7.0
+      ],
+      "matchesActualRockPeak": true
+    },
+    {
+      "node": "scenic_lightning_rock_front",
+      "point": [
+        0.0,
+        0.3466,
+        17.5
+      ],
+      "matchesActualRockPeak": true
+    }
+  ],
+  "lightningProjections": {
+    "1280x720": [
+      [
+        0.23924,
+        0.42921
+      ],
+      [
+        0.77269,
+        0.44801
+      ],
+      [
+        0.48337,
+        0.90935
+      ]
+    ],
+    "390x844": [
+      [
+        0.06905,
+        0.46959
+      ],
+      [
+        0.94847,
+        0.47778
+      ],
+      [
+        0.47559,
+        0.65617
+      ]
+    ],
+    "1800x1350": [
+      [
+        0.15232,
+        0.42921
+      ],
+      [
+        0.86359,
+        0.44801
+      ],
+      [
+        0.47783,
+        0.90935
+      ]
+    ]
+  },
+  "closedCrownMasses": false,
+  "botanicalModelsIllustrative": true
+}

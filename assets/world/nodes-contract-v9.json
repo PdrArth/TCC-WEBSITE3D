@@ -1,0 +1,77 @@
+{
+  "version": 9,
+  "pond": {
+    "name": "lake_water",
+    "plane": "XZ in glTF",
+    "localY": 0,
+    "worldY": -0.16,
+    "vertices": 3221,
+    "radialStepMeters": 0.87,
+    "fishClearArea": {
+      "x": [
+        -6,
+        6
+      ],
+      "z": [
+        -7,
+        5
+      ],
+      "y": -0.2
+    }
+  },
+  "foliageNodes": [
+    "ambient_leaves_pesquisa_ipe_amarelo",
+    "ambient_flowers_pesquisa_ipe_amarelo",
+    "ambient_leaves_pesquisa_jabuticabeira",
+    "ambient_leaves_gerar_palmeira",
+    "ambient_leaves_gerar_pitangueira",
+    "ambient_leaves_comparar_quaresmeira",
+    "ambient_flowers_comparar_quaresmeira",
+    "ambient_leaves_comparar_pau_brasil",
+    "ambient_leaves_validar_araucaria",
+    "ambient_leaves_validar_jabuticabeira",
+    "ambient_leaves_especificar_pau_brasil",
+    "ambient_leaves_especificar_palmeira_jovem",
+    "ambient_leaves_evoluir_banana",
+    "ambient_leaves_evoluir_pitangueira",
+    "ambient_leaves_perspectivas_ipe_roxo",
+    "ambient_flowers_perspectivas_ipe_roxo",
+    "ambient_leaves_perspectivas_palmeira",
+    "ambient_leaves_pesquisa_understory",
+    "ambient_leaves_gerar_understory",
+    "ambient_leaves_comparar_understory",
+    "ambient_leaves_validar_understory",
+    "ambient_leaves_especificar_understory",
+    "ambient_leaves_evoluir_understory",
+    "ambient_leaves_perspectivas_understory"
+  ],
+  "fish": "Six animated fish supplied by runtime; no duplicate static fish export",
+  "lightningTargets": [
+    {
+      "node": "scenic_lightning_rock_left",
+      "point": [
+        -19.0,
+        0.3144,
+        -7.0
+      ]
+    },
+    {
+      "node": "scenic_lightning_rock_right",
+      "point": [
+        19.0,
+        0.3144,
+        -7.0
+      ]
+    },
+    {
+      "node": "scenic_lightning_rock_front",
+      "point": [
+        0.0,
+        0.3466,
+        17.5
+      ]
+    }
+  ],
+  "idsAndCamerasPreserved": true,
+  "batching": "Tree pivots retained; leaves and flowers grouped by material per island at their existing common ground pivot"
+}

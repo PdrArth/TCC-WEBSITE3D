@@ -1,0 +1,1018 @@
+{
+  "version": 9,
+  "blender": "4.5.14 LTS",
+  "source": "assets/world/archipelago-v9.blend",
+  "baseSource": "assets/world/archipelago-v8.blend",
+  "baseCommit": "4b713d9f18d6dde3e77499ae6b8341dd6a75edac",
+  "worldMeshes": 95,
+  "worldPolygons": 319478,
+  "trees": [
+    {
+      "island": "pesquisa",
+      "kind": "ipe_amarelo",
+      "canopy": "ambient_leaves_pesquisa_ipe_amarelo",
+      "wood": "island_pesquisa_ipe_amarelo_wood",
+      "height": 4.92,
+      "leafSurfaces": 630,
+      "closedCrownMasses": false,
+      "flowerSurfaces": 189,
+      "illustrative": true
+    },
+    {
+      "island": "pesquisa",
+      "kind": "jabuticabeira",
+      "canopy": "ambient_leaves_pesquisa_jabuticabeira",
+      "wood": "island_pesquisa_jabuticabeira_wood",
+      "height": 3.62,
+      "leafSurfaces": 810,
+      "closedCrownMasses": false,
+      "flowerSurfaces": 0,
+      "illustrative": true
+    },
+    {
+      "island": "gerar",
+      "kind": "palmeira",
+      "canopy": "ambient_leaves_gerar_palmeira",
+      "wood": "island_gerar_palmeira_wood",
+      "height": 5.72,
+      "leafSurfaces": 570,
+      "closedCrownMasses": false,
+      "illustrative": true
+    },
+    {
+      "island": "gerar",
+      "kind": "pitangueira",
+      "canopy": "ambient_leaves_gerar_pitangueira",
+      "wood": "island_gerar_pitangueira_wood",
+      "height": 3.82,
+      "leafSurfaces": 810,
+      "closedCrownMasses": false,
+      "flowerSurfaces": 0,
+      "illustrative": true
+    },
+    {
+      "island": "comparar",
+      "kind": "quaresmeira",
+      "canopy": "ambient_leaves_comparar_quaresmeira",
+      "wood": "island_comparar_quaresmeira_wood",
+      "height": 4.82,
+      "leafSurfaces": 810,
+      "closedCrownMasses": false,
+      "flowerSurfaces": 675,
+      "illustrative": true
+    },
+    {
+      "island": "comparar",
+      "kind": "pau_brasil",
+      "canopy": "ambient_leaves_comparar_pau_brasil",
+      "wood": "island_comparar_pau_brasil_wood",
+      "height": 4.12,
+      "leafSurfaces": 1215,
+      "closedCrownMasses": false,
+      "flowerSurfaces": 0,
+      "illustrative": true
+    },
+    {
+      "island": "validar",
+      "kind": "araucaria",
+      "canopy": "ambient_leaves_validar_araucaria",
+      "wood": "island_validar_araucaria_wood",
+      "height": 5.57,
+      "leafSurfaces": 1480,
+      "closedCrownMasses": false,
+      "flowerSurfaces": 0,
+      "illustrative": true
+    },
+    {
+      "island": "validar",
+      "kind": "jabuticabeira",
+      "canopy": "ambient_leaves_validar_jabuticabeira",
+      "wood": "island_validar_jabuticabeira_wood",
+      "height": 3.7199999999999998,
+      "leafSurfaces": 810,
+      "closedCrownMasses": false,
+      "flowerSurfaces": 0,
+      "illustrative": true
+    },
+    {
+      "island": "especificar",
+      "kind": "pau_brasil",
+      "canopy": "ambient_leaves_especificar_pau_brasil",
+      "wood": "island_especificar_pau_brasil_wood",
+      "height": 4.72,
+      "leafSurfaces": 1215,
+      "closedCrownMasses": false,
+      "flowerSurfaces": 0,
+      "illustrative": true
+    },
+    {
+      "island": "especificar",
+      "kind": "palmeira_jovem",
+      "canopy": "ambient_leaves_especificar_palmeira_jovem",
+      "wood": "island_especificar_palmeira_jovem_wood",
+      "height": 4.47,
+      "leafSurfaces": 570,
+      "closedCrownMasses": false,
+      "illustrative": true
+    },
+    {
+      "island": "evoluir",
+      "kind": "banana",
+      "canopy": "ambient_leaves_evoluir_banana",
+      "wood": "island_evoluir_banana_wood",
+      "height": 4.0,
+      "leafSurfaces": 15,
+      "closedCrownMasses": false,
+      "illustrative": true
+    },
+    {
+      "island": "evoluir",
+      "kind": "pitangueira",
+      "canopy": "ambient_leaves_evoluir_pitangueira",
+      "wood": "island_evoluir_pitangueira_wood",
+      "height": 4.07,
+      "leafSurfaces": 810,
+      "closedCrownMasses": false,
+      "flowerSurfaces": 0,
+      "illustrative": true
+    },
+    {
+      "island": "perspectivas",
+      "kind": "ipe_roxo",
+      "canopy": "ambient_leaves_perspectivas_ipe_roxo",
+      "wood": "island_perspectivas_ipe_roxo_wood",
+      "height": 4.92,
+      "leafSurfaces": 630,
+      "closedCrownMasses": false,
+      "flowerSurfaces": 189,
+      "illustrative": true
+    },
+    {
+      "island": "perspectivas",
+      "kind": "palmeira",
+      "canopy": "ambient_leaves_perspectivas_palmeira",
+      "wood": "island_perspectivas_palmeira_wood",
+      "height": 5.069999999999999,
+      "leafSurfaces": 570,
+      "closedCrownMasses": false,
+      "illustrative": true
+    }
+  ],
+  "planting": [
+    {
+      "island": "pesquisa",
+      "entryDetailPriority": true,
+      "forms": [
+        "compound/ovate tree leaves",
+        "pinnate palm fronds",
+        "fenestrated ornamental aroid leaves",
+        "fern fronds",
+        "heliconia-inspired bracts",
+        "bromeliad rosettes",
+        "rounded petals"
+      ],
+      "leafyMeshesGroupedByPivot": true
+    },
+    {
+      "island": "gerar",
+      "entryDetailPriority": false,
+      "forms": [
+        "compound/ovate tree leaves",
+        "pinnate palm fronds",
+        "fenestrated ornamental aroid leaves",
+        "fern fronds",
+        "heliconia-inspired bracts",
+        "bromeliad rosettes",
+        "rounded petals"
+      ],
+      "leafyMeshesGroupedByPivot": true
+    },
+    {
+      "island": "comparar",
+      "entryDetailPriority": false,
+      "forms": [
+        "compound/ovate tree leaves",
+        "pinnate palm fronds",
+        "fenestrated ornamental aroid leaves",
+        "fern fronds",
+        "heliconia-inspired bracts",
+        "bromeliad rosettes",
+        "rounded petals"
+      ],
+      "leafyMeshesGroupedByPivot": true
+    },
+    {
+      "island": "validar",
+      "entryDetailPriority": false,
+      "forms": [
+        "compound/ovate tree leaves",
+        "pinnate palm fronds",
+        "fenestrated ornamental aroid leaves",
+        "fern fronds",
+        "heliconia-inspired bracts",
+        "bromeliad rosettes",
+        "rounded petals"
+      ],
+      "leafyMeshesGroupedByPivot": true
+    },
+    {
+      "island": "especificar",
+      "entryDetailPriority": false,
+      "forms": [
+        "compound/ovate tree leaves",
+        "pinnate palm fronds",
+        "fenestrated ornamental aroid leaves",
+        "fern fronds",
+        "heliconia-inspired bracts",
+        "bromeliad rosettes",
+        "rounded petals"
+      ],
+      "leafyMeshesGroupedByPivot": true
+    },
+    {
+      "island": "evoluir",
+      "entryDetailPriority": false,
+      "forms": [
+        "compound/ovate tree leaves",
+        "pinnate palm fronds",
+        "fenestrated ornamental aroid leaves",
+        "fern fronds",
+        "heliconia-inspired bracts",
+        "bromeliad rosettes",
+        "rounded petals"
+      ],
+      "leafyMeshesGroupedByPivot": true
+    },
+    {
+      "island": "perspectivas",
+      "entryDetailPriority": false,
+      "forms": [
+        "compound/ovate tree leaves",
+        "pinnate palm fronds",
+        "fenestrated ornamental aroid leaves",
+        "fern fronds",
+        "heliconia-inspired bracts",
+        "bromeliad rosettes",
+        "rounded petals"
+      ],
+      "leafyMeshesGroupedByPivot": true
+    }
+  ],
+  "ambientNodes": 24,
+  "pond": {
+    "name": "lake_water",
+    "plane": "XZ in glTF",
+    "localY": 0,
+    "worldY": -0.16,
+    "vertices": 3221,
+    "radialStepMeters": 0.87,
+    "fishClearArea": {
+      "x": [
+        -6,
+        6
+      ],
+      "z": [
+        -7,
+        5
+      ],
+      "y": -0.2
+    }
+  },
+  "lightningTargets": [
+    {
+      "node": "scenic_lightning_rock_left",
+      "point": [
+        -19.0,
+        0.3144,
+        -7.0
+      ]
+    },
+    {
+      "node": "scenic_lightning_rock_right",
+      "point": [
+        19.0,
+        0.3144,
+        -7.0
+      ]
+    },
+    {
+      "node": "scenic_lightning_rock_front",
+      "point": [
+        0.0,
+        0.3466,
+        17.5
+      ]
+    }
+  ],
+  "pavilionFurniture": "Geometry/positions retained from v8",
+  "layout": "Seven centers, hit nodes, bridges, cameras and IDs unchanged",
+  "botany": "Ornamental illustrations; no claim of a measured ecosystem or all-native planting",
+  "referenceMorphology": [
+    {
+      "feature": "Palmatelly compound Handroanthus leaves and trumpet flowers",
+      "source": "https://plantnet.rbgsyd.nsw.gov.au/cgi-bin/NSWfl.pl?lvl=gn&name=Handroanthus&page=nswfl"
+    },
+    {
+      "feature": "Broadly ovate, cut and perforated Monstera foliage",
+      "source": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:87478-1/general-information"
+    }
+  ],
+  "externalModelsUsed": false,
+  "imagePlanesUsed": false,
+  "fish": "Runtime instances; no duplicate static fish in GLB",
+  "budgets": {
+    "world": 8000000,
+    "worldLow": 4000000,
+    "poster": 160000
+  },
+  "render": "Actual final Blender EEVEE source,96samples; source/render freshness validated",
+  "worldBytes": 5190640,
+  "lowBytes": 2767416,
+  "lowPolygons": 219037,
+  "lod": "68 percent evenly sampled whole leaf/petal surfaces; branches and water grid retained; smaller furniture/stone details reduced",
+  "compression": {
+    "high": "Draco13/8/10/7",
+    "low": "Draco11/7/9/6"
+  },
+  "assetSha256": {
+    "archipelago-v9.glb": "bf46a10111c55a02c7c9a5f046a1909a140648fbdfc89c9a6abbaa8035ffc046",
+    "archipelago-v9-low.glb": "75a9924cb21059a86791bcfa62e32c494f39eed778c73c0664be868cb53d1ee8"
+  },
+  "visualRefinements": [
+    {
+      "node": "ambient_leaves_comparar_pau_brasil",
+      "previousLeafSurfaces": 810,
+      "addedWholeLeaves": 405,
+      "leafSurfaces": 1215,
+      "lengthFactor": 1.34,
+      "widthFactor": 1.9,
+      "preservedOrigin": [
+        -7.02,
+        12.6,
+        2.3072
+      ],
+      "noClosedCrownMasses": true
+    },
+    {
+      "node": "ambient_leaves_validar_araucaria",
+      "previousLeafSurfaces": 987,
+      "addedWholeLeaves": 493,
+      "leafSurfaces": 1480,
+      "lengthFactor": 1.27,
+      "widthFactor": 2.5,
+      "preservedOrigin": [
+        -2.99,
+        15.6,
+        3.1192
+      ],
+      "noClosedCrownMasses": true
+    },
+    {
+      "node": "ambient_leaves_especificar_pau_brasil",
+      "previousLeafSurfaces": 810,
+      "addedWholeLeaves": 405,
+      "leafSurfaces": 1215,
+      "lengthFactor": 1.34,
+      "widthFactor": 1.9,
+      "preservedOrigin": [
+        7.01,
+        12.6,
+        2.6432
+      ],
+      "noClosedCrownMasses": true
+    }
+  ],
+  "batchOptimization": [
+    {
+      "island": "pesquisa",
+      "from": [
+        "ambient_leaves_pesquisa_fern_understory",
+        "ambient_leaves_pesquisa_folhagem_tropical",
+        "ambient_leaves_pesquisa_grasses"
+      ],
+      "node": "ambient_leaves_pesquisa_understory",
+      "sharedGroundPivot": [
+        -11.0,
+        -9.0,
+        0.08
+      ],
+      "geometryCountsPreserved": true,
+      "materials": [
+        "Garden leaf deep",
+        "Garden sage",
+        "Garden olive dark",
+        "Grass reed"
+      ]
+    },
+    {
+      "island": "pesquisa",
+      "from": [
+        "ambient_flowers_pesquisa_garden",
+        "ambient_flowers_pesquisa_heliconia",
+        "ambient_flowers_pesquisa_bromelia"
+      ],
+      "node": "ambient_flowers_pesquisa_understory",
+      "sharedGroundPivot": [
+        -11.0,
+        -9.0,
+        0.08
+      ],
+      "geometryCountsPreserved": true,
+      "materials": [
+        "Flower coral",
+        "Flower ivory",
+        "Flower blue",
+        "Flower quaresmeira",
+        "Garden leaf deep",
+        "v9 heliconia red",
+        "v9 heliconia gold",
+        "Garden olive dark",
+        "v9 bromelia coral",
+        "Garden sage"
+      ]
+    },
+    {
+      "island": "gerar",
+      "from": [
+        "ambient_leaves_gerar_fern_understory",
+        "ambient_leaves_gerar_folhagem_tropical",
+        "ambient_leaves_gerar_grasses"
+      ],
+      "node": "ambient_leaves_gerar_understory",
+      "sharedGroundPivot": [
+        -14.0,
+        1.0,
+        0.08
+      ],
+      "geometryCountsPreserved": true,
+      "materials": [
+        "Garden leaf deep",
+        "Garden sage",
+        "Garden olive dark",
+        "Grass reed"
+      ]
+    },
+    {
+      "island": "gerar",
+      "from": [
+        "ambient_flowers_gerar_garden",
+        "ambient_flowers_gerar_heliconia",
+        "ambient_flowers_gerar_bromelia"
+      ],
+      "node": "ambient_flowers_gerar_understory",
+      "sharedGroundPivot": [
+        -14.0,
+        1.0,
+        0.08
+      ],
+      "geometryCountsPreserved": true,
+      "materials": [
+        "Flower coral",
+        "Flower ivory",
+        "Flower blue",
+        "Flower quaresmeira",
+        "Garden leaf deep",
+        "v9 heliconia red",
+        "v9 heliconia gold",
+        "Garden olive dark",
+        "v9 bromelia coral",
+        "Garden sage"
+      ]
+    },
+    {
+      "island": "comparar",
+      "from": [
+        "ambient_leaves_comparar_fern_understory",
+        "ambient_leaves_comparar_folhagem_tropical",
+        "ambient_leaves_comparar_grasses"
+      ],
+      "node": "ambient_leaves_comparar_understory",
+      "sharedGroundPivot": [
+        -10.0,
+        11.0,
+        0.08
+      ],
+      "geometryCountsPreserved": true,
+      "materials": [
+        "Garden leaf deep",
+        "Garden sage",
+        "Garden olive dark",
+        "Grass reed"
+      ]
+    },
+    {
+      "island": "comparar",
+      "from": [
+        "ambient_flowers_comparar_garden",
+        "ambient_flowers_comparar_heliconia",
+        "ambient_flowers_comparar_bromelia"
+      ],
+      "node": "ambient_flowers_comparar_understory",
+      "sharedGroundPivot": [
+        -10.0,
+        11.0,
+        0.08
+      ],
+      "geometryCountsPreserved": true,
+      "materials": [
+        "Flower coral",
+        "Flower ivory",
+        "Flower blue",
+        "Flower quaresmeira",
+        "Garden leaf deep",
+        "v9 heliconia red",
+        "v9 heliconia gold",
+        "Garden olive dark",
+        "v9 bromelia coral",
+        "Garden sage"
+      ]
+    },
+    {
+      "island": "validar",
+      "from": [
+        "ambient_leaves_validar_fern_understory",
+        "ambient_leaves_validar_folhagem_tropical",
+        "ambient_leaves_validar_grasses"
+      ],
+      "node": "ambient_leaves_validar_understory",
+      "sharedGroundPivot": [
+        0.0,
+        14.0,
+        0.08
+      ],
+      "geometryCountsPreserved": true,
+      "materials": [
+        "Garden leaf deep",
+        "Garden sage",
+        "Garden olive dark",
+        "Grass reed"
+      ]
+    },
+    {
+      "island": "validar",
+      "from": [
+        "ambient_flowers_validar_garden",
+        "ambient_flowers_validar_heliconia",
+        "ambient_flowers_validar_bromelia"
+      ],
+      "node": "ambient_flowers_validar_understory",
+      "sharedGroundPivot": [
+        0.0,
+        14.0,
+        0.08
+      ],
+      "geometryCountsPreserved": true,
+      "materials": [
+        "Flower coral",
+        "Flower ivory",
+        "Flower blue",
+        "Flower quaresmeira",
+        "Garden leaf deep",
+        "v9 heliconia red",
+        "v9 heliconia gold",
+        "Garden olive dark",
+        "v9 bromelia coral",
+        "Garden sage"
+      ]
+    },
+    {
+      "island": "especificar",
+      "from": [
+        "ambient_leaves_especificar_fern_understory",
+        "ambient_leaves_especificar_folhagem_tropical",
+        "ambient_leaves_especificar_grasses"
+      ],
+      "node": "ambient_leaves_especificar_understory",
+      "sharedGroundPivot": [
+        10.0,
+        11.0,
+        0.08
+      ],
+      "geometryCountsPreserved": true,
+      "materials": [
+        "Garden leaf deep",
+        "Garden sage",
+        "Garden olive dark",
+        "Grass reed"
+      ]
+    },
+    {
+      "island": "especificar",
+      "from": [
+        "ambient_flowers_especificar_garden",
+        "ambient_flowers_especificar_heliconia",
+        "ambient_flowers_especificar_bromelia"
+      ],
+      "node": "ambient_flowers_especificar_understory",
+      "sharedGroundPivot": [
+        10.0,
+        11.0,
+        0.08
+      ],
+      "geometryCountsPreserved": true,
+      "materials": [
+        "Flower coral",
+        "Flower ivory",
+        "Flower blue",
+        "Flower quaresmeira",
+        "Garden leaf deep",
+        "v9 heliconia red",
+        "v9 heliconia gold",
+        "Garden olive dark",
+        "v9 bromelia coral",
+        "Garden sage"
+      ]
+    },
+    {
+      "island": "evoluir",
+      "from": [
+        "ambient_leaves_evoluir_fern_understory",
+        "ambient_leaves_evoluir_folhagem_tropical",
+        "ambient_leaves_evoluir_grasses"
+      ],
+      "node": "ambient_leaves_evoluir_understory",
+      "sharedGroundPivot": [
+        14.0,
+        1.0,
+        0.08
+      ],
+      "geometryCountsPreserved": true,
+      "materials": [
+        "Garden leaf deep",
+        "Garden sage",
+        "Garden olive dark",
+        "Grass reed"
+      ]
+    },
+    {
+      "island": "evoluir",
+      "from": [
+        "ambient_flowers_evoluir_garden",
+        "ambient_flowers_evoluir_heliconia",
+        "ambient_flowers_evoluir_bromelia"
+      ],
+      "node": "ambient_flowers_evoluir_understory",
+      "sharedGroundPivot": [
+        14.0,
+        1.0,
+        0.08
+      ],
+      "geometryCountsPreserved": true,
+      "materials": [
+        "Flower coral",
+        "Flower ivory",
+        "Flower blue",
+        "Flower quaresmeira",
+        "Garden leaf deep",
+        "v9 heliconia red",
+        "v9 heliconia gold",
+        "Garden olive dark",
+        "v9 bromelia coral",
+        "Garden sage"
+      ]
+    },
+    {
+      "island": "perspectivas",
+      "from": [
+        "ambient_leaves_perspectivas_fern_understory",
+        "ambient_leaves_perspectivas_folhagem_tropical",
+        "ambient_leaves_perspectivas_grasses"
+      ],
+      "node": "ambient_leaves_perspectivas_understory",
+      "sharedGroundPivot": [
+        11.0,
+        -9.0,
+        0.08
+      ],
+      "geometryCountsPreserved": true,
+      "materials": [
+        "Garden leaf deep",
+        "Garden sage",
+        "Garden olive dark",
+        "Grass reed"
+      ]
+    },
+    {
+      "island": "perspectivas",
+      "from": [
+        "ambient_flowers_perspectivas_garden",
+        "ambient_flowers_perspectivas_heliconia",
+        "ambient_flowers_perspectivas_bromelia"
+      ],
+      "node": "ambient_flowers_perspectivas_understory",
+      "sharedGroundPivot": [
+        11.0,
+        -9.0,
+        0.08
+      ],
+      "geometryCountsPreserved": true,
+      "materials": [
+        "Flower coral",
+        "Flower ivory",
+        "Flower blue",
+        "Flower quaresmeira",
+        "Garden leaf deep",
+        "v9 heliconia red",
+        "v9 heliconia gold",
+        "Garden olive dark",
+        "v9 bromelia coral",
+        "Garden sage"
+      ]
+    },
+    {
+      "island": "pesquisa",
+      "from": [
+        "ambient_leaves_pesquisa_understory",
+        "ambient_flowers_pesquisa_understory"
+      ],
+      "node": "ambient_leaves_pesquisa_understory",
+      "sharedGroundPivot": [
+        -11.0,
+        -9.0,
+        0.08
+      ],
+      "geometryCountsPreserved": true,
+      "combinedLeavesAndFlowers": true
+    },
+    {
+      "island": "gerar",
+      "from": [
+        "ambient_leaves_gerar_understory",
+        "ambient_flowers_gerar_understory"
+      ],
+      "node": "ambient_leaves_gerar_understory",
+      "sharedGroundPivot": [
+        -14.0,
+        1.0,
+        0.08
+      ],
+      "geometryCountsPreserved": true,
+      "combinedLeavesAndFlowers": true
+    },
+    {
+      "island": "comparar",
+      "from": [
+        "ambient_leaves_comparar_understory",
+        "ambient_flowers_comparar_understory"
+      ],
+      "node": "ambient_leaves_comparar_understory",
+      "sharedGroundPivot": [
+        -10.0,
+        11.0,
+        0.08
+      ],
+      "geometryCountsPreserved": true,
+      "combinedLeavesAndFlowers": true
+    },
+    {
+      "island": "validar",
+      "from": [
+        "ambient_leaves_validar_understory",
+        "ambient_flowers_validar_understory"
+      ],
+      "node": "ambient_leaves_validar_understory",
+      "sharedGroundPivot": [
+        0.0,
+        14.0,
+        0.08
+      ],
+      "geometryCountsPreserved": true,
+      "combinedLeavesAndFlowers": true
+    },
+    {
+      "island": "especificar",
+      "from": [
+        "ambient_leaves_especificar_understory",
+        "ambient_flowers_especificar_understory"
+      ],
+      "node": "ambient_leaves_especificar_understory",
+      "sharedGroundPivot": [
+        10.0,
+        11.0,
+        0.08
+      ],
+      "geometryCountsPreserved": true,
+      "combinedLeavesAndFlowers": true
+    },
+    {
+      "island": "evoluir",
+      "from": [
+        "ambient_leaves_evoluir_understory",
+        "ambient_flowers_evoluir_understory"
+      ],
+      "node": "ambient_leaves_evoluir_understory",
+      "sharedGroundPivot": [
+        14.0,
+        1.0,
+        0.08
+      ],
+      "geometryCountsPreserved": true,
+      "combinedLeavesAndFlowers": true
+    },
+    {
+      "island": "perspectivas",
+      "from": [
+        "ambient_leaves_perspectivas_understory",
+        "ambient_flowers_perspectivas_understory"
+      ],
+      "node": "ambient_leaves_perspectivas_understory",
+      "sharedGroundPivot": [
+        11.0,
+        -9.0,
+        0.08
+      ],
+      "geometryCountsPreserved": true,
+      "combinedLeavesAndFlowers": true
+    }
+  ],
+  "renders": {
+    "pesquisa": {
+      "url": "/experience/editorial/v9/pesquisa.webp",
+      "dimensions": [
+        1200,
+        780
+      ],
+      "bytes": 43974,
+      "quality": 90,
+      "sha256": "a9f732052b886d80c06b66c8ce8e9249ec81e71045dae6f294ac6f42a3334f79",
+      "source": "assets/world/editorial-v9-pesquisa.png",
+      "sourceSha256": "9b0057d4f77d1e04426353a9b3b37e3f3679926ea219598b00739e11b2da4594",
+      "authoringScene": "assets/world/archipelago-v9.blend",
+      "freshRender": true,
+      "thumbnail": {
+        "url": "/experience/world/thumb-v9-pesquisa.webp",
+        "dimensions": [
+          512,
+          333
+        ],
+        "bytes": 11954,
+        "sha256": "ac3e001d44faf58d6f99fc150de1dcb428d56ce1935be2dafcd85ccd60554491"
+      }
+    },
+    "gerar": {
+      "url": "/experience/editorial/v9/gerar.webp",
+      "dimensions": [
+        1200,
+        780
+      ],
+      "bytes": 46206,
+      "quality": 90,
+      "sha256": "7cedf5b54b80fe472960360821a896f0c492e7e3c90dba9e136c8247d8c487ac",
+      "source": "assets/world/editorial-v9-gerar.png",
+      "sourceSha256": "0ebc94f8f79b945e34d1b66ad96770f641018fdb9e3b9722444e9a8df44e6968",
+      "authoringScene": "assets/world/archipelago-v9.blend",
+      "freshRender": true,
+      "thumbnail": {
+        "url": "/experience/world/thumb-v9-gerar.webp",
+        "dimensions": [
+          512,
+          333
+        ],
+        "bytes": 11696,
+        "sha256": "60848771efef98d4efef012844feca39d36d63247b122a641558fcbc974d4ac3"
+      }
+    },
+    "comparar": {
+      "url": "/experience/editorial/v9/comparar.webp",
+      "dimensions": [
+        1200,
+        780
+      ],
+      "bytes": 46964,
+      "quality": 90,
+      "sha256": "d50612e84d97e79cd34576fe880c2c3e62d4eb7ac2b7ca1cc0b2f7a8a3ab4121",
+      "source": "assets/world/editorial-v9-comparar.png",
+      "sourceSha256": "8e51d09b8d1f9b891aa224e78d6cdcd57c4d636dcfd94ceb76fa48eaa121fd5c",
+      "authoringScene": "assets/world/archipelago-v9.blend",
+      "freshRender": true,
+      "thumbnail": {
+        "url": "/experience/world/thumb-v9-comparar.webp",
+        "dimensions": [
+          512,
+          333
+        ],
+        "bytes": 12238,
+        "sha256": "a5c427940ea5f0e2493f85b907691bab07f2ddfbf8959503f6c03c218f0346bf"
+      }
+    },
+    "validar": {
+      "url": "/experience/editorial/v9/validar.webp",
+      "dimensions": [
+        1200,
+        780
+      ],
+      "bytes": 50936,
+      "quality": 90,
+      "sha256": "f9024b88051b9900bf127a52b81ec8a1c4e09532c6630477586b8cb50d836408",
+      "source": "assets/world/editorial-v9-validar.png",
+      "sourceSha256": "34807a2450a093886c416cb9ce9928464b7fc9a74dd826d94be54729db0dd1a9",
+      "authoringScene": "assets/world/archipelago-v9.blend",
+      "freshRender": true,
+      "thumbnail": {
+        "url": "/experience/world/thumb-v9-validar.webp",
+        "dimensions": [
+          512,
+          333
+        ],
+        "bytes": 13582,
+        "sha256": "1565b0eea7bd92cae1abd8f91327e487e1ff10a2b1899babe27509827a64eeb0"
+      }
+    },
+    "especificar": {
+      "url": "/experience/editorial/v9/especificar.webp",
+      "dimensions": [
+        1200,
+        780
+      ],
+      "bytes": 50016,
+      "quality": 90,
+      "sha256": "4032e2b3e30f43ea6f8553e0f10a4cd74aa575036666076fd6246ecd61e4226a",
+      "source": "assets/world/editorial-v9-especificar.png",
+      "sourceSha256": "77893efb22e62f396730493156c8269b80796f7f0ee5504d69505de3bfca4eec",
+      "authoringScene": "assets/world/archipelago-v9.blend",
+      "freshRender": true,
+      "thumbnail": {
+        "url": "/experience/world/thumb-v9-especificar.webp",
+        "dimensions": [
+          512,
+          333
+        ],
+        "bytes": 12812,
+        "sha256": "6b43d9e44d716386afcbb8cebb1346ed861df2adad327b01f3b336c6b52154ee"
+      }
+    },
+    "evoluir": {
+      "url": "/experience/editorial/v9/evoluir.webp",
+      "dimensions": [
+        1200,
+        780
+      ],
+      "bytes": 47018,
+      "quality": 90,
+      "sha256": "c8dd4739ead3fd1045cae9fa8d1b9163f038426b7b7d2e5d290c4eb14a14d3df",
+      "source": "assets/world/editorial-v9-evoluir.png",
+      "sourceSha256": "c32172fb67c696c7e6f0b8d05a251bef8a68da6fb2c1c15f6620f7f4a70e03bd",
+      "authoringScene": "assets/world/archipelago-v9.blend",
+      "freshRender": true,
+      "thumbnail": {
+        "url": "/experience/world/thumb-v9-evoluir.webp",
+        "dimensions": [
+          512,
+          333
+        ],
+        "bytes": 13266,
+        "sha256": "a5edeebd8b613df681d48c2ae6be1a80b0913e76953f925821165c7eebc2fbad"
+      }
+    },
+    "perspectivas": {
+      "url": "/experience/editorial/v9/perspectivas.webp",
+      "dimensions": [
+        1200,
+        780
+      ],
+      "bytes": 50554,
+      "quality": 90,
+      "sha256": "917cced4f48b2218b95a7d7e44214bef98d8c714ac7a9651026d19adc72f4262",
+      "source": "assets/world/editorial-v9-perspectivas.png",
+      "sourceSha256": "4d0d49619fbb787e3da37c160d0b46efa3a14047cfdd7ab6d47007345ec0bdf3",
+      "authoringScene": "assets/world/archipelago-v9.blend",
+      "freshRender": true,
+      "thumbnail": {
+        "url": "/experience/world/thumb-v9-perspectivas.webp",
+        "dimensions": [
+          512,
+          333
+        ],
+        "bytes": 13904,
+        "sha256": "61de8e73e03dba40063679a4733ed28ed765dc50c4f75ea71394d7828754df96"
+      }
+    },
+    "poster": {
+      "url": "/experience/world/poster-v9.webp",
+      "dimensions": [
+        1800,
+        1350
+      ],
+      "bytes": 112394,
+      "quality": 86,
+      "sha256": "31ed6284e9518994b40b9488a586fc50dfd03f05ccd317d6ea77e52b263bc9df",
+      "source": "assets/world/poster-v9-render.png",
+      "sourceSha256": "04bf5546add2159c62ebe5aeeadce44c72b21c9ee21b84ab803fa1d802f73529",
+      "authoringScene": "assets/world/archipelago-v9.blend",
+      "freshRender": true
+    }
+  },
+  "sourceSha256": "142c01fc04e146d0f26559c17ed658ec531bebb95049dcde5d2d7b936ac047ac",
+  "visualReview": {
+    "comparison": "assets/world/comparison-v9.png",
+    "reviewedActualPosterAndSevenEditorialRenders": true,
+    "improvements": [
+      "Individual curved leaf blades and rounded petals replace closed spherical crown volumes",
+      "Entrance garden has broad perforated leaves, rosettes, curved bracts and a fuller ornamental bed",
+      "Palms have arched feather foliage and bark variation; banana blades have organic splits",
+      "Validation conifer and Specification compound crown retain the density increase in source, binaries and images",
+      "Furniture and spatial sequence remain readable at the unchanged cameras"
+    ],
+    "limits": "Stylized ornamental garden, not photorealism, botanical identification or a surveyed all-native ecosystem"
+  }
+}

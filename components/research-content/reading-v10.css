@@ -1,0 +1,312 @@
+/* Imported after the reader/shell styles. Only the full-page v10 notebook. */
+.island-reading[data-reader-layout="v10"] {
+  --reader-gutter: clamp(40px, 3.4vw, 64px);
+  --reader-type: clamp(22px, 1.43vw, 24px);
+  --reader-lead: clamp(24px, 1.84vw, 29px);
+}
+
+[data-reader-layout="v10"] .island-reading-inner {
+  width: min(1400px, calc(100% - 2 * var(--reader-gutter)));
+  max-width: none;
+  padding: 0 0 clamp(32px, 2.5vw, 40px);
+}
+
+[data-reader-layout="v10"] .research-content.rc-reading {
+  display: block;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  font-size: var(--reader-type);
+}
+
+[data-reader-layout="v10"] .rc-reading-header {
+  width: 100%;
+  margin-bottom: 40px;
+  box-shadow: none;
+}
+
+[data-reader-layout="v10"] .rc-essay.rc-reading-section {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+[data-reader-layout="v10"] .rc-theme-copy,
+[data-reader-layout="v10"] .rc-reading-library .rc-library {
+  width: 100%;
+  max-width: none;
+}
+
+/* The article is wide; ordinary prose retains a readable line measure. */
+[data-reader-layout="v10"] .rc-essay.rc-reading-section p {
+  max-width: 80ch;
+  font-size: var(--reader-type);
+  line-height: 1.65;
+  margin: 0 0 1.1em;
+}
+
+[data-reader-layout="v10"] .research-content .rc-theme-heading h2,
+[data-reader-layout="v10"] .research-content .rc-reading-library > h2 {
+  max-width: none;
+  font-size: clamp(40px, 3.22vw, 59px);
+  line-height: 1.08;
+  margin: 0 0 22px;
+}
+
+[data-reader-layout="v10"] .rc-essay.rc-reading-section .rc-reading-deck {
+  max-width: 76ch;
+  font-size: var(--reader-lead);
+  line-height: 1.5;
+  margin-bottom: 34px;
+}
+
+[data-reader-layout="v10"] .rc-essay.rc-reading-section .rc-eyebrow {
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+[data-reader-layout="v10"] .rc-essay.rc-reading-section :is(.rc-muted, .rc-editorial-note, .rc-supported-by, .rc-study-metric) {
+  font-size: 20px;
+  line-height: 1.6;
+}
+
+[data-reader-layout="v10"] .rc-essay.rc-reading-section :is(.rc-source-count, .rc-news-byline, .rc-checked-date) {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+[data-reader-layout="v10"] .rc-essay :is(h3, h4) {
+  max-width: none;
+}
+
+[data-reader-layout="v10"] .rc-essay.rc-reading-section .rc-theme-copy h3 {
+  font-size: clamp(28px, 2.02vw, 33px);
+  line-height: 1.2;
+  margin: 42px 0 18px;
+}
+
+[data-reader-layout="v10"] .rc-theme-copy .rc-pavilion-paragraph {
+  margin-bottom: 36px;
+}
+
+[data-reader-layout="v10"] .rc-essay .rc-theme-copy .rc-pavilion-paragraph h3 {
+  font-size: clamp(23px, 1.75vw, 27px);
+  line-height: 1.35;
+  margin: 0 0 12px;
+}
+
+[data-reader-layout="v10"] .rc-essay .rc-theme-scene {
+  width: 100%;
+  max-width: none;
+  grid-template-columns: minmax(190px, 280px) minmax(0, 1fr);
+  gap: clamp(24px, 3vw, 42px);
+  margin: 0 0 40px;
+  padding-bottom: 28px;
+}
+
+[data-reader-layout="v10"] .rc-theme-scene img {
+  height: auto;
+  aspect-ratio: 20 / 13;
+  object-fit: contain;
+}
+
+[data-reader-layout="v10"] .rc-theme-scene figcaption {
+  max-width: 72ch;
+  font-size: 19px;
+  line-height: 1.55;
+}
+
+[data-reader-layout="v10"] .rc-theme-visual {
+  width: 100%;
+  max-width: none;
+  margin: 32px 0 40px;
+  padding: 24px 0;
+  border: 0;
+  border-block: 1px solid var(--rc-line);
+  background: transparent;
+}
+
+[data-reader-layout="v10"] .rc-theme-visual figcaption {
+  max-width: 80ch;
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+[data-reader-layout="v10"] .rc-step-flow {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+[data-reader-layout="v10"] .rc-step-flow li > strong,
+[data-reader-layout="v10"] .rc-mini-timeline strong {
+  font-size: 21px;
+}
+
+[data-reader-layout="v10"] .rc-mini-timeline li span {
+  font-size: 16px;
+}
+
+[data-reader-layout="v10"] .rc-question-list li {
+  font-size: 19px;
+}
+
+[data-reader-layout="v10"] .rc-theme-visual .rc-evidence-contrast .rc-evidence-number {
+  font-size: clamp(38px, 3vw, 46px);
+  line-height: 1.1;
+}
+
+/* References and the chapter exit align with the topic bar, not the prose cap. */
+[data-reader-layout="v10"] .rc-theme-copy .rc-section-sources {
+  width: 100%;
+  max-width: none;
+  margin: 38px 0 24px;
+  padding-top: 18px;
+}
+
+[data-reader-layout="v10"] .rc-source-disclosure-summary {
+  font-size: 20px;
+}
+
+[data-reader-layout="v10"] .rc-source-title strong {
+  font-size: 22px;
+}
+
+[data-reader-layout="v10"] .rc-source-title small {
+  font-size: 18px;
+}
+
+[data-reader-layout="v10"] .rc-essay .rc-chapter-navigation {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 100%;
+  max-width: none;
+  gap: 32px;
+  margin: 32px 0 0;
+  padding: 22px 0 0;
+  align-items: start;
+}
+
+[data-reader-layout="v10"] .rc-chapter-navigation a {
+  min-width: 0;
+  max-width: none;
+  min-height: 64px;
+  margin: 0;
+  padding: 4px 0;
+  font-size: 22px;
+  line-height: 1.35;
+}
+
+[data-reader-layout="v10"] .rc-chapter-navigation a[data-direction="previous"] {
+  grid-column: 1;
+  justify-content: flex-start;
+  margin-left: 0;
+  text-align: left;
+}
+
+[data-reader-layout="v10"] .rc-chapter-navigation a[data-direction="next"] {
+  grid-column: 2;
+  justify-content: flex-end;
+  margin-left: 0;
+  text-align: right;
+}
+
+[data-reader-layout="v10"] .rc-chapter-navigation a > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+[data-reader-layout="v10"] .rc-chapter-navigation small {
+  font-size: 13px;
+}
+
+[data-reader-layout="v10"] .rc-chapter-navigation svg {
+  flex: none;
+}
+
+@media (max-width: 1199px) {
+  .island-reading[data-reader-layout="v10"] {
+    --reader-gutter: 32px;
+    --reader-type: clamp(18px, 1.75vw, 19px);
+    --reader-lead: 21px;
+  }
+}
+
+@media (max-width: 700px) {
+  .island-reading[data-reader-layout="v10"] {
+    --reader-gutter: 20px;
+    --reader-type: 18px;
+    --reader-lead: 19px;
+  }
+
+  [data-reader-layout="v10"] .rc-reading-header {
+    margin-bottom: 28px;
+  }
+
+  [data-reader-layout="v10"] .research-content .rc-theme-heading h2,
+  [data-reader-layout="v10"] .research-content .rc-reading-library > h2 {
+    font-size: clamp(31px, 6.44vw, 40px);
+    margin-bottom: 18px;
+  }
+
+  [data-reader-layout="v10"] .rc-essay .rc-theme-scene {
+    grid-template-columns: minmax(104px, 136px) minmax(0, 1fr);
+    gap: 16px;
+    margin-bottom: 30px;
+    padding-bottom: 22px;
+  }
+
+  [data-reader-layout="v10"] .rc-theme-scene figcaption {
+    font-size: 15px;
+  }
+
+  [data-reader-layout="v10"] .rc-essay.rc-reading-section :is(.rc-muted, .rc-editorial-note, .rc-supported-by, .rc-study-metric) {
+    font-size: 18px;
+  }
+
+  [data-reader-layout="v10"] .rc-theme-visual {
+    margin: 26px 0 30px;
+    padding-block: 20px;
+  }
+
+  [data-reader-layout="v10"] .rc-step-flow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  [data-reader-layout="v10"] .rc-step-flow li > strong,
+  [data-reader-layout="v10"] .rc-mini-timeline strong,
+  [data-reader-layout="v10"] .rc-question-list li {
+    font-size: 17px;
+  }
+
+  [data-reader-layout="v10"] .rc-mini-timeline li span {
+    font-size: 14px;
+  }
+
+  [data-reader-layout="v10"] .rc-source-title strong {
+    font-size: 19px;
+  }
+
+  [data-reader-layout="v10"] .rc-source-title small {
+    font-size: 16px;
+  }
+
+  [data-reader-layout="v10"] .rc-essay .rc-chapter-navigation {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    margin-top: 28px;
+    padding-top: 18px;
+  }
+
+  [data-reader-layout="v10"] .rc-chapter-navigation > span[aria-hidden="true"] {
+    display: none;
+  }
+
+  [data-reader-layout="v10"] .rc-chapter-navigation a[data-direction] {
+    grid-column: 1;
+    font-size: 20px;
+  }
+}

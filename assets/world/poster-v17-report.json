@@ -1,0 +1,83 @@
+{
+  "version": 17,
+  "source": "assets/world/archipelago-v9.blend",
+  "render": "assets/world/poster-v17-render.png",
+  "renderSha256": "3e3c5abb98577f11aa10d5da4415dd650c5fbb3f0ae440bf5dcf2f0fadbfff9f",
+  "blender": "4.5.14 LTS",
+  "poster": "public/experience/world/poster-v17.webp",
+  "dimensions": [
+    1800,
+    1350
+  ],
+  "bytes": 146886,
+  "quality": 86,
+  "compression": {
+    "encoder": "Pillow WebP",
+    "method": 6,
+    "alphaPreservedExactly": true
+  },
+  "sha256": "ca5faa5c6d3692cc56b266d734e4619a365a3db2cde48626cb56e4c7315ae543",
+  "filmTransparent": true,
+  "hiddenBackdrop": "Poster shadow ground",
+  "camera": {
+    "position": [
+      1.8900000000000001,
+      30.62,
+      45.755
+    ],
+    "target": [
+      0,
+      0.8,
+      -1.6
+    ],
+    "fov": 38,
+    "introDistanceScale": 1.05
+  },
+  "focusPoints": {
+    "pesquisa": [
+      0.22811,
+      0.57747
+    ],
+    "gerar": [
+      0.21883,
+      0.42112
+    ],
+    "comparar": [
+      0.33272,
+      0.3101
+    ],
+    "validar": [
+      0.50841,
+      0.28552
+    ],
+    "especificar": [
+      0.68249,
+      0.31799
+    ],
+    "evoluir": [
+      0.7854,
+      0.43592
+    ],
+    "perspectivas": [
+      0.75893,
+      0.56998
+    ]
+  },
+  "alpha": {
+    "corners": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "visiblePixels": 1085565,
+    "opaquePixels": 1059585
+  },
+  "preservedAssetHashes": {
+    "assets/world/archipelago-v9.blend": "142c01fc04e146d0f26559c17ed658ec531bebb95049dcde5d2d7b936ac047ac",
+    "public/experience/world/archipelago-v9.glb": "bf46a10111c55a02c7c9a5f046a1909a140648fbdfc89c9a6abbaa8035ffc046",
+    "public/experience/world/archipelago-v9-low.glb": "75a9924cb21059a86791bcfa62e32c494f39eed778c73c0664be868cb53d1ee8",
+    "public/experience/world/poster-v9.webp": "31ed6284e9518994b40b9488a586fc50dfd03f05ccd317d6ea77e52b263bc9df"
+  },
+  "note": "Fresh Blender PNG render and Pillow WebP compression only; no bitmap editing. Browser composition needs separate QA."
+}

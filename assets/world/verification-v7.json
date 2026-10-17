@@ -1,0 +1,85 @@
+{
+  "version": 7,
+  "models": {
+    "world": {
+      "filename": "archipelago-v7.glb",
+      "bytes": 7202772,
+      "triangles": 554476,
+      "meshes": 49,
+      "primitives": 270,
+      "vertexColoredPrimitives": 270,
+      "materials": 35,
+      "textures": 11,
+      "sha256": "3203ca1192778830b9d894c680aa12bf2f5c42e309bc3f11a003549fc6e97323",
+      "noAvatar": true,
+      "allSevenHitNodes": true
+    },
+    "worldLow": {
+      "filename": "archipelago-v7-low.glb",
+      "bytes": 3142656,
+      "triangles": 189880,
+      "meshes": 49,
+      "primitives": 270,
+      "vertexColoredPrimitives": 270,
+      "materials": 35,
+      "textures": 11,
+      "sha256": "02c7f2a1e3ba8c7250101420e7cd6acd9198f8ebb61e6d218c46751909c4eb0c",
+      "noAvatar": true,
+      "allSevenHitNodes": true
+    }
+  },
+  "images": {
+    "pesquisa": {
+      "url": "/experience/editorial/v7/pesquisa.webp",
+      "bytes": 39538,
+      "sha256": "805b442f245ddac857da4901ff29b88d226497e9321a98fd29a4252837e593f0"
+    },
+    "gerar": {
+      "url": "/experience/editorial/v7/gerar.webp",
+      "bytes": 40744,
+      "sha256": "c6850e84884a521a9b37e7a03fc6ff4bde00a720a0fb0208d7f7936061380de8"
+    },
+    "comparar": {
+      "url": "/experience/editorial/v7/comparar.webp",
+      "bytes": 42988,
+      "sha256": "713330a0498d98302dc0736c1cc2e134d115e8351dd858b6cd46a553ee6123c0"
+    },
+    "validar": {
+      "url": "/experience/editorial/v7/validar.webp",
+      "bytes": 44122,
+      "sha256": "44315daaa95935e1dc74e931b8305b667da62b0eb122ef5981978870273a467c"
+    },
+    "especificar": {
+      "url": "/experience/editorial/v7/especificar.webp",
+      "bytes": 44298,
+      "sha256": "8b743b79ce869ee9e573cce7a3094b6d81c7fedeab8e189e04694b6f4faa9a23"
+    },
+    "evoluir": {
+      "url": "/experience/editorial/v7/evoluir.webp",
+      "bytes": 44348,
+      "sha256": "4e0823e805caa020b09e2646c9be89b2a4651d6d6322ecb365b3b463a433edd0"
+    },
+    "perspectivas": {
+      "url": "/experience/editorial/v7/perspectivas.webp",
+      "bytes": 38858,
+      "sha256": "f3ea1c5172cab7f943fdb5b653d8857884d7372fe5908422db537e824eda46e8"
+    },
+    "poster": {
+      "url": "/experience/world/poster-v7.webp",
+      "bytes": 98998,
+      "sha256": "5173a990a3b5c60722b5b785b8bd3a5ca25d679e97d1453ce4a030e0362ebe7c"
+    }
+  },
+  "navigation": {
+    "mode": "direct",
+    "nodes": 8,
+    "allSevenDestinationsReachable": true,
+    "noAvatarLoaded": true
+  },
+  "islands": {
+    "count": 7,
+    "minimumPhysicalGap": 1.1,
+    "lightningOutsideContent": true
+  },
+  "ambientCanopies": 14
+}

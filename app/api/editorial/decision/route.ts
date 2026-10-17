@@ -1,0 +1,4 @@
+import { z } from "zod";
+import { requireOwner, assertSameOrigin, errorResponse } from "@/lib/owner";
+import { decideDraft } from "@/lib/updates";
+export async function POST(request: Request) { try { await requireOwner(); assertSameOrigin(request); if (Number(request.headers.get("content-length")) > 2000) return Response.json({ error: "Solicitação muito grande" }, { status: 413 }); const input = z.object({ id: z.string().uuid(), decision: z.enum(["published", "discarded"]), revision: z.number().int().positive() }).strict().safeParse(await request.json()); if (!input.success) return Response.json({ error: "Solicitação inválida" }, { status: 400 }); const changed = await decideDraft(input.data.id,input.data.decision,input.data.revision); return Response.json({ changed }, { headers: { "Cache-Control": "no-store" } }); } catch (error) { return errorResponse(error); } }
