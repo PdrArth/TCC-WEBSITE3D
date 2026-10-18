@@ -1,4 +1,6 @@
-import { requireOwner, errorResponse } from "@/lib/owner";
-import { listEditorial } from "@/lib/updates";
+import { backendRedirect } from "@/lib/deployment-backend.mjs";
+
 export const dynamic = "force-dynamic";
-export async function GET() { try { await requireOwner(); return Response.json(await listEditorial(), { headers: { "Cache-Control": "no-store" } }); } catch (error) { return errorResponse(error); } }
+export function GET(request: Request) {
+  return backendRedirect(request, "/api/editorial");
+}

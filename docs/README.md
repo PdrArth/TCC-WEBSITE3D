@@ -14,3 +14,5 @@ Os documentos foram separados por assunto para facilitar a consulta sem misturar
 Os arquivos por versão documentam decisões e verificações feitas durante a construção do site. Eles não substituem o TCC nem devem ser lidos como resultados de um novo experimento.
 
 Para entender como o código, a cena 3D, os recursos públicos e os testes se conectam, consulte [`architecture.md`](architecture.md).
+
+A publicação na Vercel e a conexão com o serviço editorial existente estão descritas em [`deployment.md`](deployment.md).

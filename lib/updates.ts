@@ -1,14 +1,26 @@
-import { env } from "cloudflare:workers";
-import type { DraftInput } from "./editorial-policy";
-import type { UpdateRow, PublicUpdate, ResearchRun } from "./update-types";
-const fields = `id,title,summary,relevance,limitations,source_url AS sourceUrl,organization,type,event_date AS eventDate,publication_date AS publicationDate,checked_date AS checkedDate,status,created_at AS createdAt,published_at AS publishedAt,revision`;
-function db() { if (!env.DB) throw new Error("Database unavailable"); return env.DB; }
-export async function listPublished(): Promise<PublicUpdate[]> { const result = await db().prepare(`SELECT ${fields} FROM updates WHERE status = 'published' ORDER BY publication_date DESC, created_at DESC LIMIT 30`).all<UpdateRow>(); return result.results.map(row => ({ id: row.id, title: row.title, summary: row.summary, relevance: row.relevance, limitations: row.limitations, sourceUrl: row.sourceUrl, organization: row.organization, type: row.type, eventDate: row.eventDate, publicationDate: row.publicationDate, checkedDate: row.checkedDate, publishedAt: row.publishedAt })); }
-export async function listEditorial() { const rows = await db().prepare(`SELECT ${fields} FROM updates ORDER BY created_at DESC LIMIT 200`).all<UpdateRow>(); const latestRun = await db().prepare("SELECT id,checked_at AS checkedAt,status,summary FROM research_runs ORDER BY checked_at DESC LIMIT 1").first<ResearchRun>(); return { updates: rows.results, latestRun }; }
-export async function saveDrafts(drafts: DraftInput[]) {
-  const binding = db(); const now = new Date().toISOString();
-  await binding.batch(drafts.map(item => binding.prepare(`INSERT INTO updates (id,title,summary,relevance,limitations,source_url,organization,type,event_date,publication_date,checked_date,status,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,'draft',?) ON CONFLICT(source_url) DO UPDATE SET title=excluded.title,summary=excluded.summary,relevance=excluded.relevance,limitations=excluded.limitations,organization=excluded.organization,type=excluded.type,event_date=excluded.event_date,publication_date=excluded.publication_date,checked_date=excluded.checked_date,revision=updates.revision+1 WHERE updates.status='draft' AND (updates.title<>excluded.title OR updates.summary<>excluded.summary OR updates.relevance<>excluded.relevance OR updates.limitations<>excluded.limitations OR updates.organization<>excluded.organization OR updates.type<>excluded.type OR updates.event_date IS NOT excluded.event_date OR updates.publication_date<>excluded.publication_date OR updates.checked_date<>excluded.checked_date)`).bind(crypto.randomUUID(),item.title,item.summary,item.relevance,item.limitations,item.sourceUrl,item.organization,item.type,item.eventDate,item.publicationDate,item.checkedDate,now)));
-  return Promise.all(drafts.map(item => binding.prepare(`SELECT ${fields} FROM updates WHERE source_url=?`).bind(item.sourceUrl).first<UpdateRow>()));
+import { z } from "zod";
+import { backendUrl } from "./deployment-backend.mjs";
+import type { PublicUpdate } from "./update-types";
+
+const publicUpdate = z.object({
+  id: z.string(), title: z.string(), summary: z.string(), relevance: z.string(),
+  limitations: z.string(), organization: z.string(),
+  sourceUrl: z.string().url().refine(value => new URL(value).protocol === "https:"),
+  type: z.enum(["announcement", "research", "company_case"]),
+  eventDate: z.string().nullable(), publicationDate: z.string(), checkedDate: z.string(),
+  publishedAt: z.string().nullable(),
+});
+const publicResponse = z.object({
+  updates: z.array(publicUpdate.extend({ status: z.literal("published").optional() })).max(30),
+});
+
+export async function listPublished(fetcher: typeof fetch = fetch): Promise<PublicUpdate[]> {
+  const response = await fetcher(backendUrl("/api/updates"), {
+    cache: "no-store", redirect: "error", signal: AbortSignal.timeout(10_000),
+    headers: { Accept: "application/json" },
+  });
+  if (!response.ok) throw new Error(`Published updates unavailable (${response.status}).`);
+  const payload = publicResponse.parse(await response.json());
+  // Whitelist the public fields even if the remote service adds private metadata.
+  return payload.updates.map(update => publicUpdate.parse(update));
 }
-export async function decideDraft(id: string, decision: "published" | "discarded", revision: number) { const result = await db().prepare("UPDATE updates SET status=?,published_at=? WHERE id=? AND status='draft' AND revision=?").bind(decision, decision === "published" ? new Date().toISOString() : null, id, revision).run(); return result.meta.changes > 0; }
-export async function recordRun(run: ResearchRun) { await db().prepare("INSERT INTO research_runs (id,checked_at,status,summary) VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET checked_at=excluded.checked_at,status=excluded.status,summary=excluded.summary").bind(run.id,run.checkedAt,run.status,run.summary).run(); return run; }

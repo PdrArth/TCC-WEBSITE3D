@@ -1,4 +1,4 @@
-import { env } from "cloudflare:workers";
+const env = process.env;
 import { getChatGPTUser } from "@/app/chatgpt-auth";
 import { isOwnerEmail } from "./editorial-policy";
 export class AccessError extends Error { constructor(public status: number, message: string) { super(message); } }

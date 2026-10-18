@@ -1,6 +1,7 @@
 import vinext from "vinext";
 import { defineConfig } from "vite";
-import hostingConfig from "./.openai/hosting.json";
+// Optional legacy Sites preview: no private hosting file is required by a clone.
+const hostingConfig: { d1: string | null; r2: string | null } = { d1: "DB", r2: null };
 import { readExecutionProfile } from "./scripts/execution-profile.mjs";
 import { sites } from "./build/sites-vite-plugin";
 import { connectorPreview } from "./build/connector-preview-plugin.mjs";

@@ -36,7 +36,7 @@ O arquipélago é uma forma de percorrer os capítulos, não um experimento de p
 | `test/` | Testes e dados sintéticos usados por eles. |
 | `docs/` | Índice da documentação, registros de pesquisa, áudio, design, créditos e validações. |
 
-O mapa da documentação está em [`docs/README.md`](docs/README.md), e o fluxo entre a cena autoral, os arquivos públicos e a aplicação está em [`docs/architecture.md`](docs/architecture.md). A aplicação combina React e TypeScript com Three.js e React Three Fiber; as páginas e serviços usam Vinext e Cloudflare.
+O mapa da documentação está em [`docs/README.md`](docs/README.md), e o fluxo entre a cena autoral, os arquivos públicos e a aplicação está em [`docs/architecture.md`](docs/architecture.md). A aplicação combina React e TypeScript com Three.js e React Three Fiber. A versão pública usa Next.js na Vercel; a revisão privada e o banco permanecem no serviço editorial existente, conforme [`docs/deployment.md`](docs/deployment.md).
 
 ## Créditos e direitos
 

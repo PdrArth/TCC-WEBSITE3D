@@ -19,6 +19,8 @@ const SIGN_OUT_PATH = "/signout-with-chatgpt";
 const CALLBACK_PATH = "/callback";
 
 export async function getChatGPTUser(): Promise<ChatGPTUser | null> {
+  // Vercel cannot attest Sites headers. Private pages use the original service.
+  if (process.env.VERCEL || process.env.TCC_TRUST_SITES_AUTH !== "1") return null;
   const requestHeaders = await headers();
   const userId = requestHeaders.get(USER_ID_HEADER);
   const email = requestHeaders.get(USER_EMAIL_HEADER);

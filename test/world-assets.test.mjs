@@ -89,7 +89,7 @@ test('The original PDF and source registry remain intact', async () => {
   assert.equal(sources.filter(item => item.group === 'complementary').length, 13);
   assert.equal(new Set(sources.map(item => item.id)).size, 24);
 });
-test('Every active music track and bird excerpt has a local resource and license provenance', async () => {
+test('Active audio has license provenance and either a local file or an explicit remote fallback', async () => {
   const manifest = JSON.parse(await readFile(publicFile('/experience/audio/audio-manifest.json'), 'utf8'));
   assert.ok(manifest.playlist.length >= 1);
   for (const track of manifest.playlist) {
@@ -99,9 +99,19 @@ test('Every active music track and bird excerpt has a local resource and license
     assert.equal(new URL(track.assetSource).origin, 'https://genshin.hoyoverse.com');
     assert.equal(track.source, 'https://genshin.hoyoverse.com/en/home');
     assert.ok(track.url.startsWith('/experience/audio/'));
-    const bytes = await readFile(publicFile(track.url));
-    assert.ok(bytes.length > 1000);
-    assert.equal(createHash('sha256').update(bytes).digest('hex'), track.sha256);
+    try {
+      const bytes = await readFile(publicFile(track.url));
+      assert.ok(bytes.length > 1000);
+      assert.equal(createHash('sha256').update(bytes).digest('hex'), track.sha256);
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+      // Rights-reserved music is deliberately absent from a fresh public clone.
+      const { default: config } = await import('../next.config.ts');
+      const { backendUrl } = await import('../lib/deployment-backend.mjs');
+      const rewrites = await config.rewrites();
+      const fallback = rewrites.find(rule => rule.source === track.url);
+      assert.equal(fallback?.destination, backendUrl(track.url).href);
+    }
   }
   assert.equal(manifest.birds.length, 4);
   for (const bird of manifest.birds) {

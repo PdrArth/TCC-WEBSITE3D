@@ -6,7 +6,8 @@ O repositório segue a organização do framework: rotas ficam em `app/`, a inte
 flowchart LR
   A[app: páginas e APIs] --> C[components: interface e cena]
   C --> L[lib: conteúdo e regras compartilhadas]
-  L --> D[db e drizzle: persistência]
+  L --> E[Serviço editorial existente: publicações aprovadas]
+  E --> D[Cloudflare D1: persistência editorial]
   S[assets/world: fontes editáveis 3D] --> W[scripts/world: preparação e validação]
   W --> P[public/experience/world: modelos servidos pelo site]
   P --> C
