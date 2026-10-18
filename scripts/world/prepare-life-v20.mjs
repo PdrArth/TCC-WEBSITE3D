@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
-import { createEnvironmentManifest } from "../../lib/experience/environment.mjs";
-import { bridgePillars, createIslandLifeLayout, lifeSurfaceSegments, pathLength, sampleLifePath } from "../../lib/experience/island-life.mjs";
-import { createFishRoutes } from "../../components/island-experience/scene-motion.mjs";
-import { prepareLifeGeometry } from "../../lib/experience/life-geometry.mjs";
+import { createEnvironmentManifest } from "../../src/lib/experience/environment.mjs";
+import { bridgePillars, createIslandLifeLayout, lifeSurfaceSegments, pathLength, sampleLifePath } from "../../src/lib/experience/island-life.mjs";
+import { createFishRoutes } from "../../src/components/island-experience/scene-motion.mjs";
+import { prepareLifeGeometry } from "../../src/lib/experience/life-geometry.mjs";
 
 const root = new URL("../../", import.meta.url);
 const manifest = JSON.parse(await fs.readFile(new URL("public/experience/world/manifest-v19.json", root), "utf8"));

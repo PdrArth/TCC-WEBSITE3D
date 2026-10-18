@@ -5,7 +5,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import draco3d from "draco3d";
 import { decodeSourceWorld, prepareRuntimeWorld, readGlb } from "../scripts/world/prepare-runtime-world.mjs";
-import { optimizeWorld, selectedBatchPavilion } from "../components/island-experience/optimize-world.mjs";
+import { optimizeWorld, selectedBatchPavilion } from "../src/components/island-experience/optimize-world.mjs";
 
 const source=await readFile(new URL("../public/experience/world/archipelago-v9-low.glb",import.meta.url));
 const prepared=await prepareRuntimeWorld(source,{provenance:true});

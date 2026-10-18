@@ -3,8 +3,8 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { FrameCadence } from "../lib/experience/navigation.mjs";
-import { rainDropScale, weatherVisualProfile, daylightPalette, CameraOrbit, orbitPosition, environmentSeconds, createRainImpacts, advanceRainImpacts, createHailField, advanceHail, writeBranchedLightning, writeFishPose, advanceSnow, createSnowField, createBirdGeometry, clampZoom, wheelZoom, advanceRain, birdFlightPaths, birdsMayFly, createRainField, easeCamera, easeHeading, fieldOfView, mayAdaptQuality, motionSeconds, overviewDistanceScale, restingPose, ThunderClock, writeBirdPose, writeLightningBolt } from "../components/island-experience/scene-motion.mjs";
+import { FrameCadence } from "../src/lib/experience/navigation.mjs";
+import { rainDropScale, weatherVisualProfile, daylightPalette, CameraOrbit, orbitPosition, environmentSeconds, createRainImpacts, advanceRainImpacts, createHailField, advanceHail, writeBranchedLightning, writeFishPose, advanceSnow, createSnowField, createBirdGeometry, clampZoom, wheelZoom, advanceRain, birdFlightPaths, birdsMayFly, createRainField, easeCamera, easeHeading, fieldOfView, mayAdaptQuality, motionSeconds, overviewDistanceScale, restingPose, ThunderClock, writeBirdPose, writeLightningBolt } from "../src/components/island-experience/scene-motion.mjs";
 
 const manifest = JSON.parse(await readFile(new URL("../public/experience/world/manifest-v9.json", import.meta.url), "utf8"));
 const vector = values => new THREE.Vector3(...values);

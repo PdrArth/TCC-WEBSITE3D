@@ -6,10 +6,10 @@ import { createHash } from "node:crypto";
 import { runInNewContext } from "node:vm";
 import { createThunderWav } from "../scripts/audio/generate-thunder.mjs";
 
-const source = await readFile(new URL("../lib/experience/audio.ts", import.meta.url), "utf8");
+const source = await readFile(new URL("../src/lib/experience/audio.ts", import.meta.url), "utf8");
 const javascript = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText;
 const { ExperienceAudio, AUDIO_CATALOG, shuffledMusicOrder } = await import("data:text/javascript;base64," + Buffer.from(javascript).toString("base64"));
-const earlySource = await readFile(new URL("../lib/experience/early-audio-script.ts", import.meta.url), "utf8");
+const earlySource = await readFile(new URL("../src/lib/experience/early-audio-script.ts", import.meta.url), "utf8");
 const earlyJavascript = ts.transpileModule(earlySource, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText;
 const { EARLY_AUDIO_SCRIPT } = await import("data:text/javascript;base64," + Buffer.from(earlyJavascript).toString("base64"));
 const deferred = () => { let resolve, reject; const promise = new Promise((yes, no) => { resolve = yes; reject = no; }); return { promise, resolve, reject }; };

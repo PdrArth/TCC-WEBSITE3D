@@ -1,5 +1,5 @@
 import type { NextConfig } from "next";
-import { backendUrl } from "./lib/deployment-backend.mjs";
+import { backendUrl } from "./src/lib/deployment-backend.mjs";
 
 const nextConfig: NextConfig = {
   experimental: { cpus: 2 },

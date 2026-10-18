@@ -2,8 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import * as THREE from "three";
-import { createEnvironmentManifest, surfaceAt } from "../lib/experience/environment.mjs";
-import { advanceHail, advanceRainImpacts, atmospherePalette, birdFlightShare, createHailField, createRainField, createRainImpacts, createRainSprayGeometry, lightningTargets, weatherVisualProfile, ThunderClock } from "../components/island-experience/scene-motion.mjs";
+import { createEnvironmentManifest, surfaceAt } from "../src/lib/experience/environment.mjs";
+import { advanceHail, advanceRainImpacts, atmospherePalette, birdFlightShare, createHailField, createRainField, createRainImpacts, createRainSprayGeometry, lightningTargets, weatherVisualProfile, ThunderClock } from "../src/components/island-experience/scene-motion.mjs";
 
 const environment = createEnvironmentManifest();
 const near = (actual,expected) => assert.ok(Math.abs(actual-expected)<.00001,`${actual} should equal ${expected}`);

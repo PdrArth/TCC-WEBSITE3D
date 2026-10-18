@@ -2,8 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import * as THREE from "three";
-import { createEnvironmentManifest, insidePolygon } from "../lib/experience/environment.mjs";
-import { birdFlightShare, createFishRoutes, faunaCount, fishAppearance, fishColors, fishSegmentIsClear, writeBirdPose, writeFishPose } from "../components/island-experience/scene-motion.mjs";
+import { createEnvironmentManifest, insidePolygon } from "../src/lib/experience/environment.mjs";
+import { birdFlightShare, createFishRoutes, faunaCount, fishAppearance, fishColors, fishSegmentIsClear, writeBirdPose, writeFishPose } from "../src/components/island-experience/scene-motion.mjs";
 
 const manifest = JSON.parse(await readFile(new URL("../public/experience/world/manifest-v20.json", import.meta.url), "utf8"));
 function lakeFixture() {
@@ -28,8 +28,8 @@ test("v20 fauna counts, colors and sizes retain fixed instanced draw budgets", a
   assert.equal(new Set(Array.from({length:20},(_,i)=>fishAppearance(i).color)).size,4);
   assert.equal(new Set(Array.from({length:20},(_,i)=>fishAppearance(i).scale)).size,5);
   assert.deepEqual(fishColors,["#e8b653","#e78068","#f5e6bf","#65b8ad"]);
-  const atmosphere=await readFile(new URL("../components/island-experience/atmosphere.tsx",import.meta.url),"utf8");
-  const scenery=await readFile(new URL("../components/island-experience/scenery.tsx",import.meta.url),"utf8");
+  const atmosphere=await readFile(new URL("../src/components/island-experience/atmosphere.tsx",import.meta.url),"utf8");
+  const scenery=await readFile(new URL("../src/components/island-experience/scenery.tsx",import.meta.url),"utf8");
   assert.equal((atmosphere.match(/<instancedMesh name="bird_/g)??[]).length,3);
   assert.equal((scenery.match(/<instancedMesh name="lake_fish_/g)??[]).length,2);
   assert.match(atmosphere,/scale = 1\.4\*/);

@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { createEnvironmentManifest } from '../lib/experience/environment.mjs';
-import { ISLAND_LIFE_VERSION, advanceResident, bridgeSurfaceSegments, bridgePillars, createIslandLifeLayout, createResidentState, homeLocalPoint, isIslandWalkingPoint, lifeSurfaceSegments, pathLength, planLifeRoute, residentPauseReason, residentReturnRoute, residentShelterReason, sampleLifePath, walkingSurfaceSegments, writeResidentPose } from '../lib/experience/island-life.mjs';
+import { createEnvironmentManifest } from '../src/lib/experience/environment.mjs';
+import { ISLAND_LIFE_VERSION, advanceResident, bridgeSurfaceSegments, bridgePillars, createIslandLifeLayout, createResidentState, homeLocalPoint, isIslandWalkingPoint, lifeSurfaceSegments, pathLength, planLifeRoute, residentPauseReason, residentReturnRoute, residentShelterReason, sampleLifePath, walkingSurfaceSegments, writeResidentPose } from '../src/lib/experience/island-life.mjs';
 const environment=createEnvironmentManifest(),layout=createIslandLifeLayout(environment);
 const daytime={weather:'clear',hour:13,moving:true,visible:true};
 const dist=(a,b)=>Math.hypot(...a.map((v,i)=>v-b[i]));

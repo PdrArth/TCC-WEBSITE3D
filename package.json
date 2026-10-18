@@ -7,15 +7,15 @@
     "node": "24.x"
   },
   "scripts": {
-    "install:ci": "node scripts/install-ci.mjs",
+    "install:ci": "node scripts/sites/install-ci.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "dev:sites": "node scripts/run-framework.mjs dev",
-    "build:sites": "node scripts/run-framework.mjs build",
+    "dev:sites": "node scripts/sites/run-framework.mjs dev",
+    "build:sites": "node scripts/sites/run-framework.mjs build",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "test": "node --test test/*.test.mjs",
-    "db:generate": "drizzle-kit generate"
+    "db:generate": "drizzle-kit generate --config infrastructure/editorial/drizzle.config.ts"
   },
   "dependencies": {
     "@react-three/drei": "10.7.9",

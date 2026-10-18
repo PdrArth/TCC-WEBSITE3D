@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import * as THREE from "three";
-import { writeRainImpactPose, writeCloudAnchor, ThunderClock } from "../components/island-experience/scene-motion.mjs";
-import { FrameStalls, prepareEffectMaterials } from "../components/island-experience/render-preparation.mjs";
+import { writeRainImpactPose, writeCloudAnchor, ThunderClock } from "../src/components/island-experience/scene-motion.mjs";
+import { FrameStalls, prepareEffectMaterials } from "../src/components/island-experience/render-preparation.mjs";
 
 const immediateStart = callback => { callback(); return () => {}; };
 

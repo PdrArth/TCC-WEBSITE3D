@@ -5,7 +5,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import ts from "typescript";
 
-const sources = JSON.parse(await readFile(new URL("../lib/sources.json", import.meta.url), "utf8"));
+const sources = JSON.parse(await readFile(new URL("../src/lib/sources.json", import.meta.url), "utf8"));
 const packagePaths = Object.fromEntries(["react", "react/jsx-runtime", "lucide-react"].map(name => [name, import.meta.resolve(name)]));
 async function compiled(path, replacements = {}) {
   const source = (await readFile(new URL(path, import.meta.url), "utf8"))
@@ -15,14 +15,14 @@ async function compiled(path, replacements = {}) {
   for (const [specifier, destination] of Object.entries({ ...packagePaths, ...replacements })) code = code.replaceAll(JSON.stringify(specifier), JSON.stringify(destination));
   return "data:text/javascript;base64," + Buffer.from(code).toString("base64");
 }
-const researchUrl = await compiled("../lib/research.ts");
-const editorialUrl = await compiled("../components/research-content/editorial-data.ts");
-const pavilionUrl = await compiled("../lib/pavilion-content.ts");
-const readerUrl = await compiled("../components/research-content/index.tsx", {
+const researchUrl = await compiled("../src/lib/research.ts");
+const editorialUrl = await compiled("../src/components/research-content/editorial-data.ts");
+const pavilionUrl = await compiled("../src/lib/pavilion-content.ts");
+const readerUrl = await compiled("../src/components/research-content/index.tsx", {
   "@/lib/research": researchUrl,
   "@/lib/pavilion-content": pavilionUrl,
   "./editorial-data": editorialUrl,
-  "@/lib/reading-navigation.mjs": new URL("../lib/reading-navigation.mjs", import.meta.url).href,
+  "@/lib/reading-navigation.mjs": new URL("../src/lib/reading-navigation.mjs", import.meta.url).href,
 });
 const { PavilionContent } = await import(readerUrl);
 const { editorialSections } = await import(editorialUrl);
@@ -63,7 +63,7 @@ test("tools show all eight unaltered dated events, caveats and original links to
 test("summaries retain the productivity contrast and the notebook remains wide with an 18px body floor", async () => {
   const html = panel("comparar");
   for (const text of ["55,8%", "19%", "não devem ser somados", "percepção não equivale"]) assert.ok(html.includes(text));
-  const css = await readFile(new URL("../components/research-content/reading-v10.css", import.meta.url), "utf8");
+  const css = await readFile(new URL("../src/components/research-content/reading-v10.css", import.meta.url), "utf8");
   assert.match(css, /width: min\(1400px, calc\(100% - 2 \* var\(--reader-gutter\)\)\)/);
   assert.match(css, /--reader-type: clamp\(22px, 1\.43vw, 24px\)/);
   assert.match(css, /--reader-type: 18px/);

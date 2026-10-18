@@ -1,10 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { surfaceAt } from "../lib/experience/environment.mjs";
-import { advanceRainImpacts, createRainField, createRainImpacts } from "../components/island-experience/scene-motion.mjs";
-import { advanceResident, createResidentState } from "../lib/experience/island-life.mjs";
-import { restoreLifeGeometry } from "../lib/experience/life-geometry.mjs";
+import { surfaceAt } from "../src/lib/experience/environment.mjs";
+import { advanceRainImpacts, createRainField, createRainImpacts } from "../src/components/island-experience/scene-motion.mjs";
+import { advanceResident, createResidentState } from "../src/lib/experience/island-life.mjs";
+import { restoreLifeGeometry } from "../src/lib/experience/life-geometry.mjs";
 
 const before = JSON.parse(await readFile(new URL("../public/experience/world/manifest-v19.json", import.meta.url), "utf8"));
 const current = JSON.parse(await readFile(new URL("../public/experience/world/manifest-v20.json", import.meta.url), "utf8"));

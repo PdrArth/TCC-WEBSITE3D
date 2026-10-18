@@ -1,45 +1,57 @@
 # Do código à supervisão
 
-## Se a IA escreve código, o que muda no trabalho de quem desenvolve?
+**Se a IA escreve código, o que cabe a nós?**
 
-Este repositório contém o site que apresenta o TCC de Pedro Arthur Oliveira Januário e o PDF do trabalho. A pesquisa analisa o que estudos acadêmicos e documentos técnicos dizem sobre produtividade, erros, retrabalho e mudanças na prática de desenvolvimento de software.
+Transformei meu TCC em um arquipélago para explorar essa pergunta. Cada uma das sete ilhas apresenta uma parte da pesquisa sobre inteligência artificial generativa e o trabalho de quem desenvolve software: o que se ganha em velocidade, o que ainda precisa ser revisado e como especificar, compreender e validar uma solução passam a ocupar mais espaço na profissão.
 
-A resposta não é igual em todos os cenários. Os estudos avaliam tarefas, participantes e métricas diferentes; por isso, o site preserva essas diferenças e não transforma um resultado isolado em regra geral. A pesquisa também discute por que especificar o problema, revisar o código e validar a solução continuam sendo parte central do trabalho.
+**[Explorar o arquipélago →](https://tcc-pdrarth.vercel.app/)** · [Abrir o caderno de leitura](https://tcc-pdrarth.vercel.app/#caderno/pesquisa) · [Ler o TCC em PDF](https://tcc-pdrarth.vercel.app/tcc-pedro-arthur.pdf)
 
-[Explorar as sete ilhas](https://do-codigo-a-supervisao-pedro.pdrarth.chatgpt.site/) · [Ler o TCC em PDF](https://do-codigo-a-supervisao-pedro.pdrarth.chatgpt.site/tcc-pedro-arthur.pdf)
+## Um lugar para conhecer a pesquisa
 
-![Captura atual do arquipélago interativo, com as sete ilhas da pesquisa](docs/assets/site-overview.png)
+O percurso começa na pergunta do trabalho, passa pela evolução das ferramentas, confronta estudos de produtividade e chega às mudanças na profissão. Ao selecionar uma ilha, um painel reúne a síntese, os exemplos visuais e as fontes daquele tema. O caderno oferece uma leitura contínua, e o PDF mantém o texto acadêmico completo.
 
-## Sete temas, uma pergunta
-
-1. **A pesquisa** — problema, hipótese e percurso da revisão.
-2. **Ferramentas** — como as ferramentas de programação com IA ampliaram o que pode ser delegado.
-3. **Produtividade** — ganhos observados e diferenças entre velocidade percebida e resultado real.
-4. **Validação** — revisão, testes, qualidade e custo do retrabalho.
-5. **Especificação** — critérios, contexto e *Spec-Driven Development*.
-6. **Profissão** — o que muda na atuação e nas responsabilidades de quem desenvolve.
-7. **Perspectivas** — conclusões do TCC e perguntas para trabalhos futuros.
-
-O arquipélago é uma forma de percorrer os capítulos, não um experimento de produtividade. Cada ilha apresenta uma síntese e suas fontes; a leitura completa e o PDF preservam o desenvolvimento acadêmico.
-
-## Organização do repositório
-
-| Caminho | O que reúne |
+| Ilha | O que você encontra |
 | --- | --- |
-| `app/` | Páginas e rotas da aplicação. |
-| `components/` | Interface, caderno de leitura e cena 3D. |
-| `lib/` | Conteúdo, contratos e regras compartilhadas. |
-| `assets/world/` | Arquivos editáveis do mundo, texturas e manifestos de origem. |
-| `public/` | Recursos servidos pelo site, incluindo o PDF do TCC. |
-| `scripts/world/` | Preparação e validação dos recursos 3D. |
-| `db/`, `drizzle/`, `examples/` | Esquema, migrações e integração de banco. |
-| `test/` | Testes e dados sintéticos usados por eles. |
-| `docs/` | Índice da documentação, registros de pesquisa, áudio, design, créditos e validações. |
+| **01 · Pesquisa** | Problema, hipótese e percurso da revisão. |
+| **02 · Ferramentas** | A passagem das sugestões de código à delegação de tarefas. |
+| **03 · Produtividade** | Resultados que mudam conforme a tarefa, a experiência e a métrica. |
+| **04 · Validação** | Revisão, testes e o trabalho necessário depois da geração. |
+| **05 · Especificação** | Contexto, critérios de aceitação e *Spec-Driven Development*. |
+| **06 · Profissão** | Responsabilidade técnica, supervisão e formação. |
+| **07 · Perspectivas** | Conclusões e perguntas para futuras investigações. |
 
-O mapa da documentação está em [`docs/README.md`](docs/README.md), e o fluxo entre a cena autoral, os arquivos públicos e a aplicação está em [`docs/architecture.md`](docs/architecture.md). A aplicação combina React e TypeScript com Three.js e React Three Fiber. A versão pública usa Next.js na Vercel; a revisão privada e o banco permanecem no serviço editorial existente, conforme [`docs/deployment.md`](docs/deployment.md).
+Entre uma leitura e outra, o cenário continua vivo: o horário avança, o clima muda, um morador percorre as pontes e os animais ocupam o lago e as ilhas. A experiência pode ser explorada com a câmera ou acessada diretamente pela leitura, sem depender da navegação em 3D.
 
-## Créditos e direitos
+## A pesquisa por trás do cenário
 
-Créditos, licenças e proveniência dos recursos visuais e sonoros estão separados em [`docs/credits/`](docs/credits/README.md). Os arquivos de imagem e evidência ficam em [`docs/assets/`](docs/assets/README.md), e os registros técnicos da trilha ficam em [`docs/audio/`](docs/audio/README.md).
+O TCC de **Pedro Arthur Oliveira Januário** é uma revisão narrativa da literatura com apoio documental. Seu núcleo reúne **11 fontes — cinco acadêmicas e seis técnicas, críticas e jornalísticas**. Outros 13 documentos complementam a contextualização das ferramentas e dos trabalhos futuros.
 
-O repositório não concede uma licença geral para reutilizar o código, o texto acadêmico ou os modelos autorais. Recursos de terceiros permanecem sujeitos às condições registradas em seus créditos.
+Os estudos não são apresentados como se medissem a mesma coisa. Tarefas, participantes, métodos e limitações acompanham os resultados. O site apresenta a pesquisa; a cena 3D não constitui um experimento de produtividade.
+
+## Como o projeto é construído
+
+A aplicação usa **Next.js, React e TypeScript**. O mundo interativo é renderizado com **Three.js e React Three Fiber**, a partir de modelos próprios preparados no Blender. Conteúdo e controles permanecem em HTML, com navegação por teclado, adaptação a telas menores e respeito à preferência por movimento reduzido.
+
+O site público está na **Vercel**. O serviço editorial existente mantém o banco e a revisão privada; a interface pública recebe somente novidades aprovadas. Essa separação está documentada em [Publicação e serviço editorial](docs/deployment.md).
+
+## Onde está cada parte
+
+```text
+src/             Aplicação: páginas, interface, conteúdo e regras
+public/          Modelos otimizados, sons, imagens e PDF servidos pelo site
+assets/          Arquivos de criação do mundo 3D
+infrastructure/  Integrações da hospedagem e do serviço editorial
+scripts/         Preparação de recursos e ferramentas de manutenção
+test/            Testes de comportamento e contratos
+docs/            Arquitetura, pesquisa, créditos e registros do projeto
+```
+
+As configurações exigidas pelas ferramentas ficam na raiz. O mapa detalhado do código está em [Arquitetura](docs/architecture.md), e o índice dos documentos está em [Documentação](docs/README.md).
+
+## Autoria e créditos
+
+Projeto de **[Pedro Arthur Oliveira Januário](https://github.com/PdrArth)**, construído a partir de seu TCC sobre IA generativa e desenvolvimento de software.
+
+As origens e condições de uso de modelos, texturas e sons estão reunidas em [Créditos e licenças](docs/credits/README.md). Capturas e registros de validação ficam na documentação, separados do código da aplicação.
+
+Este repositório não concede uma licença geral de reutilização do código, do texto acadêmico ou dos modelos autorais. Recursos de terceiros mantêm suas próprias condições de uso.

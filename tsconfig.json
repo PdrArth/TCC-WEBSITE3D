@@ -24,7 +24,7 @@
     ],
     "paths": {
       "@/*": [
-        "./*"
+        "./src/*"
       ]
     },
     "types": [
@@ -42,10 +42,7 @@
   ],
   "exclude": [
     "node_modules",
-    "examples",
-    "build",
-    "db/index.ts",
-    "db/sites-updates.ts",
+    "infrastructure",
     "vite.config.ts"
   ]
 }

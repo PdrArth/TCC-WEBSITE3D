@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import * as THREE from "three";
-import {openingFrame,applyOpeningView,clearOpeningView} from "../components/island-experience/opening-layout.mjs";
-import {fieldOfView} from "../components/island-experience/scene-motion.mjs";
+import {openingFrame,applyOpeningView,clearOpeningView} from "../src/components/island-experience/opening-layout.mjs";
+import {fieldOfView} from "../src/components/island-experience/scene-motion.mjs";
 
 test("fullscreen sky preserves island pixel positions at every welcome breakpoint",()=>{
   for(const [width,height] of [[1280,720],[2048,968],[650,697],[390,844],[844,390]]){

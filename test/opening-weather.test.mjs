@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { claimOpeningWeather, openingWeatherKinds, openingWeatherKey } from "../lib/experience/opening-weather.mjs";
+import { claimOpeningWeather, openingWeatherKinds, openingWeatherKey } from "../src/lib/experience/opening-weather.mjs";
 
 function storage() {
   const values = new Map();

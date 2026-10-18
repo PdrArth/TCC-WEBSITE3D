@@ -83,7 +83,7 @@ test('Every pavilion is reachable through existing navigation nodes', async () =
 test('The original PDF and source registry remain intact', async () => {
   const pdf = await readFile(publicFile('/tcc-pedro-arthur.pdf'));
   assert.equal(createHash('sha256').update(pdf).digest('hex'), '59d208f910c5cec1bb951025a9d643e11e33f82e8dea86ec7c6e2105b96fe257');
-  const sources = JSON.parse(await readFile(path.join(root, 'lib/sources.json'), 'utf8'));
+  const sources = JSON.parse(await readFile(path.join(root, 'src/lib/sources.json'), 'utf8'));
   assert.equal(sources.filter(item => item.group === 'academic').length, 5);
   assert.equal(sources.filter(item => item.group === 'technical').length, 6);
   assert.equal(sources.filter(item => item.group === 'complementary').length, 13);
@@ -107,7 +107,7 @@ test('Active audio has license provenance and either a local file or an explicit
       if (error.code !== 'ENOENT') throw error;
       // Rights-reserved music is deliberately absent from a fresh public clone.
       const { default: config } = await import('../next.config.ts');
-      const { backendUrl } = await import('../lib/deployment-backend.mjs');
+      const { backendUrl } = await import('../src/lib/deployment-backend.mjs');
       const rewrites = await config.rewrites();
       const fallback = rewrites.find(rule => rule.source === track.url);
       assert.equal(fallback?.destination, backendUrl(track.url).href);

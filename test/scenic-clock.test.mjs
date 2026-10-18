@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { advanceHour, phaseAtHour, clockLabel, initialFront, nextFront, frontDuration } from "../lib/experience/scenic-clock.mjs";
+import { advanceHour, phaseAtHour, clockLabel, initialFront, nextFront, frontDuration } from "../src/lib/experience/scenic-clock.mjs";
 test("the scenic day crosses sunset, night and midnight without resetting at a front change", () => {
   assert.equal(phaseAtHour(advanceHour(16, 30)), "dusk");
   assert.equal(phaseAtHour(advanceHour(19, 30)), "night");

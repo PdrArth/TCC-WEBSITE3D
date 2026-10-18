@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
-import type { DraftInput } from "../lib/editorial-policy";
-import type { UpdateRow, PublicUpdate, ResearchRun } from "../lib/update-types";
+import type { DraftInput } from "../../../src/lib/editorial-policy";
+import type { UpdateRow, PublicUpdate, ResearchRun } from "../../../src/lib/update-types";
 const fields = `id,title,summary,relevance,limitations,source_url AS sourceUrl,organization,type,event_date AS eventDate,publication_date AS publicationDate,checked_date AS checkedDate,status,created_at AS createdAt,published_at AS publishedAt,revision`;
 function db() { if (!env.DB) throw new Error("Database unavailable"); return env.DB; }
 export async function listPublished(): Promise<PublicUpdate[]> { const result = await db().prepare(`SELECT ${fields} FROM updates WHERE status = 'published' ORDER BY publication_date DESC, created_at DESC LIMIT 30`).all<UpdateRow>(); return result.results.map(row => ({ id: row.id, title: row.title, summary: row.summary, relevance: row.relevance, limitations: row.limitations, sourceUrl: row.sourceUrl, organization: row.organization, type: row.type, eventDate: row.eventDate, publicationDate: row.publicationDate, checkedDate: row.checkedDate, publishedAt: row.publishedAt })); }

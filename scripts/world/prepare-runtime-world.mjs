@@ -4,7 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import draco3d from "draco3d";
 import * as THREE from "three";
-import { optimizeWorld } from "../../components/island-experience/optimize-world.mjs";
+import { optimizeWorld } from "../../src/components/island-experience/optimize-world.mjs";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const attributeNames = { POSITION:"position", NORMAL:"normal", TEXCOORD_0:"uv", TEXCOORD_1:"uv1", COLOR_0:"color", _SEASONAL_SEED:"seasonalSeed", _PAVILION_ID:"pavilionId", _SOURCE_VERTEX:"sourceVertex" };

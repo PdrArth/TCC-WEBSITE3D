@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { after, test } from "node:test";
 import { readFileSync } from "node:fs";
 import * as THREE from "three";
-import { createLifeGeometry, lifeGeometrySignature, prepareLifeGeometry, restoreLifeGeometry } from "../lib/experience/life-geometry.mjs";
+import { createLifeGeometry, lifeGeometrySignature, prepareLifeGeometry, restoreLifeGeometry } from "../src/lib/experience/life-geometry.mjs";
 
 const layout = JSON.parse(readFileSync(new URL("../public/experience/world/manifest-v20.json", import.meta.url), "utf8")).islandLife;
 const generated = createLifeGeometry(layout);

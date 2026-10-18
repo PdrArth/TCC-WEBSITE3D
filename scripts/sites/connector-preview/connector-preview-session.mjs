@@ -20,7 +20,7 @@ import {
 
 // The agent starts this script through its terminal tool after creating a local
 // Site and selecting connector read actions, following references/connector-preview.md:
-//   node <site-directory>/scripts/connector-preview/connector-preview-session.mjs <site-directory> <grants.json>
+//   node <site-directory>/scripts/sites/connector-preview/connector-preview-session.mjs <site-directory> <grants.json>
 // During the agent development loop, the Site preview writes requests into a shared folder.
 // This script checks each request with host-binding.mjs, then asks the agent over
 // stdout to call the connector. The agent returns the tool result through stdin,

@@ -6,7 +6,7 @@ import {
   readingHref,
   readingThemeIds,
   resolveReadingHash,
-} from "../lib/reading-navigation.mjs";
+} from "../src/lib/reading-navigation.mjs";
 
 const expectedThemes = [
   "pesquisa",
@@ -17,10 +17,10 @@ const expectedThemes = [
   "evoluir",
   "perspectivas",
 ];
-const sources = JSON.parse(fs.readFileSync(new URL("../lib/sources.json", import.meta.url), "utf8"));
-const editorial = fs.readFileSync(new URL("../components/research-content/editorial-data.ts", import.meta.url), "utf8");
-const reader = fs.readFileSync(new URL("../components/research-content/index.tsx", import.meta.url), "utf8");
-const islandShell = fs.readFileSync(new URL("../components/island-experience/index.tsx", import.meta.url), "utf8");
+const sources = JSON.parse(fs.readFileSync(new URL("../src/lib/sources.json", import.meta.url), "utf8"));
+const editorial = fs.readFileSync(new URL("../src/components/research-content/editorial-data.ts", import.meta.url), "utf8");
+const reader = fs.readFileSync(new URL("../src/components/research-content/index.tsx", import.meta.url), "utf8");
+const islandShell = fs.readFileSync(new URL("../src/components/island-experience/index.tsx", import.meta.url), "utf8");
 
 test("caderno keeps seven unique themes in island order and routes old anchors", () => {
   assert.deepEqual(readingThemeIds, expectedThemes);

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { gzipSync } from "node:zlib";
-import { createLifeGeometry, lifeGeometrySignature, prepareLifeGeometry, restoreLifeGeometry } from "../../lib/experience/life-geometry.mjs";
+import { createLifeGeometry, lifeGeometrySignature, prepareLifeGeometry, restoreLifeGeometry } from "../../src/lib/experience/life-geometry.mjs";
 
 const manifestPath = resolve(process.argv[2] ?? "public/experience/world/manifest-v20.json");
 const outputPath = resolve(process.argv[3] ?? "public/experience/world/life-geometry-v20.json");

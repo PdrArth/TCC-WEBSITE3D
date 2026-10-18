@@ -11,8 +11,10 @@ Os documentos foram separados por assunto para facilitar a consulta sem misturar
 | [`research/`](research/README.md) | Organização editorial e registros de leitura. |
 | [`validation/`](validation/README.md) | Relatórios de verificação por versão. |
 
-Os arquivos por versão documentam decisões e verificações feitas durante a construção do site. Eles não substituem o TCC nem devem ser lidos como resultados de um novo experimento.
+Os arquivos por versão documentam decisões e verificações feitas durante a construção do site. Eles preservam os caminhos da época; a estrutura atual está no documento de arquitetura. Eles não substituem o TCC nem devem ser lidos como resultados de um novo experimento.
 
 Para entender como o código, a cena 3D, os recursos públicos e os testes se conectam, consulte [`architecture.md`](architecture.md).
 
 A publicação na Vercel e a conexão com o serviço editorial existente estão descritas em [`deployment.md`](deployment.md).
+
+Os índices de [infraestrutura](../infrastructure/README.md) e [ferramentas](../scripts/README.md) explicam as integrações e os scripts que ficam fora de `src/`.

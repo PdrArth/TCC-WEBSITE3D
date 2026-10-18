@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { backendUrl, backendRedirect, DEFAULT_BACKEND_ORIGIN } from "../lib/deployment-backend.mjs";
-import { listPublished } from "../lib/updates.ts";
+import { backendUrl, backendRedirect, DEFAULT_BACKEND_ORIGIN } from "../src/lib/deployment-backend.mjs";
+import { listPublished } from "../src/lib/updates.ts";
 
 const published = {
   id: "published-item", title: "Estudo publicado", summary: "Resumo público",

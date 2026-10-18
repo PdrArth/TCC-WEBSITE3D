@@ -1,5 +1,5 @@
 import {readFile,writeFile} from "node:fs/promises";
-import {createEnvironmentManifest} from "../../lib/experience/environment.mjs";
+import {createEnvironmentManifest} from "../../src/lib/experience/environment.mjs";
 const root=new URL("../../",import.meta.url);
 const manifest=JSON.parse(await readFile(new URL("public/experience/world/manifest-v9.json",root),"utf8"));
 manifest.schemaVersion=3;

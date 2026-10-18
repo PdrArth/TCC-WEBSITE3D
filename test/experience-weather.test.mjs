@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { initialWeather, nextWeather, weatherDuration } from "../lib/experience/weather.mjs";
+import { initialWeather, nextWeather, weatherDuration } from "../src/lib/experience/weather.mjs";
 
 const allWeather = ["clear", "rain", "storm", "dusk"];
 const severe = new Set(["storm"]);

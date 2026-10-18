@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { FrameCadence, WorldNavigator, advanceWorld, shortestPath } from "../lib/experience/navigation.mjs";
+import { FrameCadence, WorldNavigator, advanceWorld, shortestPath } from "../src/lib/experience/navigation.mjs";
 
 const graph = {
   nodes: { spawn: { position: [0, 0, 0] }, junction: { position: [0, 0, 2] }, stair: { position: [1, .25, 2] }, landing: { position: [2, .5, 2] }, other: { position: [-2, 0, 2] } },

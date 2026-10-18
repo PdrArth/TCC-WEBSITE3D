@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { weatherFromCode, roundCoordinates, weatherPhase, seasonAtLocation, normalizeForecast } from "../lib/experience/weather.mjs";
+import { weatherFromCode, roundCoordinates, weatherPhase, seasonAtLocation, normalizeForecast } from "../src/lib/experience/weather.mjs";
 test("WMO conditions include fog, freezing rain, snow and hail without inventing severe events", () => {
   const groups = [["clear",[0]],["partly-cloudy",[1,2]],["overcast",[3]],["fog",[45,48]],["drizzle",[51,53,55]],["freezing-rain",[56,57,66,67]],["rain",[61,63,65,80,81,82]],["snow",[71,73,75,77,85,86]],["storm",[95]],["hail",[96,99]]];
   for (const [condition,codes] of groups) for (const code of codes) assert.equal(weatherFromCode(code), condition);

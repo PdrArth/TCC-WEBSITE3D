@@ -1,9 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { draftBatchSchema, draftSchema, isOwnerEmail } from "../lib/editorial-policy.ts";
+import { draftBatchSchema, draftSchema, isOwnerEmail } from "../src/lib/editorial-policy.ts";
 const drafts = JSON.parse(fs.readFileSync(new URL("./fixtures/synthetic-drafts.json",import.meta.url),"utf8"));
-const sources = JSON.parse(fs.readFileSync(new URL("../lib/sources.json",import.meta.url),"utf8"));
+const sources = JSON.parse(fs.readFileSync(new URL("../src/lib/sources.json",import.meta.url),"utf8"));
 test("initial research is bounded and has valid dates and explicit limitations", () => { assert.equal(draftBatchSchema.safeParse({ drafts }).success,true); assert.equal(new Set(drafts.map(d=>d.sourceUrl)).size,5); });
 test("inconsistent dates, unsafe URLs and oversized batches are rejected", () => { for (const patch of [{ publicationDate: "2026-09-08" },{ eventDate:"2026-02-30" },{ publicationDate:"2026-10-04" },{ sourceUrl:"javascript:alert(1)" },{ summary:"" }]) assert.equal(draftSchema.safeParse({...drafts[0],...patch}).success,false); assert.equal(draftBatchSchema.safeParse({drafts:[...drafts,drafts[0]]}).success,false); });
 test("tracked URL parameters are stripped and version anchors remain distinct", () => { const d=draftSchema.parse({...drafts[0],sourceUrl:"https://example.org/changelog?utm_source=a#version2"}); assert.equal(d.sourceUrl,"https://example.org/changelog#version2"); });

@@ -2,7 +2,7 @@ import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-export const projectRoot = fileURLToPath(new URL("../", import.meta.url));
+export const projectRoot = fileURLToPath(new URL("../../", import.meta.url));
 const runtimeRoot = process.env.SITES_RUNTIME_ROOT || path.join(projectRoot, ".sites-runtime");
 
 process.env.CLOUDFLARE_CF_FETCH_ENABLED ||= "false";

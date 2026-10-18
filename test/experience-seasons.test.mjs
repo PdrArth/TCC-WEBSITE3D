@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { getSeason, seasonCalendar, seasonInfo, seasonRegion, vegetationDensity, vegetationGroup } from "../lib/experience/seasons.mjs";
+import { getSeason, seasonCalendar, seasonInfo, seasonRegion, vegetationDensity, vegetationGroup } from "../src/lib/experience/seasons.mjs";
 
 test("the local calendar assigns the four Southern Hemisphere meteorological quarters", () => {
   const expected = ["summer", "summer", "autumn", "autumn", "autumn", "winter", "winter", "winter", "spring", "spring", "spring", "summer"];

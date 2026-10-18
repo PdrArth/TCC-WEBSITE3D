@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import * as THREE from "three";
-import {optimizeWorld,selectedBatchPavilion} from "../components/island-experience/optimize-world.mjs";
-import {createEnvironmentManifest,createEnvironmentState,advanceEnvironment,surfaceAt} from "../lib/experience/environment.mjs";
+import {optimizeWorld,selectedBatchPavilion} from "../src/components/island-experience/optimize-world.mjs";
+import {createEnvironmentManifest,createEnvironmentState,advanceEnvironment,surfaceAt} from "../src/lib/experience/environment.mjs";
 
 test("batching preserves world-space geometry and selection of different pavilions",()=>{
  const scene=new THREE.Group(),material=new THREE.MeshStandardMaterial({name:"Wall"});

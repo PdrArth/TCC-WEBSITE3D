@@ -1,6 +1,6 @@
 # Publicação na Vercel
 
-A versão pública usa o build nativo do Next.js, com a configuração versionada em `vercel.json`. O processo não depende de `.openai/hosting.json`, Wrangler ou bindings de Cloudflare. O Node.js fica na linha 24.x para evitar trocas automáticas de versão principal.
+A versão pública está em [tcc-pdrarth.vercel.app](https://tcc-pdrarth.vercel.app/) e usa o build nativo do Next.js, com a configuração versionada em `vercel.json`. O processo não depende de `.openai/hosting.json`, Wrangler ou bindings de Cloudflare. O Node.js fica na linha 24.x para evitar trocas automáticas de versão principal.
 
 ## Serviço editorial existente
 
@@ -16,4 +16,4 @@ As páginas `/revisao` e `/revisao/ilhas`, as APIs privadas e o MCP direcionam o
 
 O MP3 de Genshin não é versionado no repositório público. A rota existente do áudio tem um rewrite para o mesmo arquivo na hospedagem original, preservando a música e os controles da experiência. Os demais sons e recursos são arquivos públicos do próprio projeto.
 
-Os scripts `dev:sites` e `build:sites` preservam a opção de prévia do ambiente anterior; eles não são utilizados pelo deploy da Vercel. Os arquivos do backend D1 permanecem em `db/` como fonte do serviço original e estão fora da compilação Next.js.
+Os scripts `dev:sites` e `build:sites` preservam a opção de prévia do ambiente anterior; eles não são utilizados pelo deploy da Vercel. Os arquivos do backend D1 permanecem em `infrastructure/editorial/` como fonte do serviço original e estão fora da compilação Next.js. A configuração e os plugins de Sites ficam em `infrastructure/sites/`, com os comandos auxiliares em `scripts/sites/`.
