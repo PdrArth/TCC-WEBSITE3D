@@ -19,7 +19,7 @@ export function overviewDistanceScale(fov, width, height) {
   if (width <= 0 || height <= 0) return 1;
   const aspect = width / height;
   const vertical = fieldOfView(fov, width, height) * Math.PI / 180;
-  return Math.max(1, Math.tan(fov * Math.PI / 360) * 1.10 / (aspect * Math.tan(vertical / 2)));
+  return Math.max(1, Math.tan(fov * Math.PI / 360) * 1.30 / (aspect * Math.tan(vertical / 2)));
 }
 
 export function restingPose(manifest, pavilionId, intro = false) {
@@ -65,7 +65,7 @@ export class CameraOrbit {
     if (Math.hypot(dx, dy) > 6) this.dragging = true;
     if (!this.dragging) return false;
     this.yaw = this.anchor.yaw - dx / Math.max(1, width) * Math.PI * 1.8;
-    this.pitch = Math.max(-.18, Math.min(.24, this.anchor.pitch + dy / Math.max(1, height) * .8));
+    this.pitch = Math.max(-.48, Math.min(.78, this.anchor.pitch + dy / Math.max(1, height) * 1.6));
     return true;
   }
   end() { this.suppressClick ||= this.dragging; if (this.anchor || this.pinchHeld) this.pause(); this.anchor = null; this.pinchHeld = false; this.dragging = false; return this.suppressClick; }
@@ -76,7 +76,7 @@ export function orbitPosition(position, target, yaw = 0, pitch = 0, zoom = 1) {
   const x = position[0] - target[0], y = position[1] - target[1], z = position[2] - target[2];
   const radius = Math.hypot(x, y, z) / Math.max(.1, zoom);
   const azimuth = Math.atan2(x, z) + yaw;
-  const elevation = Math.max(.18, Math.min(1.12, Math.atan2(y, Math.hypot(x, z)) + pitch));
+  const elevation = Math.max(.16, Math.min(1.43, Math.atan2(y, Math.hypot(x, z)) + pitch));
   return [target[0] + Math.sin(azimuth) * Math.cos(elevation) * radius, target[1] + Math.sin(elevation) * radius, target[2] + Math.cos(azimuth) * Math.cos(elevation) * radius];
 }
 
@@ -111,8 +111,17 @@ export function rainDropScale(profile, distance, fov, viewportHeight) {
 }
 
 export const fishColors = ["#e8b653", "#e78068", "#f5e6bf", "#65b8ad"];
-export function faunaCount(kind, quality) { return kind === "birds" ? quality === "high" ? 12 : 8 : quality === "high" ? 20 : 12; }
-export function fishAppearance(index) { return { color: fishColors[index % fishColors.length], scale: .84 + index % 5 * .105 }; }
+export function faunaCount(kind, quality) { return kind === "birds" ? quality === "high" ? 12 : 8 : quality === "high" ? 40 : 24; }
+export function fishAppearance(index) { return { color: fishColors[index % fishColors.length], scale: .95 + index % 5 * .10 }; }
+/** Independently phased swimmers reuse the validated corridors without marching in a line. */
+export function createFishSchools(prepared, count) {
+  if (!prepared.routes.length) return prepared;
+  return { ...prepared, routes:Array.from({length:count},(_,index)=>{
+    const route=prepared.routes[index%prepared.routes.length];
+    return {...route,...fishAppearance(index),phase:(index*.61803398875+.137)%1,
+      speed:.48+((index*.754877666)%1)*.56, direction:index%3===0?-1:1, wander:.085};
+  }) };
+}
 
 function fishSegmentDistance(x, z, a, b) {
   const dx = b[0] - a[0], dz = b[1] - a[1], length = dx * dx + dz * dz;
@@ -232,14 +241,19 @@ export function writeFishPose(pose, index, seconds, prepared) {
   if (prepared?.routes.length) {
     const route = prepared.routes[index % prepared.routes.length];
     if(!route.length){pose.x=route.points[0][0];pose.z=route.points[0][1];pose.y=prepared.waterHeight-.15;pose.heading=0;pose.tail=0;return pose;}
-    const distance = (time * route.speed + route.phase * route.length) % route.length;
+    const direction=route.direction??1;
+    const travel=time*route.speed + (route.wander ? Math.sin(time*.23+index)*.22 : 0);
+    const distance = ((travel*direction + route.phase * route.length) % route.length + route.length) % route.length;
     let low = 0, high = route.points.length - 1;
     while (low < high) { const mid = (low + high) >> 1; if (route.cumulative[mid + 1] <= distance) low = mid + 1; else high = mid; }
     const a = route.points[low], b = route.points[(low + 1) % route.points.length], t = (distance - route.cumulative[low]) / Math.max(.00001, route.cumulative[low + 1] - route.cumulative[low]);
     pose.x = a[0] + (b[0] - a[0]) * t; pose.z = a[1] + (b[1] - a[1]) * t;
-    pose.y = prepared.waterHeight - .15 + Math.sin(time * .75 + index) * .018;
+    pose.y = prepared.waterHeight - .14 - (route.wander ? index%3*.025 : 0) + Math.sin(time * .75 + index) * .018;
     const heading = route.headings[low], nextHeading = route.headings[(low+1)%route.points.length];
-    pose.heading = heading + Math.atan2(Math.sin(nextHeading-heading),Math.cos(nextHeading-heading))*t; pose.tail = Math.sin(time * (5 + index % 3 * .4) + index) * .3;
+    pose.heading = heading + Math.atan2(Math.sin(nextHeading-heading),Math.cos(nextHeading-heading))*t + (direction<0?Math.PI:0);
+    const wander=(route.wander??0)*Math.sin(time*.41+index*2.39996);
+    pose.x+=Math.cos(pose.heading)*wander; pose.z-=Math.sin(pose.heading)*wander;
+    pose.tail = Math.sin(time * (5 + index % 3 * .4) + index) * .3;
     return pose;
   }
   const t = time * (.16 + index % 3 * .02) + index * 1.7;
@@ -660,8 +674,8 @@ export function daylightPalette(timeOfDay, day, dawn, dusk, night) {
   return result;
 }
 
-const clearPalette = { sky: "#e2ebe6", upper: "#fff5df", lower: "#9ba587", sun: "#fff0d2", fill: "#e1edf0", ambient: 2.3, intensity: 3.3, fillIntensity: .65, exposure: 1.12, sunPosition: [-8,16,10], rain: 0, cloud: .12, cloudColor: "#f1f4ef" };
-const cloudPalette = { ...clearPalette, sky: "#c7d1d0", upper: "#d7e3e4", ambient: 1.95, intensity: 1.25, exposure: 1.02, cloud: .85, cloudColor: "#bcc9ce" };
+const clearPalette = { sky: "#e2ebe6", upper: "#fff5df", lower: "#9ba587", sun: "#fff0d2", fill: "#e1edf0", ambient: 2.0, intensity: 3.45, fillIntensity: .65, exposure: 1.12, sunPosition: [-8,16,10], rain: 0, cloud: .12, cloudColor: "#f1f4ef" };
+const cloudPalette = { ...clearPalette, sky: "#c7d1d0", upper: "#d7e3e4", ambient: 1.8, intensity: 1.55, exposure: 1.02, cloud: .85, cloudColor: "#bcc9ce" };
 const rainPalette = { ...cloudPalette, sky: "#a5b9c1", sun: "#d6e4ea", fill: "#c0d5e4", rain: .4, cloud: .88 };
 const weatherPalettes = {
   clear: clearPalette,

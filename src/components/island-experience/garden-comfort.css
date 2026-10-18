@@ -1,0 +1,41 @@
+/* Small extensions of the existing cream, sage and editorial design. */
+.garden-options { color: #304d3e; }
+.garden-options-intro { margin: 8px 0 24px; font-size: 19px; }
+.garden-options fieldset { border: 0; border-top: 1px solid #d5dccc; padding: 20px 0; margin: 0; min-width: 0; }
+.garden-options legend { padding: 0 10px 0 0; font-size: 18px; font-weight: 600; }
+.garden-options fieldset p { font-size: 14px; line-height: 1.5; color: #596b5d; margin-bottom: 0; }
+.garden-choices { display: flex; flex-wrap: wrap; gap: 8px; }
+.garden-choices button { min-height: 44px; padding: 9px 14px; border: 1px solid #bac8b7; border-radius: 8px; font: inherit; font-size: 15px; color: #304d3e; background: #f6f5ed; cursor: pointer; }
+.garden-choices button[aria-pressed=true] { background: #315747; color: #fffdf4; border-color: #315747; }
+.garden-choices button:hover { border-color: #315747; }
+.garden-choices button:disabled { opacity: .5; cursor: default; }
+.garden-options .garden-now-playing { margin: 0 0 12px; color: #304d3e; }
+.garden-next-track { margin-bottom: 16px; }
+.garden-options .island-volume-controls { margin-top: 22px; }
+.garden-options input[type=range] { width: 100%; min-height: 32px; accent-color: #315747; }
+.garden-check { display: flex; align-items: center; gap: 10px; margin: 18px 0 0; font-size: 16px; }
+.garden-check input { width: 18px; height: 18px; accent-color: #315747; flex: none; }
+.garden-options :focus-visible, .garden-chapter-select select:focus-visible { outline: 3px solid #af813c; outline-offset: 3px; }
+.garden-chapter-select { display: none; }
+.wm-copy .wm-visit-state { margin-top: 9px; font-size: 12px; color: #52694d; font-weight: 600; }
+.wm-island[data-visited=true] { border-color: #809579; }
+.wm-island[aria-current=step] { box-shadow: inset 0 0 0 2px #315747; }
+.research-content[data-summary-layout="v14"] .rc-summary-heading { padding-top: 25px; }
+.research-content[data-summary-layout="v14"] .rc-panel-hero { max-width: 520px; margin: 22px auto; }
+.research-content[data-summary-layout="v14"] .rc-panel-hero img { max-height: 240px; object-fit: cover; }
+.island-panel-controls .island-inline-audio { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex: none; }
+@media (max-width: 900px) {
+  .garden-chapter-select { display: grid; gap: 8px; font-size: 13px; color: #52694d; padding: 14px 0; }
+  .garden-chapter-select select { width: 100%; min-height: 46px; border: 1px solid #bac8b7; border-radius: 6px; color: #304d3e; background: #fcfaf4; font: inherit; font-size: 17px; padding: 8px 12px; }
+  .rc-reading-header .rc-reading-nav { display: none; }
+  .research-content[data-summary-layout="v14"] .rc-panel-hero img { max-height: 190px; }
+}
+@media (max-width: 600px) {
+  .island-header { gap: 8px; }
+  .island-header nav { gap: 4px; }
+  .island-header nav button { min-width: 38px; min-height: 44px; }
+  .island-header nav a { min-width: 38px; min-height: 44px; justify-content: center; }
+  .island-header nav a[href^="#caderno"] { font-size: 0; }
+  .island-header nav a[href^="#caderno"] svg { display: block; width: 18px; height: 18px; }
+  .island-panel--station[data-panel-layout="v14"] .island-panel-bar { min-height: 62px; }
+}

@@ -36,7 +36,7 @@ test("every island renders its existing art and all three paragraphs without hid
     assert.equal((html.match(/class="rc-panel-paragraph"/g) ?? []).length, 3);
     assert.equal(html.includes('role="tab'), false);
     for (const paragraph of section.paragraphs) assert.ok(html.includes(paragraph.heading));
-    assert.ok(html.indexOf('class="rc-panel-hero"') < html.indexOf('class="rc-summary-heading"'));
+    assert.ok(html.indexOf('class="rc-summary-heading"') < html.indexOf('class="rc-panel-hero"'), "the title and lead precede the illustration");
     assert.ok(html.includes("não representa evidência dos estudos"));
     assert.ok(html.includes("Fontes desta síntese"));
   }

@@ -27,6 +27,62 @@
       "startAtSeconds": 45.65,
       "sha256": "c901aa711353f467a392db4cb95f66a708779808973eca87018b36ba3ca23cf6",
       "verifiedAt": "2026-10-15"
+    },
+    {
+      "url": "/experience/audio/dream-aria.mp3",
+      "title": "Dream Aria",
+      "author": "HOYO-MiX / COGNOSPHERE",
+      "source": "https://www.youtube.com/watch?v=CDHTiOJu0xU",
+      "assetSource": "https://www.youtube.com/watch?v=CDHTiOJu0xU",
+      "license": "Uso pessoal nao comercial conforme FAQ oficial; direitos reservados, revogavel",
+      "licenseSource": "https://www.hoyolab.com/article/143107",
+      "attribution": "© All rights reserved by COGNOSPHERE. Other properties belong to their respective owners.",
+      "volume": 0.68,
+      "startAtSeconds": 0,
+      "sha256": "5143bb999c9c4f4b5d52522017ebce45b07e21c97fa03de9a1cf3105fbad5203",
+      "verifiedAt": "2026-10-17"
+    },
+    {
+      "url": "/experience/audio/ruus-melody.mp3",
+      "title": "Ruu's Melody",
+      "author": "HOYO-MiX / COGNOSPHERE",
+      "source": "https://www.youtube.com/watch?v=UejrqpW7CnM",
+      "assetSource": "https://www.youtube.com/watch?v=UejrqpW7CnM",
+      "license": "Uso pessoal nao comercial conforme FAQ oficial; direitos reservados, revogavel",
+      "licenseSource": "https://www.hoyolab.com/article/143107",
+      "attribution": "© All rights reserved by COGNOSPHERE. Other properties belong to their respective owners.",
+      "volume": 0.68,
+      "startAtSeconds": 0,
+      "sha256": "d6741347e571282d35b24e7ba151e395fedf4f07d1905f3d8e3652c8beb69d19",
+      "verifiedAt": "2026-10-17"
+    },
+    {
+      "url": "/experience/audio/la-vaguelette.mp3",
+      "title": "La vaguelette",
+      "author": "HOYO-MiX / COGNOSPHERE",
+      "source": "https://www.youtube.com/watch?v=lm3t3myPspk",
+      "assetSource": "https://www.youtube.com/watch?v=lm3t3myPspk",
+      "license": "Uso pessoal nao comercial conforme FAQ oficial; direitos reservados, revogavel",
+      "licenseSource": "https://www.hoyolab.com/article/143107",
+      "attribution": "© All rights reserved by COGNOSPHERE. Other properties belong to their respective owners.",
+      "volume": 0.68,
+      "startAtSeconds": 0,
+      "sha256": "63cc7ebc58ed2d73354050e8f1ae96fcb13574c986a5c902049123f56d39917c",
+      "verifiedAt": "2026-10-17"
+    },
+    {
+      "url": "/experience/audio/nilou-tnbee.mp3",
+      "title": "Nilou - Dance of the Delicate Lotus (tnbee mix)",
+      "author": "HOYO-MiX; arranjo e producao: tnbee",
+      "source": "https://www.youtube.com/watch?v=imSiOWE1bEo",
+      "assetSource": "https://www.youtube.com/watch?v=imSiOWE1bEo",
+      "license": "Uso como musica de fundo com credito conforme descricao do arranjo; direitos da composicao reservados",
+      "licenseSource": "https://www.youtube.com/watch?v=imSiOWE1bEo",
+      "attribution": "Composicao: HOYO-MiX. Arranjo e producao: tnbee. © All rights reserved by COGNOSPHERE. Other properties belong to their respective owners.",
+      "volume": 0.68,
+      "startAtSeconds": 0,
+      "sha256": "6ab50531193a4850807fdc29954df6843aa6bc34d0fffc251164182aaf82698b",
+      "verifiedAt": "2026-10-17"
     }
   ],
   "selection": {

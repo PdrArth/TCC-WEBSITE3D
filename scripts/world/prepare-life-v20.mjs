@@ -51,6 +51,7 @@ environment.waterObstacles = obstacles;
 // landfalls, camera coordinates or the seven academic islands.
 environment.fishRoutes = JSON.parse(JSON.stringify(createFishRoutes(environment, 20, 2020), (_key, value) => typeof value === "number" ? Number(value.toFixed(6)) : value));
 manifest.version = 20;
+manifest.cameraBounds = { ...manifest.cameraBounds, minZoom: .55, maxZoom: 2.8 };
 manifest.environment = environment;
 manifest.islandLife = layout;
 manifest.preparedLifeGeometry = prepareLifeGeometry(layout);

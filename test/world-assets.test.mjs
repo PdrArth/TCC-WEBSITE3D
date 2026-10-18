@@ -89,28 +89,29 @@ test('The original PDF and source registry remain intact', async () => {
   assert.equal(sources.filter(item => item.group === 'complementary').length, 13);
   assert.equal(new Set(sources.map(item => item.id)).size, 24);
 });
-test('Active audio has license provenance and either a local file or an explicit remote fallback', async () => {
+test('Every active music track and bird excerpt has a resource and license provenance', async () => {
   const manifest = JSON.parse(await readFile(publicFile('/experience/audio/audio-manifest.json'), 'utf8'));
-  assert.ok(manifest.playlist.length >= 1);
+  assert.equal(manifest.playlist.length, 5);
+  assert.deepEqual(manifest.playlist[0], manifest.music, 'Preserve the original track');
+  const approved = new Set(['https://genshin.hoyoverse.com/en/home', 'https://www.youtube.com/watch?v=CDHTiOJu0xU', 'https://www.youtube.com/watch?v=UejrqpW7CnM', 'https://www.youtube.com/watch?v=lm3t3myPspk', 'https://www.youtube.com/watch?v=imSiOWE1bEo']);
+  assert.deepEqual(new Set(manifest.playlist.map(track => track.source)), approved);
   for (const track of manifest.playlist) {
-    assert.equal(track.author, 'HOYO-MiX / COGNOSPHERE');
-    assert.equal(track.licenseSource, 'https://www.hoyolab.com/article/143107');
+    assert.ok(track.author.includes('HOYO-MiX'));
+    assert.equal(track.licenseSource, track.url.includes('nilou-tnbee') ? track.source : 'https://www.hoyolab.com/article/143107');
     assert.ok(track.attribution.includes('COGNOSPHERE'));
-    assert.equal(new URL(track.assetSource).origin, 'https://genshin.hoyoverse.com');
-    assert.equal(track.source, 'https://genshin.hoyoverse.com/en/home');
+    assert.ok(['https://genshin.hoyoverse.com', 'https://www.youtube.com'].includes(new URL(track.assetSource).origin));
     assert.ok(track.url.startsWith('/experience/audio/'));
     try {
       const bytes = await readFile(publicFile(track.url));
       assert.ok(bytes.length > 1000);
       assert.equal(createHash('sha256').update(bytes).digest('hex'), track.sha256);
     } catch (error) {
-      if (error.code !== 'ENOENT') throw error;
-      // Rights-reserved music is deliberately absent from a fresh public clone.
-      const { default: config } = await import('../next.config.ts');
-      const { backendUrl } = await import('../src/lib/deployment-backend.mjs');
-      const rewrites = await config.rewrites();
-      const fallback = rewrites.find(rule => rule.source === track.url);
-      assert.equal(fallback?.destination, backendUrl(track.url).href);
+      if(error.code !== 'ENOENT')throw error;
+      assert.equal(track.url,manifest.music.url,'only the original theme may be served by the existing backend');
+      const {default:config}=await import('../next.config.ts');
+      const {backendUrl}=await import('../src/lib/deployment-backend.mjs');
+      const fallback=(await config.rewrites()).find(rule=>rule.source===track.url);
+      assert.equal(fallback?.destination,backendUrl(track.url).href);
     }
   }
   assert.equal(manifest.birds.length, 4);
@@ -120,7 +121,7 @@ test('Active audio has license provenance and either a local file or an explicit
     assert.ok((await readFile(publicFile(bird.url))).length > 100);
   }
   assert.ok(!JSON.stringify(manifest).includes('Kounine'));
-  assert.ok(!JSON.stringify(manifest).includes('youtube.com'), 'No YouTube soundtrack is hosted as a site asset');
+  assert.ok(manifest.playlist.every(track => track.url.startsWith('/experience/audio/')), 'Playback uses local audio files, not embedded videos');
   for (const item of [manifest.selection, manifest.arrival]) {
     assert.ok(item.url.startsWith('/experience/audio/'));
     assert.ok((await readFile(publicFile(item.url))).length > 100);

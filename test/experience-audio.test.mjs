@@ -7,10 +7,12 @@ import { runInNewContext } from "node:vm";
 import { createThunderWav } from "../scripts/audio/generate-thunder.mjs";
 
 const source = await readFile(new URL("../src/lib/experience/audio.ts", import.meta.url), "utf8");
-const javascript = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText;
+const catalogJSON = await readFile(new URL("../public/experience/audio/audio-manifest.json", import.meta.url), "utf8");
+const inlineCatalog = text => text.replace(/import catalog from "[^\"]+";/, `const catalog = ${catalogJSON};`);
+const javascript = ts.transpileModule(inlineCatalog(source), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText;
 const { ExperienceAudio, AUDIO_CATALOG, shuffledMusicOrder } = await import("data:text/javascript;base64," + Buffer.from(javascript).toString("base64"));
 const earlySource = await readFile(new URL("../src/lib/experience/early-audio-script.ts", import.meta.url), "utf8");
-const earlyJavascript = ts.transpileModule(earlySource, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText;
+const earlyJavascript = ts.transpileModule(inlineCatalog(earlySource), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText;
 const { EARLY_AUDIO_SCRIPT } = await import("data:text/javascript;base64," + Buffer.from(earlyJavascript).toString("base64"));
 const deferred = () => { let resolve, reject; const promise = new Promise((yes, no) => { resolve = yes; reject = no; }); return { promise, resolve, reject }; };
 const flush = async () => { for (let index = 0; index < 12; index++) await Promise.resolve(); };
@@ -125,11 +127,12 @@ function browser(t, options = {}) {
     }
   }
   const early = options.early ? {
-    element: new Player(AUDIO_CATALOG.music.url), desired: true, silenced: false,
+    element: new Player(AUDIO_CATALOG.playlist[options.earlyIndex ?? 0].url), trackIndex: options.earlyIndex ?? 0, desired: true, silenced: false,
     gesture: true, status: "playing", pending: options.earlyPending?.promise ?? null, owner: null,
     claim(owner) { this.owner = owner; return this.element; },
     release(owner) { if (this.owner === owner) { this.owner = null; this.pending = null; } },
     setEnabled(enabled) { this.desired = enabled; this.silenced = !enabled; if (!enabled) this.element.pause(); },
+    rememberTrack(index, time) { this.trackIndex = index; this.element.src = AUDIO_CATALOG.playlist[index].url; this.element.currentTime = time; },
   } : null;
   if (early) { early.element.readyState = 1; early.element.currentTime = 58; early.element.paused = !!options.earlyPending; early.element.volume = .68; }
   const replacements = {
@@ -148,7 +151,7 @@ function browser(t, options = {}) {
     Object.defineProperty(globalThis, key, { value, configurable: true, writable: true });
   }
   t.after(() => { for (const [key, descriptor] of originals) { if (descriptor) Object.defineProperty(globalThis, key, descriptor); else delete globalThis[key]; } });
-  const audio = new ExperienceAudio();
+  const audio = new ExperienceAudio(options.random ?? (() => .999999));
   t.after(() => audio.dispose());
   return { audio, calls, players, contexts, nodes, buffers, options, early };
 }
@@ -180,11 +183,55 @@ function earlyBrowser(options = {}) {
     addEventListener: listen(listeners),
   };
   const window = {};
-  const context = { window, document, performance: { now: () => 25 }, Promise };
+  const math = Object.create(Math); math.random = options.random ?? (() => 0);
+  const context = { window, document, performance: { now: () => 25 }, Promise, Math: math };
   runInNewContext(EARLY_AUDIO_SCRIPT, context);
   return { element, document, state: window.__tccEntryAudio, options, runAgain: () => runInNewContext(EARLY_AUDIO_SCRIPT, context),
     emit: (name, event) => dispatch(listeners, name, event), metadata() { element.readyState = 1; dispatch(mediaListeners, "loadedmetadata"); } };
 }
+
+test("startup can select each approved track and uses that track's cue before React", async () => {
+  for (let index = 0; index < AUDIO_CATALOG.playlist.length; index++) {
+    const env = earlyBrowser({ random: () => (index + .5) / AUDIO_CATALOG.playlist.length, readyState: 0 });
+    assert.equal(env.state.trackIndex, index);
+    assert.equal(env.element.src, AUDIO_CATALOG.playlist[index].url);
+    env.metadata(); await flush();
+    assert.equal(env.element.currentTime, AUDIO_CATALOG.playlist[index].startAtSeconds);
+    assert.equal(env.element.playCalls, 1);
+    env.state.rememberTrack((index + 1) % AUDIO_CATALOG.playlist.length, 37);
+    assert.equal(env.element.src, AUDIO_CATALOG.playlist[(index + 1) % AUDIO_CATALOG.playlist.length].url);
+    assert.equal(env.element.currentTime, 37, "a remount keeps the current song and position");
+  }
+});
+
+test("the hydrated shuffle includes the adopted song exactly once per cycle and skips without repeating at a boundary", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout", "Date"] });
+  const { audio, early } = browser(t, { early: true, earlyIndex: 4 });
+  await audio.enable({ music: true });
+  assert.equal(audio.diagnostics().music.title, AUDIO_CATALOG.playlist[4].title);
+  assert.equal(early.element.currentTime, 58);
+  const heard = [audio.diagnostics().music.title];
+  for (let index = 0; index < AUDIO_CATALOG.playlist.length; index++) {
+    audio.nextTrack(); await flush(); t.mock.timers.tick(2000); await flush();
+    heard.push(audio.diagnostics().music.title);
+  }
+  assert.equal(new Set(heard.slice(0, 5)).size, 5);
+  assert.notEqual(heard[4], heard[5]);
+  audio.mute(); audio.nextTrack();
+  assert.equal(audio.diagnostics().music.title, heard[5], "skip cannot restart muted music");
+});
+
+test("native-only playback also rotates through all five songs when Web Audio is unavailable", async t => {
+  const { audio, early } = browser(t, { early: true, earlyIndex: 4, contextError: new Error("No Web Audio") });
+  await audio.enable({ music: true });
+  const heard = [early.element.src];
+  for (let index = 0; index < 4; index++) {
+    early.element.listeners.get("ended")({ target: early.element }); await flush();
+    heard.push(early.element.src);
+    assert.equal(early.element.paused, false);
+  }
+  assert.equal(new Set(heard).size, 5);
+});
 
 test("the static SSR bootstrap starts without React, positions the catalog cue and is idempotent", async () => {
   const { element, state, document, runAgain, metadata } = earlyBrowser({ readyState: 0 });
@@ -356,7 +403,8 @@ test("native music survives context construction failure and the resume deadline
     assert.equal(audio.diagnostics().music.status, "playing");
     early.element.currentTime = 120; early.element.paused = true;
     early.element.listeners.get("ended")({ target: early.element }); await flush();
-    assert.equal(early.element.currentTime, 0, "native-only fallback repeats the same track when it ends");
+    assert.equal(early.element.currentTime, 0, "native-only fallback begins the next track when it ends");
+    assert.notEqual(early.element.src, AUDIO_CATALOG.music.url);
     assert.equal(early.element.paused, false);
     assert.equal(audio.diagnostics().music.status, "playing");
   });
@@ -402,7 +450,7 @@ test("the first native-to-graph crossfade and remount preserve volume, source an
   players[1].currentTime = 9;
   audio.dispose();
   assert.equal(early.element.currentTime, 9);
-  assert.equal(early.element.src, AUDIO_CATALOG.music.url);
+  assert.equal(early.element.src, AUDIO_CATALOG.playlist[early.trackIndex].url);
   const remount = new ExperienceAudio(); t.after(() => remount.dispose());
   await remount.enable({ music: true });
   t.mock.timers.tick(4000); await flush();
@@ -410,6 +458,30 @@ test("the first native-to-graph crossfade and remount preserve volume, source an
   assert.equal(early.element.volume, .68);
   assert.equal(early.element.paused, false);
   assert.equal(players.length, 2, "remount does not construct another MP3 player");
+});
+
+test("reading attenuation ramps native music and never raises a retiring track", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout", "Date"] });
+  const { audio, early } = browser(t, { early: true });
+  await audio.enable({ music: true });
+  audio.setVolumes(.26, .1, .06, .8);
+  assert.equal(early.element.volume, .68);
+  t.mock.timers.tick(400);
+  assert.ok(early.element.volume > .26 && early.element.volume < .68);
+  t.mock.timers.tick(500);
+  assert.equal(early.element.volume, .26);
+  early.element.currentTime = 118;
+  early.element.listeners.get("timeupdate")(); await flush();
+  t.mock.timers.tick(400);
+  const outgoingVolume = early.element.volume;
+  audio.setVolumes(.68, .1, .06, .8);
+  t.mock.timers.tick(400);
+  assert.ok(early.element.volume < outgoingVolume, "leaving reading must not revive the outgoing track");
+  audio.mute();
+  const mutedVolume = early.element.volume;
+  t.mock.timers.tick(1000);
+  assert.equal(early.element.volume, mutedVolume);
+  assert.equal(early.element.paused, true);
 });
 
 test("only music data preloads before consent; ambience starts with an immediate cue", async t => {
@@ -879,19 +951,28 @@ test("night and severe precipitation cancel licensed bird scheduling, even witho
 });
 
 
-test("the shipped manifest matches the synchronous gesture catalog and licensed files exist", async () => {
+test("the shipped manifest matches the synchronous gesture catalog and every track has a resource", async () => {
   const manifest = JSON.parse(await readFile(new URL("../public/experience/audio/audio-manifest.json", import.meta.url), "utf8"));
   assert.deepEqual(manifest, AUDIO_CATALOG);
   for (const track of [...AUDIO_CATALOG.playlist, ...AUDIO_CATALOG.birds]) {
-    const bytes = await readFile(new URL("../public"+track.url, import.meta.url));
-    assert.ok(bytes.length > 1000);
+    let bytes;
+    try {
+      bytes=await readFile(new URL("../public"+track.url, import.meta.url));
+      assert.ok(bytes.length > 1000);
+    } catch(error) {
+      if(error.code !== 'ENOENT')throw error;
+      assert.equal(track.url,manifest.music.url);
+      const {default:config}=await import('../next.config.ts');
+      const {backendUrl}=await import('../src/lib/deployment-backend.mjs');
+      assert.equal((await config.rewrites()).find(rule=>rule.source===track.url)?.destination,backendUrl(track.url).href);
+    }
     assert.ok(track.source.startsWith("https://"));
     if(track.assetSource) {
-      assert.equal(new URL(track.assetSource).origin,"https://genshin.hoyoverse.com");
-      assert.equal(track.licenseSource,"https://www.hoyolab.com/article/143107");
+      assert.ok(["https://genshin.hoyoverse.com", "https://www.youtube.com"].includes(new URL(track.assetSource).origin));
+      assert.ok(track.licenseSource.startsWith("https://"));
       assert.ok(track.attribution.includes("COGNOSPHERE"));
       assert.match(track.sha256,/^[a-f0-9]{64}$/);
-      assert.equal(createHash("sha256").update(bytes).digest("hex"), track.sha256);
+      if(bytes)assert.equal(createHash("sha256").update(bytes).digest("hex"), track.sha256);
     } else assert.ok(["CC BY 4.0", "CC0 1.0"].includes(track.license));
     if(track.url.endsWith(".ogg")) assert.equal(bytes.subarray(0,4).toString(),"OggS");
   }
@@ -1115,15 +1196,16 @@ test("entry uses a 150ms fade and neither weather, tab recovery nor mute replay 
   assert.deepEqual(nodes.filter(node => node.kind === "media-source")[1].connections[0].gain.automation.at(-1), ["linear", 1, 2]);
 });
 
-test("a rejected first music gesture retries the cue, while late metadata after disposal does nothing", async t => {
+test("a rejected first music gesture retries with the next track's own cue, while late metadata after disposal does nothing", async t => {
   const { audio, players, options } = browser(t, { playError: new DOMException("Blocked", "NotAllowedError") });
   await audio.enable({ music: true });
   await flush();
   assert.equal(audio.diagnostics().music.status, "error");
   options.playError = null;
   await audio.enable({ music: true });
-  assert.equal(players[1].currentTime, 45.65);
-  assert.deepEqual(players[1].seekHistory, [45.65]);
+  const retryTrack = AUDIO_CATALOG.playlist.find(track => track.url === players[1].src);
+  assert.equal(players[1].currentTime, retryTrack.startAtSeconds);
+  assert.deepEqual(players[1].seekHistory, retryTrack.startAtSeconds > 0 ? [retryTrack.startAtSeconds] : []);
   audio.dispose();
   assert.ok(players.every(player => !player.listeners.has("loadedmetadata")));
 });

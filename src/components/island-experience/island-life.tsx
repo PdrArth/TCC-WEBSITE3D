@@ -3,8 +3,9 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, type MutableRefObject } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { createLifeGeometry, restoreLifeGeometry, segment, tintGeometry, mergePieces, type StaticKind, type PreparedLifeGeometry } from "@/lib/experience/life-geometry.mjs";
+import { createLifeGeometry, createCaughtFishGeometry, restoreLifeGeometry, segment, tintGeometry, mergePieces, type StaticKind, type PreparedLifeGeometry } from "@/lib/experience/life-geometry.mjs";
 import type { Vec3, WorldEnvironmentManifest } from "@/lib/experience-contract";
+import type { BirdCompanion } from "@/lib/experience/bird-life.mjs";
 import { createEnvironmentManifest, type EnvironmentState } from "@/lib/experience/environment.mjs";
 import {
   advanceResident, createIslandLifeLayout, createResidentState, homeLocalPoint, pathLength, residentPauseReason,
@@ -15,6 +16,7 @@ import {
  * Door and utensils have real pivots. No new lights, shadows, event targets,
  * external assets or React state in the render loop. */
 export type IslandLifeProps = {
+  companion?: MutableRefObject<BirdCompanion>;
   environment?: WorldEnvironmentManifest;
   layout?: IslandLifeLayout;
   preparedGeometry?: PreparedLifeGeometry;
@@ -52,9 +54,10 @@ function createRig(scale: number) {
   add("trousers", trunk, [0, .515, 0], [.157, .090, .103]); add("skin", trunk, [0, .951, 0], [.056, .065, .057]);
   const head = pivot(trunk, [0, 1.085, .008]);
   add("skin", head, [0, 0, 0], [.123, .160, .121]); add("hair", head, [0, .008, -.003], [.128, .164, .126]);
+  const eyes: THREE.Object3D[] = [];
   for (const side of [-1, 1]) {
     add("skin", head, [side * .121, -.003, .001], [.023, .037, .025]);
-    add("dark", head, [side * .043, .015, .114], [.0105, .014, .009]);
+    eyes.push(add("dark", head, [side * .043, .015, .114], [.0105, .014, .009]));
   }
   add("skin", head, [0, -.014, .123], [.023, .029, .026]);
   const arms: THREE.Object3D[] = [], elbows: THREE.Object3D[] = [], legs: THREE.Object3D[] = [], knees: THREE.Object3D[] = [], hands: THREE.Object3D[] = [];
@@ -69,13 +72,15 @@ function createRig(scale: number) {
   }
   const fruit = add("fruit", elbows[1], [0, -.222, .033], [.067, .067, .067]);
   const float = add("fruit", null, [0, 0, 0], [.048, .048, .048]);
-  return { root, trunk, head, parts, counts, arms, elbows, legs, knees, fruit, float, rightHand: hands[1] };
+  return { root, trunk, head, eyes, parts, counts, arms, elbows, legs, knees, fruit, float, rightHand: hands[1] };
 }
 
 type Rig = ReturnType<typeof createRig>;
 function updateRig(rig: Rig, pose: ResidentPose, layout: IslandLifeLayout, meshes: Partial<Record<ResidentKind, THREE.InstancedMesh>>) {
-  rig.root.position.set(pose.x, pose.y + pose.bodyOffsetY, pose.z); rig.root.rotation.y = pose.heading; rig.trunk.rotation.x = pose.lean;
+  rig.root.position.set(pose.x, pose.y + pose.bodyOffsetY, pose.z); rig.root.rotation.set(-pose.sleepBlend * Math.PI / 2, pose.heading, 0, "YXZ"); rig.trunk.rotation.x = pose.lean;
+  for (const eye of rig.eyes) eye.scale.y = .014 * (1 - pose.sleepBlend * .85);
   rig.head.rotation.x = pose.watering ? .11 : pose.seated ? -.035 : 0;
+  rig.head.position.z = .008 + pose.sleepBlend * .08;
   rig.arms[0].rotation.set(pose.leftArm, 0, pose.rod ? .23 : .045); rig.arms[1].rotation.set(pose.rightArm, 0, pose.rod ? -.09 : -.045);
   rig.elbows[0].rotation.set(pose.leftElbow, 0, pose.rod ? .17 : 0); rig.elbows[1].rotation.set(pose.rightElbow, 0, 0);
   rig.legs[0].rotation.x = pose.leftLeg; rig.legs[1].rotation.x = pose.rightLeg; rig.knees[0].rotation.x = pose.leftKnee; rig.knees[1].rotation.x = pose.rightKnee;
@@ -109,7 +114,7 @@ function createWateringCanGeometry() {
 const staticColors: Record<StaticKind, string> = { oak: "#ae875b", rail: "#77684e", plaster: "#e7dfc9", roof: "#ad6246", window: "#e1e8d8", stone: "#b4ad92", snow: "#f2f3e9", grass: "#8c9d72", foliage: "#5a795b" };
 const residentColors: Record<ResidentKind, string> = { skin: "#d7a67e", coat: "#da6e42", trousers: "#40627a", dark: "#343a36", hair: "#584237", fruit: "#bf4f39" };
 
-export default function IslandLife({ environment: suppliedEnvironment, layout: providedLayout, preparedGeometry, environmentState, moving = true, reducedMotion = false, quality = "high", intro = false }: IslandLifeProps) {
+export default function IslandLife({ companion, environment: suppliedEnvironment, layout: providedLayout, preparedGeometry, environmentState, moving = true, reducedMotion = false, quality = "high", intro = false }: IslandLifeProps) {
   const { gl, invalidate } = useThree();
   const environment = useMemo(() => suppliedEnvironment ?? createEnvironmentManifest(), [suppliedEnvironment]);
   const layout = useMemo(() => providedLayout ?? createIslandLifeLayout(environment), [providedLayout, environment]);
@@ -119,25 +124,49 @@ export default function IslandLife({ environment: suppliedEnvironment, layout: p
   const windowMaterial = useRef<THREE.MeshStandardMaterial>(null), roofMaterial = useRef<THREE.MeshStandardMaterial>(null);
   const snow = useRef<THREE.Mesh>(null), snowMaterial = useRef<THREE.MeshStandardMaterial>(null);
   const door = useRef<THREE.Group>(null), rod = useRef<THREE.Group>(null), can = useRef<THREE.Group>(null), drops = useRef<THREE.InstancedMesh>(null);
+  const caught = useRef<THREE.Mesh>(null), catchRing = useRef<THREE.Mesh>(null), catchRingMaterial = useRef<THREE.MeshBasicMaterial>(null);
   const report = useRef(0), lastWeather = useRef({ snow: -1, wetness: -1, night: -1 });
   const pose = useMemo(() => writeResidentPose({} as ResidentPose, state), [state]);
   const rodGeometry = useMemo(() => segment([0, -.025, 0], [0, .89, 1.20], .012, 7), []);
   const lineGeometry = useMemo(() => new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, .89, 1.20), new THREE.Vector3(0, -.82, 1.28)]), []);
   const doorGeometry = useMemo(() => createDoorGeometry(), []), canGeometry = useMemo(() => createWateringCanGeometry(), []), headHairGeometry = useMemo(() => hairGeometry(quality), [quality]);
+  const caughtGeometry = useMemo(() => createCaughtFishGeometry(), []);
+  const rodTip = useMemo(() => new THREE.Vector3(), []), hook = useMemo(() => new THREE.Vector3(), []);
   const toolHand = useMemo(() => new THREE.Vector3(), []), toolEnd = useMemo(() => new THREE.Vector3(), []), dropPosition = useMemo(() => new THREE.Vector3(), []), dropObject = useMemo(() => new THREE.Object3D(), []);
   const context = (): ResidentContext => ({ moving, reducedMotion, intro, visible: document.visibilityState === "visible", weather: environmentState?.current.weather ?? "clear", hour: environmentState?.current.hour ?? 13, night: environmentState?.current.night ?? 0 });
 
   const updateArticulation = () => {
     updateRig(rig, pose, layout, residentMeshes.current);
     if (door.current) door.current.rotation.y = layout.home.yaw - Math.max(0, Math.min(1, pose.doorOpen)) * 1.48;
+    if(companion){
+      const destination=companion.current;
+      destination.available=pose.seated&&!pose.inside&&state.phaseTime>1.5&&(state.phase!=="sitting"||state.phaseTime<14)&&!state.shelterReason;
+      toolEnd.set(.19,.97,0);rig.root.localToWorld(toolEnd);
+      destination.position[0]=toolEnd.x;destination.position[1]=toolEnd.y;destination.position[2]=toolEnd.z;destination.heading=pose.heading;
+    }
     rig.rightHand.getWorldPosition(toolHand);
     if (rod.current) {
       rod.current.visible = pose.rod && !pose.hidden;
       if (rod.current.visible) {
-        rod.current.position.copy(toolHand); rod.current.scale.setScalar(layout.resident.scale); rod.current.rotation.set(0, pose.heading, pose.rodTilt); rod.current.updateMatrixWorld(true);
-        toolEnd.set(...(pose.fishingTarget ?? layout.fishing.target)); rod.current.worldToLocal(toolEnd);
+        rod.current.position.copy(toolHand); rod.current.scale.setScalar(layout.resident.scale); rod.current.rotation.set(-pose.catchLift * .38, pose.heading, pose.rodTilt, "YXZ"); rod.current.updateMatrixWorld(true);
+        rodTip.set(0, .89, 1.20); rod.current.localToWorld(rodTip);
+        hook.set(...(pose.fishingTarget ?? layout.fishing.target)); hook.setY(hook.y + (environmentState?.current.waterLevel ?? 0));
+        if (pose.fishingBite) hook.setY(hook.y - .06 - Math.sin(state.phaseTime * 30) * .025);
+        hook.lerp(toolEnd.copy(rodTip).addScaledVector(THREE.Object3D.DEFAULT_UP, -.80), pose.catchLift);
+        toolEnd.copy(hook); rod.current.worldToLocal(toolEnd);
         const positions = lineGeometry.getAttribute("position"); positions.setXYZ(1, toolEnd.x, toolEnd.y, toolEnd.z); positions.needsUpdate = true; lineGeometry.computeBoundingSphere();
+        rig.float.position.copy(hook); rig.float.scale.setScalar(pose.catchLift < .08 ? .049 : 0); rig.float.updateMatrixWorld(true);
+        residentMeshes.current.fruit?.setMatrixAt(rig.counts.fruit - 1, rig.float.matrixWorld);
       }
+    }
+    if (caught.current) {
+      caught.current.visible = pose.caughtFish && !pose.hidden;
+      if (caught.current.visible) { caught.current.position.copy(hook).addScaledVector(THREE.Object3D.DEFAULT_UP, -.22); caught.current.rotation.set(-Math.PI / 2, pose.heading, Math.sin(state.phaseTime * 17) * .22, "YXZ"); }
+    }
+    if (catchRing.current) {
+      const age = state.phaseTime - 3.1;
+      catchRing.current.visible = pose.rod && age >= 0 && age < 1;
+      if (catchRing.current.visible) { const target = pose.fishingTarget ?? layout.fishing.target; catchRing.current.position.set(target[0], target[1] + .015 + (environmentState?.current.waterLevel ?? 0), target[2]); catchRing.current.scale.setScalar(.5 + age * 2.8); if (catchRingMaterial.current) catchRingMaterial.current.opacity = (1 - age) * .55; }
     }
     if (can.current) {
       can.current.visible = pose.watering && !pose.hidden;
@@ -160,7 +189,7 @@ export default function IslandLife({ environment: suppliedEnvironment, layout: p
 
   const publish = () => {
     const attributes = {
-      "data-world-island-life": String(layout.version), "data-world-life-draw-budget": String(batches.length + Object.keys(rig.counts).length + 5), "data-world-life-dynamic-lights": "0",
+      "data-world-island-life": String(layout.version), "data-world-life-draw-budget": String(batches.length + Object.keys(rig.counts).length + 7), "data-world-life-dynamic-lights": "0",
       "data-world-life-geometry": batches[0]?.geometry.userData.preparedLife ? "prepared" : "generated",
       "data-world-closing-bridge": "perspectivas,pesquisa", "data-world-closing-bridge-node": layout.bridge.node,
       "data-world-closing-bridge-points": String(layout.bridge.points.length), "data-world-closing-bridge-length": pathLength(layout.bridge.points).toFixed(3),
@@ -177,13 +206,14 @@ export default function IslandLife({ environment: suppliedEnvironment, layout: p
       "data-world-resident-gesture": state.gesture.toFixed(3), "data-world-resident-visible": String(!state.hidden),
       "data-world-resident-pause": residentPauseReason(context()) ?? "none", "data-world-resident-shelter": state.shelterReason ?? "none",
       "data-world-resident-inside": String(pose.inside), "data-world-resident-seated": String(pose.seated),
-      "data-world-resident-activity": pose.rod ? "rod-line-water-float" : pose.watering ? "watering-can-small-water-arc" : pose.fruit ? "reach-and-pick-fruit" : pose.inside ? "visible-house-interior" : pose.seated ? "seated-on-bench" : "articulated",
+      "data-world-resident-sleeping": String(pose.sleeping), "data-world-resident-caught-fish": String(pose.caughtFish), "data-world-resident-catch-lift": pose.catchLift.toFixed(3), "data-world-life-bed": "oak-mattress-pillow-blanket",
+      "data-world-resident-activity": pose.caughtFish ? "reeling-visible-fish" : pose.rod ? "rod-line-water-float" : pose.watering ? "watering-can-small-water-arc" : pose.fruit ? "reach-and-pick-fruit" : pose.sleeping ? "sleeping-in-bed" : pose.inside ? "seated-on-bed" : pose.seated ? "seated-on-bench" : "articulated",
     };
     for (const [key, value] of Object.entries(attributes)) gl.domElement.setAttribute(key, value);
   };
 
   useLayoutEffect(() => {
-    writeResidentPose(pose, state); updateArticulation(); invalidate();
+    writeResidentPose(pose, state, layout); updateArticulation(); invalidate();
     // Initialize the rig and tools before the first visible frame.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rig, pose, state, invalidate, quality]);
@@ -195,11 +225,11 @@ export default function IslandLife({ environment: suppliedEnvironment, layout: p
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gl, layout, state, moving, reducedMotion, intro, environmentState, invalidate]);
   useEffect(() => () => { for (const batch of batches) batch.geometry.dispose(); }, [batches]);
-  useEffect(() => () => { rodGeometry.dispose(); lineGeometry.dispose(); doorGeometry.dispose(); canGeometry.dispose(); }, [rodGeometry, lineGeometry, doorGeometry, canGeometry]);
+  useEffect(() => () => { rodGeometry.dispose(); lineGeometry.dispose(); doorGeometry.dispose(); canGeometry.dispose(); caughtGeometry.dispose(); }, [rodGeometry, lineGeometry, doorGeometry, canGeometry, caughtGeometry]);
   useEffect(() => () => headHairGeometry.dispose(), [headHairGeometry]);
 
   useFrame((_, delta) => {
-    advanceResident(state, delta, context(), layout); writeResidentPose(pose, state); updateArticulation();
+    advanceResident(state, delta, context(), layout); writeResidentPose(pose, state, layout); updateArticulation();
     const scenic = environmentState?.current, night = scenic?.night ?? 0, cover = scenic?.snow ?? 0, wetness = scenic?.wetness ?? 0;
     if (windowMaterial.current) { windowMaterial.current.emissiveIntensity = night * .85; windowMaterial.current.opacity = .10 + night * .10; }
     if (roofMaterial.current) roofMaterial.current.roughness = .90 - wetness * .32;
@@ -233,6 +263,8 @@ export default function IslandLife({ environment: suppliedEnvironment, layout: p
     <group ref={can} name="island_resident_watering_can" visible={false}>
       <mesh geometry={canGeometry} raycast={noRaycast}><meshStandardMaterial color="#72938b" metalness={.10} roughness={.65} /></mesh>
     </group>
+    <mesh ref={caught} name="island_resident_caught_fish" geometry={caughtGeometry} visible={false} raycast={noRaycast}><meshStandardMaterial color="#e9bd67" vertexColors roughness={.56} side={THREE.DoubleSide} /></mesh>
+    <mesh ref={catchRing} name="island_resident_fishing_splash" rotation-x={-Math.PI / 2} visible={false} raycast={noRaycast}><ringGeometry args={[.15,.18,24]} /><meshBasicMaterial ref={catchRingMaterial} color="#d9ede3" transparent opacity={0} depthWrite={false} side={THREE.DoubleSide} /></mesh>
     <instancedMesh ref={mesh => { drops.current = mesh; mesh?.instanceMatrix.setUsage(THREE.DynamicDrawUsage); }} name="island_resident_watering_drops" args={[undefined, undefined, 8]} visible={false} frustumCulled={false} raycast={noRaycast}>
       <sphereGeometry args={[1, 5, 4]} /><meshBasicMaterial color="#bbd8d4" transparent opacity={.62} depthWrite={false} />
     </instancedMesh>

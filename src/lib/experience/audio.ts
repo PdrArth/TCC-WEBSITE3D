@@ -1,3 +1,4 @@
+import catalog from "../../../public/experience/audio/audio-manifest.json";
 import type { AudioManifest } from "@/lib/experience-contract";
 import type { EntryAudioBootstrap } from "@/lib/experience/early-audio-script";
 
@@ -30,92 +31,7 @@ export type AudioDiagnostics = {
 };
 
 /** The gesture sees the complete catalog synchronously; no legacy fallback can race a fetch. */
-export const AUDIO_CATALOG = {
-  "music": {
-    "url": "/experience/audio/genshin-official-theme.mp3",
-    "title": "Genshin Impact · tema instrumental oficial",
-    "author": "HOYO-MiX / COGNOSPHERE",
-    "source": "https://genshin.hoyoverse.com/en/home",
-    "assetSource": "https://genshin.hoyoverse.com/_nuxt/medias/video-bgm.532ef479.mp3",
-    "license": "Uso pessoal nao comercial conforme FAQ oficial; direitos reservados, revogavel",
-    "licenseSource": "https://www.hoyolab.com/article/143107",
-    "attribution": "© All rights reserved by COGNOSPHERE. Other properties belong to their respective owners.",
-    "volume": 0.68,
-    "startAtSeconds": 45.65,
-    "sha256": "c901aa711353f467a392db4cb95f66a708779808973eca87018b36ba3ca23cf6",
-    "verifiedAt": "2026-10-15"
-  },
-  "playlist": [
-    {
-      "url": "/experience/audio/genshin-official-theme.mp3",
-      "title": "Genshin Impact · tema instrumental oficial",
-      "author": "HOYO-MiX / COGNOSPHERE",
-      "source": "https://genshin.hoyoverse.com/en/home",
-      "assetSource": "https://genshin.hoyoverse.com/_nuxt/medias/video-bgm.532ef479.mp3",
-      "license": "Uso pessoal nao comercial conforme FAQ oficial; direitos reservados, revogavel",
-      "licenseSource": "https://www.hoyolab.com/article/143107",
-      "attribution": "© All rights reserved by COGNOSPHERE. Other properties belong to their respective owners.",
-      "volume": 0.68,
-      "startAtSeconds": 45.65,
-      "sha256": "c901aa711353f467a392db4cb95f66a708779808973eca87018b36ba3ca23cf6",
-      "verifiedAt": "2026-10-15"
-    }
-  ],
-  "selection": {
-    "url": "/experience/audio/selection.ogg",
-    "volume": 0.08
-  },
-  "arrival": {
-    "url": "/experience/audio/arrival.ogg",
-    "volume": 0.08
-  },
-  "thunder": {
-    "url": "/experience/audio/thunder-v15.wav",
-    "volume": 0.55,
-    "author": "site-tcc — síntese procedural própria",
-    "generatedBy": "scripts/audio/generate-thunder.mjs",
-    "source": "Síntese original determinística; nenhum sample de terceiros",
-    "sha256": "2950b2e40c4eaf8600eb81bcd2f7e115c2981d63024cc250bfb73f85b6086ace"
-  },
-  "birds": [
-    {
-      "url": "/experience/audio/bird-1.ogg",
-      "title": "Robin isolated - excerpt 1",
-      "author": "JohnsonBrandEditing",
-      "source": "https://freesound.org/people/JohnsonBrandEditing/sounds/434024/",
-      "license": "CC0 1.0",
-      "attribution": "Bird, Robin Isolated by JohnsonBrandEditing on Freesound.org (CC0). Public HQ preview, trimmed and faded.",
-      "volume": 0.18
-    },
-    {
-      "url": "/experience/audio/bird-2.ogg",
-      "title": "Robin isolated - excerpt 2",
-      "author": "JohnsonBrandEditing",
-      "source": "https://freesound.org/people/JohnsonBrandEditing/sounds/434024/",
-      "license": "CC0 1.0",
-      "attribution": "Bird, Robin Isolated by JohnsonBrandEditing on Freesound.org (CC0). Public HQ preview, trimmed and faded.",
-      "volume": 0.18
-    },
-    {
-      "url": "/experience/audio/bird-3.ogg",
-      "title": "Robin isolated - excerpt 3",
-      "author": "JohnsonBrandEditing",
-      "source": "https://freesound.org/people/JohnsonBrandEditing/sounds/434024/",
-      "license": "CC0 1.0",
-      "attribution": "Bird, Robin Isolated by JohnsonBrandEditing on Freesound.org (CC0). Public HQ preview, trimmed and faded.",
-      "volume": 0.18
-    },
-    {
-      "url": "/experience/audio/bird-4.ogg",
-      "title": "Robin isolated - excerpt 4",
-      "author": "JohnsonBrandEditing",
-      "source": "https://freesound.org/people/JohnsonBrandEditing/sounds/434024/",
-      "license": "CC0 1.0",
-      "attribution": "Bird, Robin Isolated by JohnsonBrandEditing on Freesound.org (CC0). Public HQ preview, trimmed and faded.",
-      "volume": 0.18
-    }
-  ]
-};
+export const AUDIO_CATALOG = catalog;
 const CROSSFADE_SECONDS = 2;
 const ENTRY_FADE_SECONDS = .15;
 export function shuffledMusicOrder(count: number, previous = -1, random = Math.random): number[] {
@@ -214,15 +130,18 @@ export class ExperienceAudio {
   lastError: string | null = null;
   onStateChange: ((enabled: boolean, error: string | null) => void) | null = null;
 
-  constructor() {
+  constructor(private random = Math.random) {
     // A download and a metadata seek are silent. Only enable() may request play.
     if (typeof Audio === "undefined") return;
     const early = typeof window !== "undefined" ? window.__tccEntryAudio : null;
     if (early) {
       this.earlyEntry = early;
       const player = early.claim(this);
-      this.entryMusic = { player, index: 0 };
-      this.entryCueConsumed = early.status === "playing" || player.currentTime > AUDIO_CATALOG.music.startAtSeconds;
+      const index = early.trackIndex;
+      this.musicIndex = index;
+      this.musicOrder = shuffledMusicOrder(AUDIO_CATALOG.playlist.length, index, this.random).filter(item => item !== index);
+      this.entryMusic = { player, index };
+      this.entryCueConsumed = early.status === "playing" || player.currentTime > AUDIO_CATALOG.playlist[index].startAtSeconds;
       this.record("music-entry-adopted", `${player.currentTime.toFixed(2)}s`);
       return;
     }
@@ -350,7 +269,7 @@ export class ExperienceAudio {
     this.record("context-created");
   }
   private nextMusicIndex(commit = true) {
-    if (!this.musicOrder.length) this.musicOrder = shuffledMusicOrder(AUDIO_CATALOG.playlist!.length, this.musicIndex);
+    if (!this.musicOrder.length) this.musicOrder = shuffledMusicOrder(AUDIO_CATALOG.playlist!.length, this.musicIndex, this.random);
     const index = this.musicOrder.shift()!;
     if (commit) this.musicIndex = index;
     return index;
@@ -387,7 +306,7 @@ export class ExperienceAudio {
     if (!this.music || this.musicError) {
       const nativeRetry = this.music === this.earlyEntry?.element ? this.music : null;
       this.releasePlayer(this.music);
-      const entry = this.entryMusic ?? (nativeRetry ? { player: nativeRetry, index: 0 } : null);
+      const entry = this.entryMusic ?? (nativeRetry ? { player: nativeRetry, index: this.earlyEntry!.trackIndex } : null);
       this.entryMusic = null;
       this.musicIndex = entry?.index ?? this.nextMusicIndex();
       const track = AUDIO_CATALOG.playlist![this.musicIndex];
@@ -648,18 +567,24 @@ export class ExperienceAudio {
   private musicEnded = (event?: Event) => {
     if (event?.target && event.target !== this.music) return;
     if (!this.canPlay() && this.music === this.earlyEntry?.element && this.earlyEntry.owner === this && this.desired && this.musicEnabled && !this.isHidden() && !this.disposed) {
-      this.music!.currentTime = 0;
+      this.musicIndex = this.nextMusicIndex();
+      this.currentMusicUrl = AUDIO_CATALOG.playlist[this.musicIndex].url;
+      this.earlyEntry.rememberTrack(this.musicIndex, 0);
       void this.playMusic();
       return;
     }
     this.advanceMusic();
   };
+  nextTrack() {
+    if (!this.desired || !this.musicEnabled || this.disposed || this.isHidden() || this.transitioning) return;
+    this.musicEnded();
+  }
   private retainNativeMusic(error: unknown) {
     const early = this.earlyEntry;
     if (!early || early.owner !== this || !this.desired || !this.musicEnabled || this.isHidden() || early.element.paused) return false;
     if (!this.music) {
-      this.music = early.element; this.musicIndex = 0;
-      this.entryMusic = null; this.currentMusicUrl = AUDIO_CATALOG.music.url;
+      this.music = early.element; this.musicIndex = early.trackIndex;
+      this.entryMusic = null; this.currentMusicUrl = AUDIO_CATALOG.playlist[early.trackIndex].url;
       this.attachPlayer(this.music);
     }
     this.enabled = false;
@@ -713,18 +638,30 @@ export class ExperienceAudio {
     this.record("muted");
     this.onStateChange?.(false, null);
   }
-  /** An optional third argument controls ambience; two sliders still share mute. */
-  setVolumes(music: number, effects: number, ambience = effects * .65) {
+  /** Independent buses; an optional transition gently ducks music during reading. */
+  setVolumes(music: number, effects: number, ambience = effects * .65, transitionSeconds = 0) {
     for (const player of this.nativeFades.keys()) this.cancelNativeFade(player);
     this.musicVolume = volume(music);
     this.effectsVolume = volume(effects);
     this.ambienceVolume = volume(ambience);
-    for (const player of [this.music, this.retiringMusic]) if (player && !this.mediaNodes.has(player) && (player !== this.earlyEntry?.element || this.earlyEntry.owner === this)) player.volume = this.musicVolume;
+    for (const player of [this.music, this.retiringMusic]) if (player && !this.mediaNodes.has(player) && (player !== this.earlyEntry?.element || this.earlyEntry.owner === this)) {
+      const target = player === this.retiringMusic ? 0 : this.musicVolume;
+      if (transitionSeconds > 0 && !player.paused) {
+        const from = player.volume, started = Date.now();
+        const tick = () => {
+          if (this.disposed || !this.desired || this.isHidden()) { this.cancelNativeFade(player); return; }
+          const t = Math.min(1, (Date.now() - started) / (transitionSeconds * 1000));
+          player.volume = from + (target - from) * t;
+          if (t < 1) this.nativeFades.set(player, setTimeout(tick, 30)); else this.nativeFades.delete(player);
+        };
+        tick();
+      } else player.volume = target;
+    }
     if (this.context && this.context.state !== "closed") {
       for (const [node, value] of [[this.effectGain, this.effectsVolume], [this.ambientGain, this.ambienceVolume], [this.musicBus, this.musicVolume], [this.thunderBus, this.thunderLevel()]] as const) {
         if (!node) continue;
         node.gain.cancelScheduledValues(this.context.currentTime);
-        node.gain.setTargetAtTime(value, this.context.currentTime, .04);
+        node.gain.setTargetAtTime(value, this.context.currentTime, node === this.musicBus && transitionSeconds > 0 ? transitionSeconds / 3 : .04);
       }
     }
     if (!this.ambienceVolume) this.stopThunder();
@@ -1111,8 +1048,8 @@ export class ExperienceAudio {
     this.disposing = true;
     // If cleanup follows a normal playlist transition, preserve its position in
     // the reusable SSR element as well. The next mount cannot reuse closed graph nodes.
-    if (this.earlyEntry?.owner === this && this.music && this.music !== this.earlyEntry.element && this.currentMusicUrl === AUDIO_CATALOG.music.url) {
-      try { this.earlyEntry.element.currentTime = this.music.currentTime; } catch {}
+    if (this.earlyEntry?.owner === this && this.music && this.music !== this.earlyEntry.element) {
+      this.earlyEntry.rememberTrack(this.musicIndex, this.music.currentTime);
     }
     // A component cleanup is not a visitor's decision to silence the page.
     this.mute();

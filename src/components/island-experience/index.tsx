@@ -1,17 +1,18 @@
 "use client";
 
 import { Component, useCallback, useEffect, useRef, useState, useSyncExternalStore, type ComponentType, type ReactNode } from "react";
-import { ArrowLeft, ArrowRight, BookOpen, CloudLightning, CloudRain, Cloud, ExternalLink, Maximize, Minimize, Play, Settings2, Info, Sun, Sunset, Volume2, VolumeX, X, Minus, Plus, RotateCcw } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUp, ArrowDown, BookOpen, CloudLightning, CloudRain, Cloud, ExternalLink, Maximize, Minimize, Play, Settings2, Info, Sun, Sunset, Volume2, VolumeX, X, Minus, Plus, RotateCcw } from "lucide-react";
 import { pavilionIds, islandNames as names, islandDescriptions as descriptions, type PavilionId, type WorldManifest } from "@/lib/experience-contract";
 import type { PublicUpdate } from "@/lib/update-types";
 import { WorldNavigator, type Arrival } from "@/lib/experience/navigation.mjs";
-import { ExperienceAudio, type AudioDiagnostics } from "@/lib/experience/audio";
+import { AUDIO_CATALOG, ExperienceAudio, type AudioDiagnostics } from "@/lib/experience/audio";
 import { weatherKinds, weatherNames } from "@/lib/experience/weather.mjs";
 import { resolveReadingHash, readingHref } from "@/lib/reading-navigation.mjs";
 import { useScenicWeather } from "./use-scenic-weather";
 import { getSeason, seasonInfo, seasonRegion } from "@/lib/experience/seasons.mjs";
 import type { IslandSceneProps, LabelPositions, ScenePerformance } from "./scene";
 import WorldMap from "./world-map";
+import EnvironmentControls from "./environment-controls";
 import "../research-content/content.css";
 import "./island.css";
 import "../research-content/reading-v10.css";
@@ -19,6 +20,7 @@ import "../research-content/pavilion-v10.css";
 import "../research-content/pavilion-v13.css";
 import "../research-content/pavilion-v14.css";
 import "./environment-v14.css";
+import "./garden-comfort.css";
 
 // Start the world download as soon as this client module is evaluated, before
 // hydration. The notebook is a separate chunk, fetched only when it is needed.
@@ -41,8 +43,6 @@ function DeferredResearch({ children }: { children: (module: typeof import("@/co
   return <p role="status">Abrindo a pesquisa…</p>;
 }
 
-const motionSubscribe = (callback: () => void) => { const query = window.matchMedia("(prefers-reduced-motion: reduce)"); query.addEventListener("change", callback); return () => query.removeEventListener("change", callback); };
-const motionSnapshot = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const visibilitySubscribe = (callback: () => void) => { document.addEventListener("visibilitychange", callback); return () => document.removeEventListener("visibilitychange", callback); };
 const visibilitySnapshot = () => !document.hidden;
 const fallbackLabels: LabelPositions = Object.fromEntries(pavilionIds.map((id, index) => [id, { x: index < 3 ? 25 + index * 25 : index < 6 ? 23 + (index - 3) * 27 : 50, y: index < 3 ? 28 : index < 6 ? 53 : 77, visible: true }])) as LabelPositions;
@@ -66,9 +66,7 @@ function trapFocus(event: KeyboardEvent, node: HTMLElement) {
 }
 
 export default function IslandExperience({showSettings=false}:{showSettings?:boolean}) {
-  const systemReducedMotion = useSyncExternalStore(motionSubscribe, motionSnapshot, () => false);
-  const [motionPreference, setMotionPreference] = useState<"system" | "full" | "reduced">("system");
-  const reducedMotion = motionPreference === "system" ? systemReducedMotion : motionPreference === "reduced";
+  const reducedMotion = false;
   const visible = useSyncExternalStore(visibilitySubscribe, visibilitySnapshot, () => true);
   const [manifest, setManifest] = useState<WorldManifest | null>(null);
   const [worldNavigator, setWorldNavigator] = useState<WorldNavigator | null>(null);
@@ -91,11 +89,15 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
   const [audioState, setAudioState] = useState<"off" | "loading" | "on" | "error">("off");
   const [audioInitialized, setAudioInitialized] = useState(false);
   const [creditsOpen, setCreditsOpen] = useState(false);
+  const [panelSection, setPanelSection] = useState<"credits" | "environment">("credits");
+  const [readingQuiet, setReadingQuiet] = useState(true);
+  const [visited, setVisited] = useState<PavilionId[]>([]);
   const [musicVolume, setMusicVolume] = useState(.68);
   const [effectsVolume, setEffectsVolume] = useState(.10);
   const [ambienceVolume, setAmbienceVolume] = useState(.06);
   const [audioDiagnostics, setAudioDiagnostics] = useState<AudioDiagnostics | null>(null);
   const [zoom, setZoom] = useState(1);
+  const [cameraHeight, setCameraHeight] = useState(0);
   const [soundTest, setSoundTest] = useState("");
   const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
   const [labelWidths, setLabelWidths] = useState<Record<PavilionId, number>>(Object.fromEntries(pavilionIds.map(id => [id, 150])) as Record<PavilionId, number>);
@@ -123,19 +125,26 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
   const soundSilenced = useRef(false);
   const soundGesture = useRef(false);
 
-  const rememberMotion = (value: "system" | "full" | "reduced") => {
-    setMotionPreference(value);
-    try { localStorage.setItem("tcc-motion", value); } catch { /* Storage is optional. */ }
-  };
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const id = window.setTimeout(() => {
       try {
-        const preference = localStorage.getItem("tcc-motion");
-        if (preference === "full" || preference === "reduced" || preference === "system") setMotionPreference(preference);
-      } catch { /* The device preference remains available. */ }
+        const saved: unknown = JSON.parse(localStorage.getItem("tcc-visited-islands") ?? "[]");
+        if (Array.isArray(saved)) setVisited(saved.filter((id): id is PavilionId => pavilionIds.includes(id as PavilionId)));
+      } catch { /* Exploration stays available without storage. */ }
     }, 0);
-    return () => clearTimeout(timer);
+    return () => window.clearTimeout(id);
   }, []);
+  useEffect(() => {
+    const id = pavilion ?? (reading && readingTheme !== "fontes" ? readingTheme : null);
+    if (!id) return;
+    const timer = window.setTimeout(() => setVisited(previous => {
+      if (previous.includes(id)) return previous;
+      const next = [...previous, id];
+      try { localStorage.setItem("tcc-visited-islands", JSON.stringify(next)); } catch { /* Optional progress. */ }
+      return next;
+    }), 0);
+    return () => window.clearTimeout(timer);
+  }, [pavilion, reading, readingTheme]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -264,6 +273,13 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
     requestAnimationFrame(() => (lastTrigger.current?.isConnected ? lastTrigger.current : returnButton.current ?? document.querySelector<HTMLElement>(".island-enter, .island-brand"))?.focus({ preventScroll: true }));
   }, []);
 
+  const closeOverlay = useCallback(() => {
+    if (creditsOpen && reading) {
+      setCreditsOpen(false);
+      requestAnimationFrame(() => lastTrigger.current?.focus({ preventScroll: true }));
+    } else closeContent();
+  }, [creditsOpen, reading, closeContent]);
+
   const openReading = useCallback((anchor = "#caderno/pesquisa", trigger?: HTMLElement) => {
     void loadContent().catch(() => {});
     if (trigger) {
@@ -307,18 +323,18 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
   useEffect(() => {
     audio.current?.visibility(!visible);
   }, [visible]);
-  useEffect(() => { audio.current?.setVolumes(musicVolume, effectsVolume, ambienceVolume); }, [musicVolume, effectsVolume, ambienceVolume]);
+  useEffect(() => { audio.current?.setVolumes(musicVolume * (readingQuiet && (reading || !!pavilion) ? .38 : 1), effectsVolume, ambienceVolume, .8); }, [musicVolume, effectsVolume, ambienceVolume, readingQuiet, reading, pavilion]);
 
   useEffect(() => {
     const keys = (event: KeyboardEvent) => {
-      if (event.key === "Escape") { event.preventDefault(); closeContent(); }
+      if (event.key === "Escape") { event.preventDefault(); closeOverlay(); }
       else if ((pavilion || creditsOpen || mapOpen) && panel.current) trapFocus(event, panel.current);
       else if (event.ctrlKey || event.metaKey || event.altKey || /INPUT|TEXTAREA|SELECT/.test((event.target as HTMLElement)?.tagName)) return;
       else if (event.key.toLowerCase() === "m" && started && !reading && !pavilion && !creditsOpen) { event.preventDefault(); lastTrigger.current = document.activeElement as HTMLElement; setMapOpen(value => !value); }
     };
     window.addEventListener("keydown", keys);
     return () => window.removeEventListener("keydown", keys);
-  }, [pavilion, creditsOpen, reading, destination, closeContent, mapOpen, started]);
+  }, [pavilion, creditsOpen, reading, destination, closeOverlay, mapOpen, started]);
 
   useEffect(() => { audio.current?.setEnvironment(weather, phase); }, [weather, phase]);
   useEffect(() => {
@@ -429,7 +445,6 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
   const start = () => {
     if (!soundSilenced.current && !audio.current?.diagnostics().desired && audioState !== "on" && audioState !== "loading") void toggleAudio();
     setStarted(true);
-    if (motionPreference === "system") rememberMotion("full");
     setResetEpoch(value => value + 1);
     requestAnimationFrame(() => returnButton.current?.focus({ preventScroll: true }));
   };
@@ -446,7 +461,8 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
     audio.current?.play("selection");
   };
 
-  const openCredits = (trigger: HTMLElement) => {
+  const openCredits = (trigger: HTMLElement, section: "credits" | "environment" = "credits") => {
+    setPanelSection(section);
     lastTrigger.current = trigger;
     nav.current?.cancel();
     setDestination(null);
@@ -502,13 +518,13 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
     <a className="island-skip" href={readingHref("pesquisa")}>Ir para a leitura</a>
     <header className="island-header" inert={modalOpen}>
       <button className="island-brand" onClick={closeContent}>DO CÓDIGO<br /><span>À SUPERVISÃO</span></button>
-      <nav aria-label="Acessos à pesquisa">{audioControl}{<button className="island-header-options" onClick={event => openCredits(event.currentTarget)} aria-label={showSettings?"Opções e créditos":"Créditos"}>{showSettings?<Settings2 size={18} aria-hidden="true" />:<Info size={18} aria-hidden="true" />}</button>}{!reading && <a href={readingHref("pesquisa")}><BookOpen size={15} aria-hidden="true" />Ler a pesquisa</a>}<a href="/tcc-pedro-arthur.pdf" target="_blank" rel="noreferrer">PDF<ExternalLink size={13} aria-hidden="true" /></a></nav>
+      <nav aria-label="Acessos à pesquisa">{audioControl}<button className="island-header-options" onClick={event => openCredits(event.currentTarget, "environment")} aria-label="Ambiente do jardim"><Settings2 size={18} aria-hidden="true" /></button>{<button className="island-header-options" onClick={event => openCredits(event.currentTarget)} aria-label={showSettings?"Opções e créditos":"Créditos"}>{showSettings?<Settings2 size={18} aria-hidden="true" />:<Info size={18} aria-hidden="true" />}</button>}{!reading && <a href={readingHref("pesquisa")}><BookOpen size={15} aria-hidden="true" />Ler a pesquisa</a>}<a href="/tcc-pedro-arthur.pdf" target="_blank" rel="noreferrer">PDF<ExternalLink size={13} aria-hidden="true" /></a></nav>
     </header>
     <main className={`island-landing${modalOpen ? " has-panel" : ""}`} hidden={reading} inert={modalOpen} aria-label="Explore a pesquisa">
       <div ref={stage} className="island-stage" aria-label="Sete ilhas da pesquisa" data-animation={reducedMotion ? "reduced" : "full"}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={`island-poster${sceneState === "ready" ? " is-hidden" : ""}`} src={poster} alt="Sete jardins conectados por pontes: a pesquisa, ferramentas, produtividade, validação, especificação, profissão e perspectivas." fetchPriority="high" onLoad={event => { const image = event.currentTarget; if (image.naturalHeight) setPosterAspect(image.naturalWidth / image.naturalHeight); }} />
-        {Scene && manifest && sceneState !== "fallback" && worldNavigator && (!reading || sceneHasMounted) && <div className="island-canvas" aria-hidden="true"><SceneBoundary onFail={failed}><Scene manifest={manifest} navigator={worldNavigator} active={visible && !reading} reducedMotion={reducedMotion} panelOpen={!!pavilion || mapOpen} interactionBlocked={modalOpen || !started} autoQuality={qualityPreference === "auto"} pavilionId={pavilion} resetEpoch={resetEpoch} quality={quality} weather={weather} season={season} phase={phase} clock={environment.timeRef} zoom={zoom} onZoom={setZoom} intro={!started} onInteract={playSelection} onThunder={playThunder} onReady={ready} onFail={failed} onArrive={arrived} onSelect={choose} onProject={projectLabels} onPerformance={recordPerformance} /></SceneBoundary></div>}
+        {Scene && manifest && sceneState !== "fallback" && worldNavigator && (!reading || sceneHasMounted) && <div className="island-canvas" aria-hidden="true"><SceneBoundary onFail={failed}><Scene manifest={manifest} navigator={worldNavigator} active={visible && !reading} reducedMotion={reducedMotion} panelOpen={!!pavilion || mapOpen} interactionBlocked={modalOpen || !started} autoQuality={qualityPreference === "auto"} pavilionId={pavilion} resetEpoch={resetEpoch} quality={quality} weather={weather} season={season} phase={phase} clock={environment.timeRef} zoom={zoom} cameraHeight={cameraHeight} onZoom={setZoom} intro={!started} onInteract={playSelection} onThunder={playThunder} onReady={ready} onFail={failed} onArrive={arrived} onSelect={choose} onProject={projectLabels} onPerformance={recordPerformance} /></SceneBoundary></div>}
         <nav className="island-pavilions" aria-label="Ambientes da pesquisa">{pavilionIds.map(id => <button key={id} data-pavilion={id} className={`island-label${selectedIsland === id ? " is-selected" : ""}`} style={{ left: `${labelLeft(id)}%`, top: `${Math.min(93, Math.max(7, currentLabels[id].y))}%` }} aria-label={`${names[id]}: ${descriptions[id]}`} aria-current={selectedIsland === id ? "true" : undefined} onClick={event => choose(id, event.currentTarget)}><span aria-hidden="true">{pavilionIds.indexOf(id) + 1}</span><strong>{names[id]}</strong></button>)}</nav>
       </div>
       {!started && <section className="island-introduction" aria-labelledby="welcome-title">
@@ -517,13 +533,13 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
         <p className="island-welcome-copy">Sou Pedro Arthur. No meu TCC, investiguei como a inteligência artificial muda o trabalho de quem desenvolve software.</p>
         <p className="island-welcome-detail">Sete ilhas contam essa investigação, da pergunta inicial às conclusões.</p>
         <div className="island-start-actions"><button className="island-enter" onClick={start}><Play size={17} fill="currentColor" aria-hidden="true" />Explorar as ilhas<ArrowRight size={18} aria-hidden="true" /></button><a className="island-read-start" href={readingHref("pesquisa")}><BookOpen size={17} aria-hidden="true" />Ler a pesquisa</a></div>
-        <p className="island-loading-note" role="status">{sceneState === "loading" ? "Preparando o jardim… você já pode entrar." : "Um jardim para explorar. Uma pesquisa para compreender."}</p>
+        <p className="island-loading-note" role="status">{sceneState === "loading" ? "Preparando o jardim… você já pode entrar." : "Explore com música e sons da natureza. Você pode ajustar ou silenciar a qualquer momento."}</p>
       </section>}
       {started && <>
-        <div className="island-world-caption"><span>ILHAS DA PESQUISA</span><button className="island-season-status" onClick={event => openCredits(event.currentTarget)} aria-label={`Ambiente: ${seasonInfo[season].name}, ${weatherNames[weather]}. Abrir créditos`}><WeatherIcon size={15} aria-hidden="true" /><span>{seasonInfo[season].name} · {weatherNames[weather]}</span></button><small><time>{environment.clock}</time> · Horário do jardim</small></div>
-        <div className="island-zoom" aria-label="Zoom do jardim"><button aria-label="Aproximar o jardim" onClick={() => setZoom(value => Math.min(manifest?.cameraBounds?.maxZoom ?? 2, value + .15))} disabled={zoom >= (manifest?.cameraBounds?.maxZoom ?? 2)}><Plus size={17} aria-hidden="true" /></button><button aria-label="Afastar o jardim" onClick={() => setZoom(value => Math.max(manifest?.cameraBounds?.minZoom ?? .8, value - .15))} disabled={zoom <= (manifest?.cameraBounds?.minZoom ?? .8)}><Minus size={17} aria-hidden="true" /></button><button aria-label="Restaurar enquadramento" onClick={() => { setZoom(1); setResetEpoch(value => value + 1); }}><RotateCcw size={15} aria-hidden="true" /></button></div>
-        <div className="island-map-preview"><button ref={returnButton} className="island-map-launch" aria-label="Abrir mapa da pesquisa" onClick={event => openMap(event.currentTarget)}><span>Mapa · 7 ilhas<kbd>M</kbd></span><WorldMap selected={selectedIsland} onSelect={choose} /></button></div>
-        <p className="island-status" role="status" aria-live="polite">{sceneState === "fallback" ? "Modo leve · os resumos e a leitura continuam disponíveis." : sceneState === "loading" ? "Preparando as ilhas. Os resumos já estão disponíveis." : selectedIsland ? `Ilha ${pavilionIds.indexOf(selectedIsland) + 1} · ${names[selectedIsland]}` : "Arraste para girar · role para aproximar · escolha uma ilha"}</p>
+        <div className="island-world-caption"><span>ILHAS DA PESQUISA</span><button className="island-season-status" onClick={event => openCredits(event.currentTarget, "environment")} aria-label={`Ambiente: ${seasonInfo[season].name}, ${weatherNames[weather]}. Ajustar ambiente`}><WeatherIcon size={15} aria-hidden="true" /><span>{seasonInfo[season].name} · {weatherNames[weather]}</span></button><small><time>{environment.clock}</time> · Horário do jardim</small></div>
+        <div className="island-zoom" aria-label="Câmera do jardim"><button aria-label="Aproximar o jardim" onClick={() => setZoom(value => Math.min(manifest?.cameraBounds?.maxZoom ?? 2, value + .15))} disabled={zoom >= (manifest?.cameraBounds?.maxZoom ?? 2)}><Plus size={17} aria-hidden="true" /></button><button aria-label="Afastar o jardim" onClick={() => setZoom(value => Math.max(manifest?.cameraBounds?.minZoom ?? .8, value - .15))} disabled={zoom <= (manifest?.cameraBounds?.minZoom ?? .8)}><Minus size={17} aria-hidden="true" /></button><button aria-label="Subir a câmera" onClick={() => setCameraHeight(value => Math.min(6,value+.8))} disabled={cameraHeight >= 6}><ArrowUp size={17} aria-hidden="true" /></button><button aria-label="Descer a câmera" onClick={() => setCameraHeight(value => Math.max(-4,value-.8))} disabled={cameraHeight <= -4}><ArrowDown size={17} aria-hidden="true" /></button><button aria-label="Restaurar enquadramento" onClick={() => { setCameraHeight(0); setZoom(1); setResetEpoch(value => value + 1); }}><RotateCcw size={15} aria-hidden="true" /></button></div>
+        <div className="island-map-preview"><button ref={returnButton} className="island-map-launch" aria-label="Abrir mapa da pesquisa" onClick={event => openMap(event.currentTarget)}><span>Mapa · {visited.length ? `${visited.length}/7 visitadas` : "7 ilhas"}<kbd>M</kbd></span><WorldMap visited={visited} selected={selectedIsland} onSelect={choose} /></button></div>
+        <p className="island-status" role="status" aria-live="polite">{sceneState === "fallback" ? "Modo leve · os resumos e a leitura continuam disponíveis." : sceneState === "loading" ? "Preparando as ilhas. Os resumos já estão disponíveis." : selectedIsland ? `Ilha ${pavilionIds.indexOf(selectedIsland) + 1} · ${names[selectedIsland]}` : "Arraste para girar e inclinar · role para o zoom · ↑↓ movem a câmera"}</p>
       </>}
     </main>
     {reading && <main ref={reader} className="island-reading" data-reader-layout="v10" inert={modalOpen} aria-label="Caderno da pesquisa"><div className="island-reading-inner">
@@ -531,11 +547,11 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
       <h1 className="island-visually-hidden" ref={readerHeading} tabIndex={-1}>Caderno — Do código à supervisão</h1>
       <DeferredResearch>{({ ResearchReading }) => <ResearchReading initialSection={readingAnchor} updates={updates} newsState={newsState} onThemeChange={theme => { setReadingTheme(theme); if (theme !== "fontes") setSelectedIsland(theme); }} />}</DeferredResearch>
     </div></main>}
-    {modalOpen && <div className={`island-dialog-backdrop${creditsOpen ? " island-dialog-backdrop--options" : pavilion ? " island-dialog-backdrop--station" : ""}`} data-panel-layout={pavilion?"v14":undefined} onPointerDown={event => { if (event.target === event.currentTarget) closeContent(); }}>
+    {modalOpen && <div className={`island-dialog-backdrop${creditsOpen ? " island-dialog-backdrop--options" : pavilion ? " island-dialog-backdrop--station" : ""}`} data-panel-layout={pavilion?"v14":undefined} onPointerDown={event => { if (event.target === event.currentTarget) closeOverlay(); }}>
       <aside ref={panel} className={`island-panel${mapOpen ? " island-panel--map" : ""}${pavilion ? " island-panel--station" : ""}${creditsOpen ? " island-panel--options" : ""}`} data-pavilion-panel={pavilion ?? ""} data-panel-layout={pavilion ? "v14" : undefined} role="dialog" aria-modal="true" aria-labelledby="island-panel-title" tabIndex={-1}>
-        <div className="island-panel-bar"><span>{creditsOpen ? "" : mapOpen ? "SETE ILHAS, UMA PESQUISA" : `${String(pavilionIds.indexOf(pavilion!) + 1).padStart(2, "0")} / 07 · ${names[pavilion!].toUpperCase()}`}</span><div className="island-panel-controls">{!creditsOpen && !pavilion && audioControl}<button onClick={closeContent} aria-label="Fechar e voltar às ilhas"><kbd>ESC</kbd><X size={22} aria-hidden="true" /></button></div></div>
-        <h2 id="island-panel-title" ref={panelHeading} tabIndex={-1}>{creditsOpen ? (showSettings?"Opções e créditos":"Créditos") : mapOpen ? "Escolha uma ilha" : names[pavilion!]}</h2>
-        {mapOpen && <><p className="island-panel-deck">Siga as pontes de 1 a 7 ou escolha um tema para começar.</p><WorldMap selected={selectedIsland} onSelect={id => choose(id)} expanded /><p className="island-map-note">Cada ilha traz uma síntese do TCC e o acesso ao capítulo correspondente.</p></>}
+        <div className="island-panel-bar"><span>{creditsOpen ? "" : mapOpen ? "SETE ILHAS, UMA PESQUISA" : `${String(pavilionIds.indexOf(pavilion!) + 1).padStart(2, "0")} / 07 · ${names[pavilion!].toUpperCase()}`}</span><div className="island-panel-controls">{audioControl}<button onClick={closeOverlay} aria-label={creditsOpen && reading ? "Fechar e voltar à leitura" : "Fechar e voltar às ilhas"}><kbd>ESC</kbd><X size={22} aria-hidden="true" /></button></div></div>
+        <h2 id="island-panel-title" ref={panelHeading} tabIndex={-1}>{creditsOpen ? (panelSection === "environment" ? "Ambiente do jardim" : showSettings ? "Opções e créditos" : "Créditos") : mapOpen ? "Escolha uma ilha" : names[pavilion!]}</h2>
+        {mapOpen && <><p className="island-panel-deck">Siga as pontes de 1 a 7 ou escolha um tema para começar.</p><WorldMap visited={visited} selected={selectedIsland} onSelect={id => choose(id)} expanded /><p className="island-map-note">Cada ilha traz uma síntese do TCC e o acesso ao capítulo correspondente.</p></>}
         {pavilion && <>
           <DeferredResearch>{({ PavilionContent }) => <PavilionContent key={pavilion} pavilionId={pavilion} updates={updates} newsState={newsState} onInteract={playSelection} />}</DeferredResearch>
           <nav className="island-chapter-navigation" aria-label="Sequência da pesquisa">
@@ -543,18 +559,21 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
             {nextChapter ? <button className="island-next-chapter" onClick={event => choose(nextChapter, event.currentTarget)}>Próxima ilha · {names[nextChapter]}<ArrowRight size={21} aria-hidden="true" /></button> : <button className="island-next-chapter" onClick={closeContent}>Voltar ao jardim<ArrowRight size={21} aria-hidden="true" /></button>}
           </nav>
         </>}
-        {creditsOpen && <div className="island-credits">
+        {creditsOpen && panelSection === "environment" && <EnvironmentControls weather={weather} mode={environment.mode} hour={timeOfDay} onWeather={environment.manualWeather} onAutomatic={environment.automatic} onTime={environment.setTime} season={season} onSeason={setSeason} onCurrentSeason={() => setSeason(getSeason())} music={musicVolume} ambience={ambienceVolume} effects={effectsVolume} onMusic={setMusicVolume} onAmbience={setAmbienceVolume} onEffects={setEffectsVolume} readingQuiet={readingQuiet} onReadingQuiet={setReadingQuiet} currentTrack={musicStatus?.title ?? undefined} musicPlaying={musicStatus?.status === "playing"} onNextMusic={() => audio.current?.nextTrack()} />}
+        {creditsOpen && panelSection === "credits" && <div className="island-credits">
           {showSettings && <><section aria-labelledby="weather-settings-title"><h3 id="weather-settings-title">Clima do jardim</h3><p>Uma paisagem imaginária: o céu muda aleatoriamente e o dia passa devagar. Você também pode escolher o clima.</p><div className="island-weather-choices">{weatherKinds.filter(value => value !== "dusk").map(value => <button key={value} aria-pressed={weather === value && environment.mode === "manual"} onClick={() => environment.manualWeather(value)}>{weatherNames[value]}</button>)}</div><button className="island-preference-reset" onClick={environment.automatic} aria-pressed={environment.mode === "automatic"}>Clima aleatório automático</button><h3>Hora do jardim · {environment.clock}</h3><p>Um dia completo dura cerca de 12 minutos. O relógio continua independente do clima.</p><div className="island-weather-choices">{([{label:"Amanhecer",hour:6.3},{label:"Dia",hour:13},{label:"Entardecer",hour:17.5},{label:"Noite",hour:21.5}]).map(value => <button key={value.label} onClick={() => environment.setTime(value.hour)}>{value.label}</button>)}</div></section>
           <div className="island-preferences"><h3>Estação · {seasonInfo[season].name}</h3><p className="island-weather-explanation">O jardim é inspirado em {seasonRegion}. Folhagem e flores interpretam cada estação. Neve e granizo são efeitos ilustrativos deste mundo, sem representar uma previsão do tempo.</p><div className="island-weather-choices">{(["spring","summer","autumn","winter"] as const).map(value => <button key={value} aria-pressed={season === value} onClick={() => setSeason(value)}>{seasonInfo[value].name}</button>)}</div><button className="island-preference-reset" onClick={() => setSeason(getSeason())}>Usar a estação atual</button>
-            <h3>Movimento e imagem</h3><button className="island-preference-button" aria-pressed={!reducedMotion} onClick={() => rememberMotion(reducedMotion ? "full" : "reduced")}>Animações do jardim</button>{motionPreference !== "system" && <button className="island-preference-reset" onClick={() => rememberMotion("system")}>Usar preferência do dispositivo</button>}
+            <h3>Imagem</h3>
             {sceneState === "fallback" && <button className="island-preference-button" onClick={retryScene}>Tentar abrir o jardim em 3D</button>}<button className="island-preference-button" onClick={toggleFullscreen}>{fullscreen ? <Minimize size={16} aria-hidden="true" /> : <Maximize size={16} aria-hidden="true" />}{fullscreen ? " Sair da tela cheia" : " Tela cheia"}</button>
             <div className="island-weather-choices">{(["auto","high","low"] as const).map(value => <button key={value} aria-pressed={qualityPreference === value} onClick={() => { setQualityPreference(value); setQuality(value === "high" ? "high" : "low"); }}>{value === "auto" ? "Qualidade automática" : value === "high" ? "Detalhada" : "Leve"}</button>)}</div>
-            <h3>Música e sons</h3><p>Uma trilha instrumental de Genshin acompanha o jardim. Chuva, vento, aves e cliques têm volumes independentes.</p><button className="island-preference-button" data-audio-control onClick={toggleAudio}>{audioLabel}</button><button className="island-preference-button" data-audio-control onClick={testSound}>Testar som</button>
+            <h3>Música e sons</h3><p>Cinco músicas de Genshin acompanham o jardim em ordem aleatória. Chuva, vento, aves e cliques têm volumes independentes.</p><button className="island-preference-button" data-audio-control onClick={toggleAudio}>{audioLabel}</button><button className="island-preference-button" data-audio-control onClick={testSound}>Testar som</button>
             <p className="island-sound-result" role="status">{audioState === "on" && musicStatus?.status === "playing" ? `Tocando: ${musicStatus.title}` : audioState === "on" && musicStatus?.status === "loading" ? "Carregando a música…" : audioState === "on" && musicStatus?.error ? musicStatus.error : soundTest}</p>
             <div className="island-volume-controls">{[{id:"music",label:"Música",value:musicVolume,set:setMusicVolume},{id:"ambience",label:"Chuva, vento e aves",value:ambienceVolume,set:setAmbienceVolume},{id:"effects",label:"Cliques e chegada",value:effectsVolume,set:setEffectsVolume}].map(item => <div key={item.id}><label htmlFor={`island-${item.id}-volume`}>{item.label}<output>{Math.round(item.value*100)}%</output></label><input id={`island-${item.id}-volume`} aria-label={`Volume de ${item.label.toLowerCase()}`} type="range" min="0" max="100" step="1" value={Math.round(item.value*100)} onChange={event => item.set(Number(event.currentTarget.value)/100)} /></div>)}</div>
           </div>
           </>}
-          <h3>Créditos musicais</h3><p>Trilha instrumental de <a href="https://genshin.hoyoverse.com/en/home" target="_blank" rel="noreferrer">Genshin Impact — site oficial</a>, HOYO-MiX / COGNOSPHERE. Uso neste projeto pessoal e não comercial conforme a <a href="https://www.hoyolab.com/article/143107" target="_blank" rel="noreferrer">FAQ oficial</a>, consultada em 12/10/2026. © All rights reserved by COGNOSPHERE. Other properties belong to their respective owners.</p><p>Esta pesquisa é independente e não possui vínculo ou aprovação da HoYoverse. A trilha é revogável pelos titulares. Não foi extraída do YouTube nem modificada; volume e fades são aplicados durante a reprodução.</p>
+          <h3>Créditos musicais</h3><p>Músicas de Genshin Impact, de HOYO-MiX / COGNOSPHERE. O tema da Nilou usa o arranjo e a produção de <a href="https://www.youtube.com/@tnbee" target="_blank" rel="noreferrer">tnbee</a>.</p>
+          <ul>{AUDIO_CATALOG.playlist.map(track => <li key={track.url}><a href={track.source} target="_blank" rel="noreferrer">{track.title}</a></li>)}</ul>
+          <p>© All rights reserved by COGNOSPHERE. Other properties belong to their respective owners. Esta pesquisa é independente e não possui vínculo ou aprovação da HoYoverse. <a href="https://www.hoyolab.com/article/143107" target="_blank" rel="noreferrer">Condições de uso da trilha oficial</a>; <a href="https://www.youtube.com/watch?v=imSiOWE1bEo" target="_blank" rel="noreferrer">créditos e condições do arranjo de tnbee</a>.</p>
           <h3>Som e materiais</h3><p>Efeitos: <a href="https://kenney.nl/assets/interface-sounds" target="_blank" rel="noreferrer">Interface Sounds — Kenney</a>, CC0. Aves: <a href="https://freesound.org/people/JohnsonBrandEditing/sounds/434024/" target="_blank" rel="noreferrer">Bird, Robin Isolated — JohnsonBrandEditing</a>, CC0, em quatro trechos com fades. <a href="/experience/audio/audio-manifest.json" target="_blank" rel="noreferrer">Fontes e licenças dos recursos sonoros</a>.</p>
           <p>Texturas: <a href="https://polyhaven.com/a/white_plaster_02" target="_blank" rel="noreferrer">White Plaster 02 — Rob Tuytel</a>, <a href="https://polyhaven.com/a/oak_veneer_01" target="_blank" rel="noreferrer">Oak Veneer 01 — Jenelle van Heerden</a> e <a href="https://polyhaven.com/a/stone_tiles_02" target="_blank" rel="noreferrer">Stone Tiles 02 — Charlotte Baglioni</a>, sob <a href="https://polyhaven.com/license" target="_blank" rel="noreferrer">CC0</a>.</p><p><a href="/revisao">Área do autor<ExternalLink size={13} aria-hidden="true" /></a></p>
         </div>}

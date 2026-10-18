@@ -645,15 +645,15 @@ export const PavilionContent = memo(function PavilionContent({ pavilionId, updat
     if (event.target instanceof Element && event.target.closest("summary, a, button")) onInteract?.();
   }}>
     <article className="rc-pavilion-essay">
+      <header className="rc-summary-heading">
+        <h3>{section.title}</h3>
+        <p className="rc-summary-lead">{section.lead}</p>
+      </header>
       <figure className="rc-panel-hero">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={pavilionId === "gerar" ? "/experience/editorial/cards-v13/gerar.webp" : `/experience/editorial/v9/${pavilionId}.webp`} alt={`Ilustração conceitual da ilha ${pavilionSections[pavilionId].label}; não representa evidência dos estudos.`} width={1200} height={780} decoding="async" />
         <figcaption>Ilustração conceitual · {pavilionSections[pavilionId].label}</figcaption>
       </figure>
-      <header className="rc-summary-heading">
-        <h3>{section.title}</h3>
-        <p className="rc-summary-lead">{section.lead}</p>
-      </header>
       <div className="rc-panel-prose">
         {section.paragraphs.map(paragraph => <section className="rc-panel-paragraph" key={paragraph.heading}>
           <h4>{paragraph.heading}</h4>
@@ -863,10 +863,7 @@ export function ResearchReading({ updates, newsState, initialSection, onThemeCha
     };
   }, [activeSection]);
 
-  const handleSectionLink = (event: MouseEvent<HTMLAnchorElement>, section: ReadingSection) => {
-    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    event.preventDefault();
-    event.stopPropagation();
+  const selectSection = (section: ReadingSection) => {
     if (section === activeSection) {
       leavingPositionRef.current = null;
       saveReadingPosition(section, 0);
@@ -887,12 +884,18 @@ export function ResearchReading({ updates, newsState, initialSection, onThemeCha
     window.dispatchEvent(new Event(readingLocationEvent));
   };
 
+  const handleSectionLink = (event: MouseEvent<HTMLAnchorElement>, section: ReadingSection) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault(); event.stopPropagation(); selectSection(section);
+  };
+
   const activeThemeIndex = activeSection === "fontes" ? -1 : readingThemeIds.indexOf(activeSection);
   const currentLabel = activeSection === "fontes" ? "Método e fontes" : pavilionSections[activeSection].label;
 
   return (
     <div ref={rootRef} className="research-content rc-reading" data-reading-section={activeSection}>
       <header className="rc-reading-header">
+        <label className="garden-chapter-select">Tema do caderno<select value={activeSection} onChange={event => selectSection(event.target.value as ReadingSection)}>{readingNavigation.map((item, index) => <option value={item.id} key={item.id}>{index + 1}. {item.label}</option>)}<option value="fontes">Método e fontes</option></select></label>
         <nav className="rc-reading-nav" aria-label="Temas do caderno">
           {readingNavigation.map((item, index) => (
             <a

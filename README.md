@@ -8,7 +8,7 @@ Transformei meu TCC em um arquipélago para explorar essa pergunta. Cada uma das
 
 ## Um lugar para conhecer a pesquisa
 
-O percurso começa na pergunta do trabalho, passa pela evolução das ferramentas, confronta estudos de produtividade e chega às mudanças na profissão. Ao selecionar uma ilha, um painel reúne a síntese, os exemplos visuais e as fontes daquele tema. O caderno oferece uma leitura contínua, e o PDF mantém o texto acadêmico completo.
+O percurso começa na pergunta do trabalho, passa pela evolução das ferramentas, confronta estudos de produtividade e chega às mudanças na profissão. Ao selecionar uma ilha, um painel reúne a síntese, os exemplos visuais e as fontes daquele tema. O caderno oferece uma leitura contínua, com seleção direta de tema, e o PDF mantém o texto acadêmico completo.
 
 | Ilha | O que você encontra |
 | --- | --- |
@@ -30,7 +30,7 @@ Os estudos não são apresentados como se medissem a mesma coisa. Tarefas, parti
 
 ## Como o projeto é construído
 
-A aplicação usa **Next.js, React e TypeScript**. O mundo interativo é renderizado com **Three.js e React Three Fiber**, a partir de modelos próprios preparados no Blender. Conteúdo e controles permanecem em HTML, com navegação por teclado, adaptação a telas menores e respeito à preferência por movimento reduzido.
+A aplicação usa **Next.js, React e TypeScript**. O mundo interativo é renderizado com **Three.js e React Three Fiber**, a partir de modelos próprios preparados no Blender. Conteúdo e controles permanecem em HTML, com navegação por teclado, adaptação a telas menores e controles de câmera e ambiente.
 
 O site público está na **Vercel**. O serviço editorial existente mantém o banco e a revisão privada; a interface pública recebe somente novidades aprovadas. Essa separação está documentada em [Publicação e serviço editorial](docs/deployment.md).
 

@@ -1,4 +1,8 @@
-# Abertura e vida nas ilhas v18
+# Jardim: conforto e vida nas ilhas — revisão de 18/10/2026
+
+Revisão de 17/10/2026: [validação do jardim](../validation/garden-20261017.md). Mantém as sete ilhas e acrescenta flores, borboletas, controles de ambiente, ondas por vento, peixes independentes, pesca em oito pontos, assentos originais, sono noturno e cachoeira contínua por chuva. A revisão do veredito corrige os seixos da margem e as transições das aves e amplia os controles da câmera. As cinco músicas escolhidas estão integradas à playlist local. Todos os climas e estações seguem disponíveis e o movimento é sempre completo. A cachoeira termina numa bacia de pedras ligada à margem e escoa em períodos de duração limitada.
+
+# Histórico: abertura e vida nas ilhas v18
 
 Relatório atual: [validação v18](../validation/validation-v18.md). Céu inicial em tela inteira, preparação opcional adiada, ponte7→1 e rotina de morador. Ajustes manuais exclusivos do autor; pesquisa preservada. A v17 fica disponível para reversão.
 

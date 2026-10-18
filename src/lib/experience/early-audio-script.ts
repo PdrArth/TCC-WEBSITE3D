@@ -1,6 +1,9 @@
+import catalog from "../../../public/experience/audio/audio-manifest.json";
+
 /** Shared handoff only. The bootstrap never allocates Web Audio or another player. */
 export type EntryAudioBootstrap = {
   element: HTMLAudioElement;
+  trackIndex: number;
   desired: boolean;
   silenced: boolean;
   gesture: boolean;
@@ -13,6 +16,7 @@ export type EntryAudioBootstrap = {
   claim(owner: object): HTMLAudioElement;
   release(owner: object): void;
   setEnabled(enabled: boolean): void;
+  rememberTrack(index: number, time: number): void;
 };
 
 declare global {
@@ -20,29 +24,42 @@ declare global {
 }
 
 // Trusted static source, inserted immediately after the server-rendered audio.
-// Keep URL, cue and volume aligned with AUDIO_CATALOG; tests enforce the contract.
+// Both startup and the hydrated player read the same locally hosted catalog.
 export const EARLY_AUDIO_SCRIPT = String.raw`(() => {
   if (window.__tccEntryAudio) return;
   const element = document.getElementById("tcc-entry-music");
-  if (!element || element.getAttribute("src") !== "/experience/audio/genshin-official-theme.mp3") return;
+  if (!element) return;
+  const tracks = ${JSON.stringify(catalog.playlist.map(({ url, volume, startAtSeconds }) => ({ url, volume, startAtSeconds })))};
+  const trackIndex = Math.min(tracks.length - 1, Math.floor(Math.random() * tracks.length));
+  const track = tracks[trackIndex];
+  let cue = track.startAtSeconds || 0;
+  element.src = track.url;
+  element.preload = "auto";
   let positioned = false, claimedOnce = false, epoch = 0;
-  const publish = () => { document.documentElement.dataset.entryAudioStatus = state.status; };
+  const publish = () => { document.documentElement.dataset.entryAudioStatus = state.status; document.documentElement.dataset.entryAudioTrack = String(state.trackIndex); };
   const state = window.__tccEntryAudio = {
-    element, desired: true, silenced: false, gesture: false, entryRequested: false,
+    element, trackIndex, desired: true, silenced: false, gesture: false, entryRequested: false,
     status: "loading", error: null, pending: null, owner: null, startedAtMs: null,
     claim(owner) { epoch++; claimedOnce = true; this.owner = owner; return element; },
     release(owner) { if (this.owner === owner) { this.owner = null; this.pending = null; epoch++; } },
+    rememberTrack(index, time) {
+      if (!tracks[index]) return;
+      this.trackIndex = index; cue = Math.max(0, time); positioned = false;
+      element.addEventListener("loadedmetadata", position);
+      if (element.getAttribute("src") !== tracks[index].url) element.src = tracks[index].url;
+      position(); publish();
+    },
     setEnabled(enabled) {
       this.desired = enabled; this.silenced = !enabled;
       if (!enabled) { epoch++; this.pending = null; element.pause(); this.status = "off"; publish(); }
       else if (!claimedOnce) attempt();
     }
   };
-  element.volume = .68;
+  element.volume = track.volume;
   const position = () => {
     if (positioned || element.readyState < 1) return;
     try {
-      element.currentTime = Math.min(45.65, Number.isFinite(element.duration) && element.duration > 0 ? Math.max(0, element.duration - 2) : 45.65);
+      element.currentTime = Math.min(cue, Number.isFinite(element.duration) && element.duration > 0 ? Math.max(0, element.duration - 2) : cue);
       positioned = true;
       element.removeEventListener("loadedmetadata", position);
     } catch { /* Metadata may not be seekable yet; leave the listener installed. */ }

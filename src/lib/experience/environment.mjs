@@ -1,3 +1,4 @@
+import { advanceLake } from './lake-dynamics.mjs';
 /** Shared scenic state and collision surfaces, authored in glTF metres. */
 export function createEnvironmentManifest() {
   const centers = [["pesquisa",-11,9],["gerar",-14,-1],["comparar",-10,-11],["validar",0,-14],["especificar",10,-11],["evoluir",14,-1],["perspectivas",11,9]];
@@ -44,13 +45,14 @@ export function surfaceAt(x,z,manifest=defaultManifest){
 }
 
 export function createEnvironmentState(weather="clear",season="spring",hour=13){
-  return {weather,season,hour,elapsed:0,wetness:0,snow:0,ice:0,wind:.2,night:0};
+  return {weather,season,hour,elapsed:0,wetness:0,snow:0,ice:0,wind:.2,night:0,waterStorage:0,waterLevel:0,outflow:0,overflowing:false};
 }
 export function advanceEnvironment(state,seconds,weather,season,hour){
   const dt=Math.min(.1,Math.max(0,Number.isFinite(seconds)?seconds:0));
   state.weather=weather;state.season=season;state.hour=hour;state.elapsed+=dt;
   const wet=["drizzle","rain","freezing-rain","storm","hail"].includes(weather);
   state.wetness=Math.max(0,Math.min(1,state.wetness+(wet?.24:-.045)*dt));
+  const previousSnow=state.snow;
   state.snow=Math.max(0,Math.min(1,state.snow+(weather==="snow"?.075:weather==="freezing-rain"?-.012:-.035)*dt));
   state.ice=Math.max(0,Math.min(1,state.ice+(["freezing-rain","snow"].includes(weather)?.052:-.025)*dt));
   const wind=weather==="storm"||weather==="hail"?1:weather==="rain"?.6:.22;
@@ -58,5 +60,6 @@ export function advanceEnvironment(state,seconds,weather,season,hour){
   const h=((hour%24)+24)%24;
   const night=h<5.5||h>=20?1:h<7.5?1-(h-5.5)/2:h>17?(h-17)/3:0;
   state.night+=(night-state.night)*(1-Math.exp(-2*dt));
+  advanceLake(state,dt,weather,previousSnow-state.snow);
   return state;
 }

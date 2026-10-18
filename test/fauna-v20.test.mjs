@@ -24,7 +24,7 @@ function checkFishWater(pose) {
 }
 
 test("v20 fauna counts, colors and sizes retain fixed instanced draw budgets", async () => {
-  assert.deepEqual([faunaCount("birds","low"),faunaCount("birds","high"),faunaCount("fish","low"),faunaCount("fish","high")],[8,12,12,20]);
+  assert.deepEqual([faunaCount("birds","low"),faunaCount("birds","high"),faunaCount("fish","low"),faunaCount("fish","high")],[8,12,24,40]);
   assert.equal(new Set(Array.from({length:20},(_,i)=>fishAppearance(i).color)).size,4);
   assert.equal(new Set(Array.from({length:20},(_,i)=>fishAppearance(i).scale)).size,5);
   assert.deepEqual(fishColors,["#e8b653","#e78068","#f5e6bf","#65b8ad"]);

@@ -10,7 +10,9 @@ const before = JSON.parse(await readFile(new URL("../public/experience/world/man
 const current = JSON.parse(await readFile(new URL("../public/experience/world/manifest-v20.json", import.meta.url), "utf8"));
 
 test("the inhabited islet preserves the seven academic destinations and visitor routes", () => {
-  for (const key of ["assets", "pavilions", "navigation", "initialCamera", "cameraBounds", "bridges"]) assert.deepEqual(current[key], before[key], key);
+  for (const key of ["assets", "pavilions", "navigation", "initialCamera", "bridges"]) assert.deepEqual(current[key], before[key], key);
+  assert.ok(current.cameraBounds.minZoom < before.cameraBounds.minZoom);
+  assert.ok(current.cameraBounds.maxZoom > before.cameraBounds.maxZoom);
   assert.deepEqual(current.environment.land, before.environment.land);
   assert.deepEqual(current.environment.lights, before.environment.lights);
   assert.equal(current.environment.bridges.filter(bridge => bridge.lighting !== false).length, before.environment.bridges.filter(bridge => bridge.lighting !== false).length);
@@ -45,7 +47,7 @@ test("recycled rain remains above the new house roof after a long frame", () => 
   }
 });
 
-test("nighttime rest alternates between the porch and house interior", () => {
+test("nighttime rest remains inside until morning", () => {
   const layout = current.islandLife, resident = createResidentState(layout);
   const context = { moving: true, reducedMotion: false, visible: true, weather: "clear", hour: 22, night: 1 };
   let previous = resident.phase, insideVisits = 0, porchVisits = 0;
@@ -57,7 +59,7 @@ test("nighttime rest alternates between the porch and house interior", () => {
       previous = resident.phase;
     }
   }
-  assert.ok(insideVisits >= 2 && porchVisits >= 2, `expected repeated rest indoors and on porch: ${insideVisits}/${porchVisits}`);
+  assert.equal(insideVisits,1);assert.equal(porchVisits,0);assert.equal(resident.sleepBlend,1);
 });
 
 test("the published manifest restores house geometry without regenerating its parts", () => {

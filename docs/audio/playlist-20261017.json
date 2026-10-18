@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-17",
+  "targetIntegratedLufs": -31,
+  "processing": "Linear gain only; stereo MP3 160 kbps / 44.1 kHz; no musical introduction cut, no compression. Existing theme untouched. La vaguelette uses the official audio-only release.",
+  "tracks": [
+    {
+      "slug": "dream-aria",
+      "id": "CDHTiOJu0xU",
+      "title": "#08 Dream Aria (Genshin Impact Main Theme Var.)｜Genshin Impact",
+      "uploader": "Genshin Impact",
+      "source": "https://www.youtube.com/watch?v=CDHTiOJu0xU",
+      "duration": 106.048005,
+      "bytes": 2122232,
+      "sha256": "5143bb999c9c4f4b5d52522017ebce45b07e21c97fa03de9a1cf3105fbad5203",
+      "sourceIntegratedLufs": -20.01,
+      "gainDb": -10.99,
+      "integratedLufs": -31.45,
+      "truePeakDbfs": -15.72
+    },
+    {
+      "slug": "ruus-melody",
+      "id": "UejrqpW7CnM",
+      "title": "Ruu's Melody",
+      "uploader": "HOYO-MiX",
+      "source": "https://www.youtube.com/watch?v=UejrqpW7CnM",
+      "duration": 89.413878,
+      "bytes": 1789432,
+      "sha256": "d6741347e571282d35b24e7ba151e395fedf4f07d1905f3d8e3652c8beb69d19",
+      "sourceIntegratedLufs": -16.87,
+      "gainDb": -14.13,
+      "integratedLufs": -31.44,
+      "truePeakDbfs": -14.66
+    },
+    {
+      "slug": "la-vaguelette",
+      "id": "lm3t3myPspk",
+      "title": "La vaguelette",
+      "uploader": "HOYO-MiX",
+      "source": "https://www.youtube.com/watch?v=lm3t3myPspk",
+      "duration": 149.520612,
+      "bytes": 2991587,
+      "sha256": "63cc7ebc58ed2d73354050e8f1ae96fcb13574c986a5c902049123f56d39917c",
+      "sourceIntegratedLufs": -10.69,
+      "gainDb": -20.31,
+      "integratedLufs": -31.44,
+      "truePeakDbfs": -19.74
+    },
+    {
+      "slug": "nilou-tnbee",
+      "id": "imSiOWE1bEo",
+      "title": "Nilou Theme Music EXTENDED - Dance of the Delicate Lotus (tnbee mix) | Genshin Impact",
+      "uploader": "tnbee",
+      "source": "https://www.youtube.com/watch?v=imSiOWE1bEo",
+      "duration": 184.552222,
+      "bytes": 3692192,
+      "sha256": "6ab50531193a4850807fdc29954df6843aa6bc34d0fffc251164182aaf82698b",
+      "sourceIntegratedLufs": -13.97,
+      "gainDb": -17.03,
+      "integratedLufs": -31.44,
+      "truePeakDbfs": -19.23
+    }
+  ]
+}

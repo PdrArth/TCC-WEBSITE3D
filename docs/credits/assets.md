@@ -1,5 +1,15 @@
 # Créditos e histórico dos recursos
 
+## Playlist atual — 17/10/2026
+
+O tema instrumental já instalado foi preservado byte a byte. A ele se juntam [Dream Aria](https://www.youtube.com/watch?v=CDHTiOJu0xU), [Ruu's Melody](https://www.youtube.com/watch?v=UejrqpW7CnM), [La vaguelette, lançamento somente de áudio](https://www.youtube.com/watch?v=lm3t3myPspk) e [Nilou — Dance of the Delicate Lotus, mix estendido de tnbee](https://www.youtube.com/watch?v=imSiOWE1bEo), escolhidas pelo usuário. Os três primeiros links são dos canais oficiais Genshin Impact e HOYO-MiX; o último é do próprio tnbee.
+
+Composições: HOYO-MiX / COGNOSPHERE. Arranjo e produção da versão de Nilou: tnbee. © All rights reserved by COGNOSPHERE. Other properties belong to their respective owners. A [FAQ oficial](https://www.hoyolab.com/article/143107) registra as condições para uso pessoal não comercial; a descrição do vídeo de tnbee permite uso como música de fundo com créditos e distingue esse uso de republicar o arranjo isoladamente. Os arquivos não recebem licença CC0 ou CC BY por terem sido obtidos do YouTube.
+
+Download solicitado expressamente pelo usuário, realizado sem autenticação, cookies de conta ou integração de player de vídeo. Os quatro áudios foram convertidos em MP3 estéreo a 160 kbps, com ganho linear para aproximar o volume integrado do tema existente (cerca de -31 LUFS), preservando a dinâmica. Não foram incluídas falas introdutórias do clipe de La vaguelette. Arquivos, hashes, duração e ganhos: [registro da playlist](../audio/playlist-20261017.json). Catálogo ativo: `public/experience/audio/audio-manifest.json`, também usado pelo bootstrap e pelo motor de áudio.
+
+As cinco faixas são sorteadas em ciclos sem repetição interna e sem repetição imediata entre ciclos. Os créditos completos permanecem no painel do jogo. As seções seguintes são históricas.
+
 ## Card Ferramentas — opção visual 2, versão 13
 
 `public/experience/editorial/cards-v13/gerar.webp`: ilustração conceitual gerada pela ferramenta ImageGen a partir da segunda proposta escolhida por Pedro em 12/10/2026. A referência inteira fica em `../design/archive/v13/cards-v13-option-2.png`. A imagem foi convertida para WebP de 720 × 530 px, qualidade 87, com 58.524 bytes. Não foi recortada nem redesenhada na conversão. Não é fotografia, captura do ambiente 3D ou evidência dos estudos, e não recebe licença externa de banco de imagens ou atribuição CC0.

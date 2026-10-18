@@ -13,6 +13,8 @@ function segmentDistance(p,a,b){const dx=b[0]-a[0],dz=b[2]-a[2],t=Math.max(0,Mat
 function onFirmGround(p){
  if(Math.hypot(p[0]-layout.islet.center[0],p[2]-layout.islet.center[1])<=layout.islet.radius)return true;
  if(environment.land.some(island=>isIslandWalkingPoint(p,island)))return true;
+ // Authored front stairs and furniture approaches now open the formerly excluded terraces.
+ if(layout.walkingGraph.edges.filter(e=>e.kind==='furniture').some(edge=>edge.points.slice(1).some((b,i)=>segmentDistance(p,edge.points[i],b)<.025&&p[1]>=.09&&p[1]<=.65)))return true;
  return [...layout.walkingGraph.bridges,{points:layout.connector.points,width:layout.connector.width}].some(b=>b.points.slice(1).some((q,i)=>segmentDistance(p,b.points[i],q)<=b.width/2+.001));
 }
 
@@ -48,13 +50,13 @@ test('arc-length interpolation crosses corners, clamps safely and reuses the cal
  const p=[[0,0,0],[3,0,0],[3,0,4]],out=[0,0,0];assert.equal(pathLength(p),7);assert.deepEqual(sampleLifePath(p,4),[3,0,1]);assert.equal(sampleLifePath(p,6,out),out);assert.deepEqual(out,[3,0,3]);assert.deepEqual(sampleLifePath(p,-2),p[0]);assert.deepEqual(sampleLifePath(p,20),p[2]);
 });
 
-test('complete routine covers all seven islands and all bridges, with watering, fruit, observation and both fishing locations, before natural night',()=>{
+test('complete daytime routine visits all islands, fishing shores and existing furniture via safe routes',()=>{
  const state=createResidentState(layout),activities=new Set(),bridges=new Set(),phases=new Set(),poses=new Set();let firstFish=Infinity;
- while(state.cycle<1&&state.elapsed<190){const before=[...state.position];advanceResident(state,1/30,{...daytime,hour:13+state.elapsed/30},layout);assert.ok(dist(before,state.position)<=layout.resident.walkSpeed/30+.00001);assert.ok(onFirmGround(state.position));phases.add(state.phase);
- if(['watering','gathering','observing','fishing'].includes(state.phase)){activities.add(state.activityId);if(state.phase==='fishing'){firstFish=Math.min(firstFish,state.elapsed);const pose=writeResidentPose({},state);assert.equal(pose.rod,true);assert.deepEqual(pose.fishingTarget,state.activityTarget);}poses.add(writeResidentPose({},state).rightArm.toFixed(2));}
+ while(state.cycle<1&&state.elapsed<450){const before=[...state.position];advanceResident(state,1/30,daytime,layout);assert.ok(dist(before,state.position)<=layout.resident.walkSpeed/30+.00001);assert.ok(onFirmGround(state.position));phases.add(state.phase);
+ if(['watering','gathering','observing','fishing','sitting'].includes(state.phase)){activities.add(state.activityId);if(state.phase==='fishing'){firstFish=Math.min(firstFish,state.elapsed);const pose=writeResidentPose({},state);assert.equal(pose.rod,true);assert.deepEqual(pose.fishingTarget,state.activityTarget);}poses.add(writeResidentPose({},state).rightArm.toFixed(2));}
  if(state.phase==='walking'||state.phase==='walk-home'){let covered=0;for(const step of state.routeSteps){if(state.routeDistance>=covered-.001&&state.routeDistance<=covered+step.length+.001){const edge=layout.walkingGraph.edges.find(e=>e.id===step.edgeId);if(edge.bridge)bridges.add(edge.bridge);break;}covered+=step.length;}}
  }
- assert.equal(state.cycle,1);assert.ok(state.elapsed>=170&&state.elapsed<180,`cycle took ${state.elapsed}s`);assert.ok(firstFish<6);assert.equal(activities.size,8);assert.equal(bridges.size,7);assert.ok(state.distanceMoved>130);assert.ok(poses.size>50);assert.ok(phases.has('watering')&&phases.has('gathering')&&phases.has('observing'));assert.deepEqual(state.position,layout.home.seated);assert.equal(state.shelterReason,null);
+ assert.equal(state.cycle,1);assert.ok(state.elapsed>=250&&state.elapsed<450,`cycle took ${state.elapsed}s`);assert.ok(firstFish<6);assert.equal(activities.size,layout.activityPoints.length);assert.equal(bridges.size,7);assert.ok(state.distanceMoved>130);assert.ok(poses.size>50);assert.ok(phases.has('watering')&&phases.has('gathering')&&phases.has('observing'));assert.deepEqual(state.position,layout.home.seated);assert.equal(state.shelterReason,null);
 });
 
 test('rain chooses the shortest safe return from every physical edge, in both directions, including the farthest island',()=>{
@@ -84,8 +86,9 @@ test('drizzle allows the covered bench after entering; strong weather keeps the 
  for(const weather of['rain','storm','hail','snow','freezing-rain']){if(state.phase==='porch'){advanceResident(state,.1,{...daytime,weather},layout);assert.equal(state.phase,'returning');}until(state,s=>s.phase==='interior',{...daytime,weather});tick(state,12,{...daytime,weather});assert.equal(state.phase,'interior');assert.equal(state.hidden,false);assert.ok(writeResidentPose({},state).seated);}
 });
 
-test('night retires to the home/porch, while a naturally advancing clock starts that return at 19h',()=>{
- const state=createResidentState(layout);until(state,s=>s.phase==='porch',{...daytime,hour:23});assert.equal(state.shelterReason,'night');near(dist(state.position,layout.home.seated),0);until(state,s=>s.phase==='interior',{...daytime,hour:23});until(state,s=>s.phase==='porch',{...daytime,hour:23});near(dist(state.position,layout.home.seated),0);
+test('night sends the resident to bed and keeps him lying down until morning',()=>{
+ const state=createResidentState(layout);until(state,s=>s.phase==='interior',{...daytime,hour:23});tick(state,90,{...daytime,hour:23});assert.equal(state.phase,'interior');assert.equal(writeResidentPose({},state,layout).sleepBlend,1);
+ advanceResident(state,.1,{...daytime,hour:9},layout);const waking=writeResidentPose({},state,layout);assert.ok(waking.sleepBlend>0&&waking.sleepBlend<1);until(state,s=>s.phase==='walking',daytime);assert.equal(state.inside,false);
  const natural=createResidentState(layout);until(natural,s=>s.shelterReason==='night',s=>({...daytime,hour:13+s.elapsed/30}));assert.ok(natural.elapsed>=180&&natural.elapsed<180.2);assert.ok(['returning','porch','interior','entering'].includes(natural.phase));
 });
 

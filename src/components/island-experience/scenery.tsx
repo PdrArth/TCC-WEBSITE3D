@@ -10,7 +10,8 @@ import { advanceEnvironment, createEnvironmentManifest, createEnvironmentState, 
 import { FrameCadence } from "@/lib/experience/navigation.mjs";
 import { seasonInfo, vegetationDensity, vegetationGroup, type Season, type VegetationGroup } from "@/lib/experience/seasons.mjs";
 import type { Weather } from "@/lib/experience/weather.mjs";
-import { createFishRoutes, faunaCount, environmentSeconds, writeFishPose } from "./scene-motion.mjs";
+import { createFishRoutes, createFishSchools, faunaCount, environmentSeconds, writeFishPose } from "./scene-motion.mjs";
+import { lakeSpillway, lakeWaveParameters } from "@/lib/experience/lake-dynamics.mjs";
 
 type SceneryProps = {
   world: THREE.Object3D;
@@ -108,6 +109,7 @@ function addLeafSeeds(geometry: THREE.BufferGeometry) {
 }
 
 function createUniforms(environment: WorldEnvironmentManifest) {
+  const outlet = lakeSpillway(environment);
   const lightPositions = environment.lights.map(light => new THREE.Vector3(...light.position));
   const groundPositions = [...environment.land, ...(environment.decorativeLand ?? [])].slice(0, 8).map(land => new THREE.Vector3(land.center[0], land.center[1], land.radius));
   while (groundPositions.length < 8) groundPositions.push(new THREE.Vector3(1000, 1000, 0));
@@ -116,6 +118,8 @@ function createUniforms(environment: WorldEnvironmentManifest) {
   return {
     scenicTime: { value: 0 }, scenicWetness: { value: 0 }, scenicSnow: { value: 0 }, scenicIce: { value: 0 }, scenicNight: { value: 0 },
     scenicWaterHeight: { value: environment.water.height }, scenicWaterScale: { value: 1 }, scenicWind: { value: .2 },
+    scenicWaterRise: { value: 0 }, scenicWaveAmplitude: { value: .012 }, scenicWaveSpeed: { value: .76 },
+    scenicSpillway: { value: new THREE.Vector4(outlet.position[0], outlet.position[2], ...outlet.direction) },
     scenicWaterCenter: { value: new THREE.Vector2(...environment.water.center) },
     scenicWaterRadii: { value: new THREE.Vector2(...environment.water.radii) },
     scenicLand: { value: groundPositions },
@@ -138,6 +142,10 @@ uniform float scenicNight;
 uniform float scenicWaterHeight;
 uniform float scenicWaterScale;
 uniform float scenicWind;
+uniform float scenicWaterRise;
+uniform float scenicWaveAmplitude;
+uniform float scenicWaveSpeed;
+uniform vec4 scenicSpillway;
 uniform vec2 scenicWaterCenter;
 uniform vec2 scenicWaterRadii;
 uniform vec3 scenicLand[8];
@@ -151,20 +159,41 @@ float scenicShore(vec2 p) {
   for (int i = 0; i < 8; i++) inner = min(inner, abs(distance(p, scenicLand[i].xy) - scenicLand[i].z));
   return max(outer, 1.0 - smoothstep(.06, .7, inner));
 }
+float scenicWave(vec2 p) {
+  float t = scenicTime * scenicWaveSpeed;
+  return scenicWaveAmplitude * (.6 * sin(p.x * .92 + p.y * .37 - t) + .3 * sin(-p.x * .44 + p.y * 1.19 - t * 1.24) + .1 * sin(p.x * 2.1 + p.y * 1.5 - t * 1.8)) * (1.0 - scenicShore(p) * .75);
+}
 `;
-function installSurfaceShader(material: THREE.MeshStandardMaterial, uniforms: ScenicUniforms, density: { value: number }, foliage: boolean, water: boolean, snowEligible: boolean, beacon: boolean) {
+function installSurfaceShader(material: THREE.MeshStandardMaterial, uniforms: ScenicUniforms, density: { value: number }, foliage: boolean, water: boolean, snowEligible: boolean, beacon: boolean, bank = false) {
   material.onBeforeCompile = shader => {
     Object.assign(shader.uniforms, uniforms, { scenicDensity: density });
     shader.vertexShader = worldUniforms + worldVaryings + (foliage ? "attribute float seasonalSeed; varying float vSeasonalSeed;\n" : "") + shader.vertexShader;
     shader.fragmentShader = worldUniforms + worldVaryings + (foliage ? "uniform float scenicDensity; varying float vSeasonalSeed;\n" : "") + shader.fragmentShader;
+    if (water) shader.vertexShader = shader.vertexShader.replace("#include <beginnormal_vertex>", `#include <beginnormal_vertex>
+      vec2 wavePoint = (modelMatrix * vec4(position, 1.0)).xz;
+      float waveDx = (scenicWave(wavePoint + vec2(.06,0.0)) - scenicWave(wavePoint - vec2(.06,0.0))) / .12;
+      float waveDz = (scenicWave(wavePoint + vec2(0.0,.06)) - scenicWave(wavePoint - vec2(0.0,.06))) / .12;
+      vec3 waveNormal = normalize(vec3(-waveDx, 1.0, -waveDz));
+      objectNormal = normalize(vec3(dot(modelMatrix[0].xyz,waveNormal),dot(modelMatrix[1].xyz,waveNormal),dot(modelMatrix[2].xyz,waveNormal)));
+    `);
     shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", `#include <begin_vertex>
       ${water ? `
       vec2 waterPoint = (modelMatrix * vec4(position, 1.0)).xz;
       float frozenEdge = 0.0;
       if (scenicIce > .001) frozenEdge = scenicIce * scenicShore(waterPoint);
       transformed.xz *= scenicWaterScale;
-      float wave = sin(waterPoint.x * .76 + scenicTime * .42) * .010 + cos(waterPoint.y * 1.07 - scenicTime * .31) * .007;
-      transformed += normal * wave * (1.0 - frozenEdge * .88);
+      float wave = scenicWave(waterPoint);
+      transformed += normal * (scenicWaterRise + wave * (1.0 - frozenEdge * .88));
+      ` : ""}
+      ${bank ? `
+      vec3 bankPoint = (modelMatrix * vec4(position, 1.0)).xyz;
+      vec2 fromOutlet = bankPoint.xz - scenicSpillway.xy;
+      float across = dot(fromOutlet, vec2(scenicSpillway.w,-scenicSpillway.z));
+      float along = dot(fromOutlet, scenicSpillway.zw);
+      float channel = (1.0 - smoothstep(.72,1.28,abs(across))) * smoothstep(-.4,-.02,along) * (1.0 - smoothstep(1.7,2.0,along));
+      float lower = max(0.0, bankPoint.y - (scenicWaterHeight + .055)) * channel;
+      vec3 bankUp = vec3(modelMatrix[0].y,modelMatrix[1].y,modelMatrix[2].y);
+      transformed -= bankUp * lower / max(.001,dot(bankUp,bankUp));
       ` : ""}
       vScenicSurface = vec3(0.0, 1.0, 0.0);
       vScenicPosition = vec3(0.0);
@@ -199,7 +228,9 @@ function installSurfaceShader(material: THREE.MeshStandardMaterial, uniforms: Sc
         frozenEdge = scenicShore(vScenicPosition.xz) * smoothstep(icePatch * .5, .5 + icePatch * .5, scenicIce);
       }
       float shimmer = sin(vScenicPosition.x * 1.5 + vScenicPosition.z * .7 + scenicTime * .6) * sin(vScenicPosition.z * 1.3 - scenicTime * .35);
-      diffuseColor.rgb *= .97 + shimmer * .055 * (1.0 - frozenEdge);
+      diffuseColor.rgb *= .98 + shimmer * .085 * (1.0 - frozenEdge);
+      float crest = smoothstep(.30,.80,scenicWave(vScenicPosition.xz)/max(.001,scenicWaveAmplitude));
+      diffuseColor.rgb = mix(diffuseColor.rgb, vec3(.77,.89,.84), crest * pow(scenicWind,3.0) * .24 * (1.0-frozenEdge));
       diffuseColor.rgb = mix(diffuseColor.rgb, vec3(.63, .77, .79), frozenEdge * .88);
       diffuseColor.a = mix(diffuseColor.a, .9, frozenEdge);
       ` : `
@@ -226,7 +257,7 @@ function installSurfaceShader(material: THREE.MeshStandardMaterial, uniforms: Sc
       }
     `);
   };
-  material.customProgramCacheKey = () => `scenic-v14-gated-${foliage ? 1 : 0}-${water ? 1 : 0}-${snowEligible ? 1 : 0}-${beacon ? 1 : 0}`;
+  material.customProgramCacheKey = () => `scenic-v21-water-${foliage ? 1 : 0}-${water ? 1 : 0}-${snowEligible ? 1 : 0}-${beacon ? 1 : 0}-${bank ? 1 : 0}`;
   material.needsUpdate = true;
 }
 
@@ -268,10 +299,10 @@ function bindGarden(world: THREE.Object3D, uniforms: ScenicUniforms, season: Sea
         const density = { value: leaf ? vegetationDensity(season, owner?.name, flower) : 1 };
         record = { material, base: source.color.clone(), target: source.color.clone(), kind: colorKind(source.name), group, nodeName: owner?.name ?? "", flower, water, density };
         const snowEligible = !/Paper|Graphite|Display|Charcoal|Lantern|Beacon/.test(source.name);
-        installSurfaceShader(material, uniforms, density, leaf, water, snowEligible, /Lantern glass|Beacon ivory/.test(source.name));
+        installSurfaceShader(material, uniforms, density, leaf, water, snowEligible, /Lantern glass|Beacon ivory/.test(source.name), /Lake bank (sand|clay)/.test(source.name));
         if (water) {
-          material.roughness = .19; material.metalness = .14; material.color.set(seasonInfo[season].waterColor);
-          material.transparent = true; material.opacity = .62; material.depthWrite = false;
+          material.roughness = .23; material.metalness = .04; material.color.set(seasonInfo[season].waterColor);
+          material.transparent = true; material.opacity = .48; material.depthWrite = false;
         }
         records.push(record); clones.set(key, record);
       }
@@ -315,7 +346,7 @@ export default function Scenery({ world, season, reducedMotion, moving = true, w
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const fishPose = useMemo(() => ({ x: 0, y: 0, z: 0, heading: 0, tail: 0 }), []);
   const fishCount = faunaCount("fish",quality);
-  const fishRoutes = useMemo(() => environment.fishRoutes ?? createFishRoutes(environment,fishCount),[environment,fishCount]);
+  const fishRoutes = useMemo(() => createFishSchools(environment.fishRoutes ?? createFishRoutes(environment,fishCount),fishCount),[environment,fishCount]);
   const fishColors = useMemo(() => fishRoutes.routes.map(route => new THREE.Color(route.color)),[fishRoutes]);
   const metadata = seasonInfo[season];
   const progress = useRef({ leaves: metadata.leafDensity, flowers: metadata.flowerDensity, litter: metadata.litterDensity, falling: metadata.fallingLeaves });
@@ -363,6 +394,8 @@ export default function Scenery({ world, season, reducedMotion, moving = true, w
     const time = state.elapsed;
     uniforms.scenicTime.value = time; uniforms.scenicWetness.value = state.wetness;
     uniforms.scenicSnow.value = state.snow; uniforms.scenicIce.value = state.ice; uniforms.scenicNight.value = state.night; uniforms.scenicWind.value = state.wind;
+    const wave = lakeWaveParameters(state.wind, state.ice);
+    uniforms.scenicWaveAmplitude.value = wave.amplitude; uniforms.scenicWaveSpeed.value = wave.speed; uniforms.scenicWaterRise.value = state.waterLevel;
     uniforms.scenicWaterScale.value = 1 - metadata.dryness * (1 - state.wetness) * .011;
     const alpha = 1 - Math.exp(-2.2 * Math.min(.25, Math.max(1 / 120, delta)));
     const targets = { leaves: metadata.leafDensity, flowers: metadata.flowerDensity, litter: metadata.litterDensity, falling: metadata.fallingLeaves };
@@ -375,7 +408,7 @@ export default function Scenery({ world, season, reducedMotion, moving = true, w
     if (!binding) return;
     for (const record of binding.records) {
       const { material, kind } = record;
-      if (record.water) record.target.copy(waterColor).lerp(stormWater, state.wetness * .6);
+      if (record.water) { record.target.copy(waterColor).lerp(stormWater, state.wetness * .42); material.roughness = .23 + state.wind * .13; }
       else if (record.flower) record.target.copy(record.base).lerp(colors.dry, metadata.dryness * .19);
       else if (kind) {
         record.target.copy(colors[kind]);
@@ -389,7 +422,7 @@ export default function Scenery({ world, season, reducedMotion, moving = true, w
     }
     const wind = Math.min(.055, .007 + Math.max(0, windSpeed) * .0014 + state.wind * .018) * (reducedMotion ? .35 : 1);
     for (const { object, rotation, flower } of binding.pivots) {
-      const sway = Math.sin(time * (flower ? 1.15 : .7) + object.id * 1.61) * wind;
+      const sway = (Math.sin(time * (flower ? 1.15 : .7) + object.id * 1.61) + Math.sin(time * .23 + object.id) * .28) * wind;
       object.rotation.set(rotation.x + sway * .4, rotation.y + sway * .26, rotation.z + sway);
     }
     if (fallen.current) {
@@ -424,6 +457,7 @@ export default function Scenery({ world, season, reducedMotion, moving = true, w
     if (fishes.current && tails.current) {
       for (let index = 0; index < fishCount; index++) {
         writeFishPose(fishPose, index, time,fishRoutes);
+        fishPose.y += state.waterLevel - Math.max(0, state.wind - .5) * .16;
         const scale = fishRoutes.routes[index]?.scale ?? 1;
         dummy.position.set(fishPose.x, fishPose.y, fishPose.z); dummy.rotation.set(0, fishPose.heading, 0); dummy.scale.set(.105*scale, .046*scale, .235*scale); dummy.updateMatrix(); fishes.current.setMatrixAt(index, dummy.matrix);
         fishes.current.setColorAt(index,fishColors[index]); tails.current.setColorAt(index,fishColors[index]);
@@ -439,6 +473,7 @@ export default function Scenery({ world, season, reducedMotion, moving = true, w
       "data-world-leaf-density": progress.current.leaves.toFixed(3), "data-world-flower-density": progress.current.flowers.toFixed(3), "data-world-foliage-color": colors.dark.getHexString(),
       "data-world-litter-density": progress.current.litter.toFixed(3), "data-world-falling-leaves": progress.current.falling.toFixed(3), "data-world-water-scale": uniforms.scenicWaterScale.value.toFixed(4),
       "data-world-wetness": state.wetness.toFixed(3), "data-world-snow-cover": state.snow.toFixed(3), "data-world-ice-cover": state.ice.toFixed(3), "data-world-snow-surface": "authored-world-normals",
+      "data-world-wave-amplitude": wave.amplitude.toFixed(4), "data-world-wave-speed": wave.speed.toFixed(3), "data-world-water-rise": state.waterLevel.toFixed(4), "data-world-water-storage": state.waterStorage.toFixed(3),
       "data-world-leaf-ground-height": binding.groundHeight.toFixed(3), "data-world-seasonal-materials": String(binding.records.length),
     };
     for (const [key, value] of Object.entries(attributes)) gl.domElement.setAttribute(key, value);

@@ -14,6 +14,6 @@ As páginas `/revisao` e `/revisao/ilhas`, as APIs privadas e o MCP direcionam o
 
 ## Áudio
 
-O MP3 de Genshin não é versionado no repositório público. A rota existente do áudio tem um rewrite para o mesmo arquivo na hospedagem original, preservando a música e os controles da experiência. Os demais sons e recursos são arquivos públicos do próprio projeto.
+O tema instrumental original de Genshin continua fora do repositório público. Sua rota mantém o rewrite para o mesmo arquivo na hospedagem original. As quatro faixas adicionais aprovadas para o jardim ficam em `public/experience/audio/` e são servidas pela Vercel. O manifesto compartilhado preserva créditos, fontes e hashes das cinco faixas, usadas em ciclos aleatórios sem repetição interna. A proveniência está no [registro da playlist](audio/playlist-20261017.json) e nos [créditos](credits/assets.md).
 
 Os scripts `dev:sites` e `build:sites` preservam a opção de prévia do ambiente anterior; eles não são utilizados pelo deploy da Vercel. Os arquivos do backend D1 permanecem em `infrastructure/editorial/` como fonte do serviço original e estão fora da compilação Next.js. A configuração e os plugins de Sites ficam em `infrastructure/sites/`, com os comandos auxiliares em `scripts/sites/`.

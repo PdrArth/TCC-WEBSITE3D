@@ -335,7 +335,7 @@ test("camera orbit distinguishes taps from drag and suppresses only the complete
   const orbit=new CameraOrbit();
   orbit.begin(10,20); assert.equal(orbit.move(13,24,500,500),false); assert.equal(orbit.end(),false); assert.equal(orbit.consumeClick(),false);
   orbit.begin(10,20); assert.equal(orbit.move(30,22,500,500),true); assert.notEqual(orbit.yaw,0); assert.equal(orbit.end(),true); assert.equal(orbit.consumeClick(),true); assert.equal(orbit.consumeClick(),false);
-  orbit.begin(0,0); orbit.move(50,10000,500,500); assert.equal(orbit.pitch,.24);
+  orbit.begin(0,0); orbit.move(50,10000,500,500); assert.equal(orbit.pitch,.78);
   orbit.reset(); assert.equal(orbit.yaw,0); assert.equal(orbit.pitch,0); assert.equal(orbit.dragging,false); assert.equal(orbit.consumeClick(),false);
 });
 

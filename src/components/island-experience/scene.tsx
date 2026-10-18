@@ -13,8 +13,12 @@ import Atmosphere, { type Weather } from "./atmosphere";
 import Scenery from "./scenery";
 import NightLighting from "./night-lighting";
 import IslandLife from "./island-life";
+import GardenLife from "./garden-life";
 import { applyOpeningView, clearOpeningView, openingFrame } from "./opening-layout.mjs";
 import { createEnvironmentManifest, createEnvironmentState, advanceEnvironment } from "@/lib/experience/environment.mjs";
+import type { BirdCompanion } from "@/lib/experience/bird-life.mjs";
+import LakeOverflow from "./lake-overflow";
+import { groundShoreStones } from "@/lib/experience/shore-stones.mjs";
 import { optimizeWorld, selectedBatchPavilion } from "./optimize-world.mjs";
 import { FrameStalls, prepareEffectMaterials, type PreparationProgress } from "./render-preparation.mjs";
 import { CameraOrbit, environmentSeconds, orbitPosition, clampZoom, easeCamera, fieldOfView, mayAdaptQuality, overviewDistanceScale, restingPose, wheelZoom } from "./scene-motion.mjs";
@@ -40,6 +44,7 @@ export type IslandSceneProps = {
   precipitation?: number;
   snowfall?: number;
   zoom?: number;
+  cameraHeight?: number;
   onZoom?: (zoom: number) => void;
   season?: Season;
   intro?: boolean;
@@ -100,6 +105,7 @@ function LiveWorld({ world, ...props }: IslandSceneProps & { world: GLTF }) {
   const adaptation = useRef({good:0,age:0,lastQuality:props.quality,upgradeBlocked:false,frameTimes:[] as number[]});
   const environment = useMemo(()=>manifestEnvironment(props.manifest),[props.manifest]);
   const environmentState = useRef(createEnvironmentState(props.weather??"clear",props.season??"spring",props.clock?.current??props.timeOfDay??13));
+  const companion = useRef<BirdCompanion>({available:false,position:[0,0,0],heading:0});
   const clockSample = useRef({hour:props.clock?.current??props.timeOfDay??13,at:0});
   const points = useMemo(() => pavilionIds.map(id => ({ id, point: new THREE.Vector3(...props.manifest.pavilions[id].focus) })), [props.manifest]);
   const ambient = useMemo(() => {
@@ -149,6 +155,7 @@ function LiveWorld({ world, ...props }: IslandSceneProps & { world: GLTF }) {
       "data-world-zoom": zoomRef.current.toFixed(3),
       "data-world-camera-yaw": orbit.current.yaw.toFixed(4),
       "data-world-camera-pitch": orbit.current.pitch.toFixed(4),
+      "data-world-camera-height": String(props.cameraHeight ?? 0),
       "data-world-auto-orbit": autoOrbitPause??autoOrbitState.current,
       "data-world-auto-orbit-pause": orbit.current.pauseRemaining.toFixed(3),
       "data-world-environment-clock": counters.current.ambient.toFixed(3),
@@ -168,7 +175,7 @@ function LiveWorld({ world, ...props }: IslandSceneProps & { world: GLTF }) {
       "data-world-effects-prepared": `${preparation.current.done}/${preparation.current.total}`,
     };
     for (const [key, value] of Object.entries(attributes)) gl.domElement.setAttribute(key, value);
-  }, [get, gl, active, panelOpen, reducedMotion, navigation, props.weather, props.intro, camera, season, autoOrbitPause,world]);
+  }, [get, gl, active, panelOpen, reducedMotion, navigation, props.weather, props.intro, camera, season, autoOrbitPause,world,props.cameraHeight]);
 
   useEffect(() => { clockSample.current={hour:props.clock?.current??props.timeOfDay??13,at:performance.now()}; },[active,props.clock,props.timeOfDay]);
   useEffect(()=>{
@@ -321,6 +328,7 @@ function LiveWorld({ world, ...props }: IslandSceneProps & { world: GLTF }) {
     const framing=intro?openingFrame(size.width,size.height):size;
     if (!props.pavilionId) {
       const position=orbitPosition(restingCamera.position,restingCamera.target,orbit.current.yaw,orbit.current.pitch,zoomRef.current/overviewDistanceScale(restingCamera.fov,framing.width,framing.height)); cameraPosition.set(...position);
+      cameraPosition.y+=props.cameraHeight??0; desiredTarget.y+=props.cameraHeight??0;
     }
     const unsettled = easeCamera(camera, cameraTarget, cameraPosition, desiredTarget, fieldOfView(restingCamera.fov, framing.width, framing.height, !!props.pavilionId), transitionDt, reducedMotion, props.intro ? 2.8 : 7);
     if (unsettled && active) invalidate();
@@ -448,10 +456,12 @@ function LiveWorld({ world, ...props }: IslandSceneProps & { world: GLTF }) {
   }, [active, panelOpen, props.interactionBlocked, intro, onInteract, reducedMotion, manifest, onSelect, ambient, invalidate]);
 
   return <>
-    <Atmosphere weather={props.weather ?? "clear"} phase={props.phase} timeOfDay={props.timeOfDay} environment={environment} environmentState={environmentState} windSpeed={props.windSpeed} precipitation={props.precipitation} snowfall={props.snowfall} birdPerches={manifest.birdPerches} birdShelters={manifest.birdShelters} strikeTargets={strikeTargets} season={season} quality={props.quality} active={active && !panelOpen} moving={animateWorld} reducedMotion={reducedMotion} onInteract={!props.intro && !props.interactionBlocked && !panelOpen ? props.onInteract : undefined} onThunder={props.onThunder} />
+    <Atmosphere companion={companion} weather={props.weather ?? "clear"} phase={props.phase} timeOfDay={props.timeOfDay} environment={environment} environmentState={environmentState} windSpeed={props.windSpeed} precipitation={props.precipitation} snowfall={props.snowfall} birdPerches={manifest.birdPerches} birdShelters={manifest.birdShelters} strikeTargets={strikeTargets} season={season} quality={props.quality} active={active && !panelOpen} moving={animateWorld} reducedMotion={reducedMotion} onInteract={!props.intro && !props.interactionBlocked && !panelOpen ? props.onInteract : undefined} onThunder={props.onThunder} />
     <Scenery world={world.scene} environment={environment} environmentState={environmentState} quality={props.quality} weather={props.weather??"clear"} season={season} moving={animateWorld} windSpeed={props.windSpeed} reducedMotion={reducedMotion} />
+    <GardenLife environment={environment} environmentState={environmentState} season={season} reducedMotion={reducedMotion} quality={props.quality} />
+    <LakeOverflow environment={environment} environmentState={environmentState} />
     <NightLighting environment={environment} environmentState={environmentState} quality={props.quality} moving={animateWorld} reducedMotion={reducedMotion}/>
-    <IslandLife layout={manifest.islandLife} preparedGeometry={manifest.preparedLifeGeometry} environment={environment} environmentState={environmentState} quality={props.quality} moving={animateWorld} reducedMotion={reducedMotion} intro={!!intro}/>
+    <IslandLife companion={companion} layout={manifest.islandLife} preparedGeometry={manifest.preparedLifeGeometry} environment={environment} environmentState={environmentState} quality={props.quality} moving={animateWorld} reducedMotion={reducedMotion} intro={!!intro}/>
     <primitive object={world.scene} onClick={selectMesh} onPointerOver={(event: ThreeEvent<PointerEvent>) => { if (active && !panelOpen && !intro) { event.stopPropagation(); gl.domElement.style.setProperty("cursor", "pointer"); } }} onPointerOut={() => { gl.domElement.style.removeProperty("cursor"); }} />
     <mesh ref={pulse} rotation={[-Math.PI / 2, 0, 0]} visible={false} raycast={() => {}}><ringGeometry args={[.24, .31, 32]} /><meshBasicMaterial color="#f2c577" transparent opacity={0} depthWrite={false} side={THREE.DoubleSide} /></mesh>
     <pointLight ref={pulseLight} intensity={0} color="#ffcf8e" distance={3.2} decay={2} />
@@ -487,6 +497,7 @@ function IslandScene(props: IslandSceneProps) {
       await new Promise<void>(resolve=>setTimeout(resolve,0));
       if (cancelled) {disposeScene(asset.scene);return;}
       const optimizationStarted=performance.now();
+      groundShoreStones(asset.scene,manifestEnvironment(props.manifest));
       if(asset.scene.userData.runtimePrepared?.version===1 && asset.scene.userData.runtimePrepared.quality===props.quality){
         asset.scene.traverse(object=>{
           const mesh=object as THREE.Mesh;

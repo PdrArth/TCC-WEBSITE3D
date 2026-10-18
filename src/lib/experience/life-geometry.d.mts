@@ -28,3 +28,4 @@ export function restoreLifeGeometry(prepared: PreparedLifeGeometry | null | unde
 export function segment(a: Vec3, b: Vec3, radius: number, sides?: number): THREE.BufferGeometry;
 export function tintGeometry(geometry: THREE.BufferGeometry, tint?: number): THREE.BufferGeometry;
 export function mergePieces(pieces: THREE.BufferGeometry[]): THREE.BufferGeometry;
+export function createCaughtFishGeometry(): THREE.BufferGeometry;

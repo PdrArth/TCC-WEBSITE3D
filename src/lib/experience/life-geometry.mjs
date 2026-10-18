@@ -12,7 +12,7 @@ const ARRAY_TYPES = { Float32Array, Uint16Array, Uint32Array };
 /** Layout-only fingerprint: the walking graph and resident state never affect
  * static geometry. Bump the recipe when the geometry construction changes. */
 export function lifeGeometrySignature(layout) {
-    const input = JSON.stringify({ recipe: "island-life-v20.1", islet: layout.islet, home: layout.home,
+    const input = JSON.stringify({ recipe: "island-life-v20.2-bed", islet: layout.islet, home: layout.home,
         bridge: { points: layout.bridge.points, width: layout.bridge.width }, connector: layout.connector, landings: layout.landings });
     let hash = 2166136261;
     for (let index = 0; index < input.length; index++) hash = Math.imul(hash ^ input.charCodeAt(index), 16777619);
@@ -112,6 +112,14 @@ export function mergePieces(pieces) {
         piece.dispose();
     merged.computeBoundingSphere();
     return merged;
+}
+export function createCaughtFishGeometry() {
+    const body = new THREE.SphereGeometry(1, 10, 7); body.scale(.095, .062, .24);
+    const tail = new THREE.BufferGeometry(); tail.setAttribute("position", new THREE.Float32BufferAttribute([0,0,-.18,-.11,0,-.39,.11,0,-.39], 3));
+    tail.setIndex([0,1,2]); tail.setAttribute("uv", new THREE.Float32BufferAttribute([.5,1,0,0,1,0], 2)); tail.computeVertexNormals();
+    const pieces = [tintGeometry(body), tintGeometry(tail, .82)];
+    for (const side of [-1, 1]) { const eye = new THREE.SphereGeometry(.011, 5, 4); eye.translate(side * .071, .028, .15); pieces.push(tintGeometry(eye, .15)); }
+    return mergePieces(pieces);
 }
 function isletGeometry(layout, surface) {
     const { center, radius, height } = layout.islet, count = 40;
@@ -290,7 +298,13 @@ export function createLifeGeometry(layout) {
             houseBox("oak", [x, floor + y, z - .19], [seatWidth, .13, .045]);
     };
     bench(home.seated, home.bench.width);
-    bench(home.interiorSeated, .66);
+    // The porch bench stays; a low oak bed replaces the indoor chair.
+    houseBox("oak", [-.95, floor + .25, .02], [1.20, .14, 2.22]);
+    for (const x of [-1.43, -.47]) for (const z of [-.92, .96]) houseBox("rail", [x, floor + .12, z], [.085, .24, .085]);
+    houseBox("oak", [-.95, floor + .55, -1.06], [1.23, .64, .09]);
+    houseBox("plaster", [-.95, floor + .38, .02], [1.12, .16, 2.16], 0, 1.04);
+    houseBox("plaster", [-.95, floor + .49, -.52], [.79, .14, .45], 0, 1.09);
+    houseBox("foliage", [-.95, floor + .48, .67], [1.13, .055, .69], 0, 1.23);
     houseBox("oak", [.98, floor + .63, -.50], [.80, .065, .57]);
     for (const side of [-1, 1])
         for (const end of [-1, 1])

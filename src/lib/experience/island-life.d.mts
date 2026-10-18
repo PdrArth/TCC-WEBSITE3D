@@ -3,13 +3,13 @@ import type { Weather } from './weather.mjs';
 export const ISLAND_LIFE_VERSION: 20;
 export const RESIDENT_SCALE: 1.4;
 export const RESIDENT_HEIGHT: 1.76;
-export type ResidentPhase = 'walking' | 'watering' | 'gathering' | 'observing' | 'fishing' | 'walk-home' | 'returning' | 'entering' | 'interior' | 'exiting' | 'to-porch' | 'porch';
+export type ResidentPhase = 'walking' | 'watering' | 'gathering' | 'observing' | 'fishing' | 'walk-home' | 'returning' | 'entering' | 'interior' | 'exiting' | 'to-porch' | 'porch' | 'sitting';
 export type LifeObstructions = { terrace: { radius?: number; halfWidth?: number; halfDepth?: number }; beds: number[][]; trunks: number[][] };
 export type WalkingNode = { position: Vec3; island?: PavilionId };
-export type WalkingEdge = { id: string; from: string; to: string; points: Vec3[]; length: number; kind: 'island' | 'bridge' | 'connector' | 'home' | 'door'; island?: PavilionId; bridge?: string };
+export type WalkingEdge = { id: string; from: string; to: string; points: Vec3[]; length: number; kind: 'island' | 'bridge' | 'connector' | 'home' | 'door' | 'furniture'; island?: PavilionId; bridge?: string };
 export type LifeRouteStep = { edgeId: string; from: string; to: string; points: Vec3[]; length: number };
 export type LifeRoute = { points: Vec3[]; steps: LifeRouteStep[]; length: number; destination: string };
-export type LifeActivity = { id: string; node: string; kind: 'watering' | 'gathering' | 'observing' | 'fishing'; island?: PavilionId; bridge?: string; position: Vec3; target: Vec3; duration: number };
+export type LifeActivity = { id: string; node: string; kind: 'watering' | 'gathering' | 'observing' | 'fishing' | 'sitting'; seatHeight?: number; island?: PavilionId; bridge?: string; position: Vec3; target: Vec3; duration: number };
 export type IslandLifeLayout = {
  version: 20; island: 'moradia';
  islet: { id: 'moradia'; center: [number, number]; radius: number; height: number };
@@ -30,16 +30,19 @@ export type ResidentState = {
  phase: ResidentPhase; phaseTime: number; elapsed: number; cycle: number; distanceMoved: number;
  routeDistance: number; route: Vec3[]; routeSteps: LifeRouteStep[]; destination: string; node: string;
  position: Vec3; heading: number; gait: number; gesture: number; hidden: boolean;
- shelterReason: 'weather' | 'night' | null; activityIndex: number; activityId: string; activityTarget: Vec3;
+ shelterReason: 'weather' | 'night' | null; nightRest: boolean; sleepBlend: number; activityIndex: number; activityId: string; activityTarget: Vec3;
  dryTime: number; weatherTime: number; doorOpen: number; inside: boolean; resumeActivityIndex: number;
 };
 export type ResidentPose = {
  x: number; y: number; z: number; heading: number; leftLeg: number; rightLeg: number;
  leftArm: number; rightArm: number; leftElbow: number; rightElbow: number; lean: number;
  rod: boolean; fruit: boolean; hidden: boolean; rodTilt: number; seated: boolean;
+ catchLift: number; caughtFish: boolean; fishingBite: boolean; sleeping: boolean; sleepBlend: number;
  leftKnee: number; rightKnee: number; bodyOffsetY: number; watering: boolean; wateringTilt: number;
  doorOpen: number; inside: boolean; entering: boolean; activityTarget: Vec3 | null; fishingTarget: Vec3 | null;
 };
+export function residentBed(home: IslandLifeLayout['home']): { center: Vec3; foot: Vec3; width: number; length: number; yaw: number };
+export function fishingMoment(seconds: number): { bite: boolean; lift: number; caught: boolean; show: boolean };
 export function createIslandLifeLayout(environment: WorldEnvironmentManifest): IslandLifeLayout;
 export function homeLocalPoint(home: Pick<IslandLifeLayout['home'], 'position' | 'yaw'>, local: Vec3, output?: Vec3): Vec3;
 export function bridgeSurfaceSegments(layout: IslandLifeLayout): WorldEnvironmentManifest['bridges'];
