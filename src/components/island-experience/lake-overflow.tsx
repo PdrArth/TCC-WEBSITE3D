@@ -10,13 +10,13 @@ import { lakeSpillway } from "@/lib/experience/lake-dynamics.mjs";
 const noRaycast = () => {};
 
 /** A small stone overflow in the outer bank; no island, building or route is moved. */
-export default function LakeOverflow({ environment, environmentState }: { environment: WorldEnvironmentManifest; environmentState: MutableRefObject<EnvironmentState> }) {
+export default function LakeOverflow({ environment, environmentState,quality='high' }: { environment: WorldEnvironmentManifest; environmentState: MutableRefObject<EnvironmentState>;quality?:'high'|'low' }) {
   const { gl } = useThree();
   const outlet = useMemo(() => lakeSpillway(environment), [environment]);
   const stones = useRef<THREE.InstancedMesh>(null), streaks = useRef<THREE.InstancedMesh>(null), foam = useRef<THREE.InstancedMesh>(null);
   const stream = useRef<THREE.Mesh>(null), waterMaterial = useRef<THREE.MeshStandardMaterial>(null), foamMaterial = useRef<THREE.MeshBasicMaterial>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
-  const rows = 41, columns = 13;
+  const rows = quality==='high'?41:25, columns = quality==='high'?13:7;
   const waterTime = useMemo(() => ({value:0}), []);
   const ribbon = useMemo(() => {
     const vertices: number[] = [], indices: number[] = [], uv: number[] = [];
@@ -30,7 +30,7 @@ export default function LakeOverflow({ environment, environmentState }: { enviro
       if (row < rows - 1) for (let col = 0; col < columns - 1; col++) { const a = row * columns + col; indices.push(a, a + columns, a + 1, a + 1, a + columns, a + columns + 1); }
     }
     const geometry = new THREE.BufferGeometry(); geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3)); geometry.setAttribute("uv",new THREE.Float32BufferAttribute(uv,2)); geometry.setIndex(indices); geometry.computeVertexNormals(); return geometry;
-  }, [outlet]);
+  }, [outlet,rows,columns]);
   const base = useMemo(() => Float32Array.from(ribbon.getAttribute("position").array), [ribbon]);
   useEffect(() => () => ribbon.dispose(), [ribbon]);
   const basin = useMemo(() => {

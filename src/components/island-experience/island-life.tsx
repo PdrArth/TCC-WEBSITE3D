@@ -6,6 +6,8 @@ import * as THREE from "three";
 import { createLifeGeometry, createCaughtFishGeometry, restoreLifeGeometry, segment, tintGeometry, mergePieces, type StaticKind, type PreparedLifeGeometry } from "@/lib/experience/life-geometry.mjs";
 import type { Vec3, WorldEnvironmentManifest } from "@/lib/experience-contract";
 import type { BirdCompanion } from "@/lib/experience/bird-life.mjs";
+import {createGreeting,requestGreeting,advanceGreeting} from '@/lib/experience/garden-interactions.mjs';
+import type {ScenicSound} from '@/lib/experience/scene-signals';
 import { createEnvironmentManifest, type EnvironmentState } from "@/lib/experience/environment.mjs";
 import {
   advanceResident, createIslandLifeLayout, createResidentState, homeLocalPoint, pathLength, residentPauseReason,
@@ -16,6 +18,8 @@ import {
  * Door and utensils have real pivots. No new lights, shadows, event targets,
  * external assets or React state in the render loop. */
 export type IslandLifeProps = {
+  onSpatialSound?: (kind:ScenicSound,point:Vec3)=>void;
+  interactionBlocked?:boolean;
   companion?: MutableRefObject<BirdCompanion>;
   environment?: WorldEnvironmentManifest;
   layout?: IslandLifeLayout;
@@ -76,13 +80,15 @@ function createRig(scale: number) {
 }
 
 type Rig = ReturnType<typeof createRig>;
-function updateRig(rig: Rig, pose: ResidentPose, layout: IslandLifeLayout, meshes: Partial<Record<ResidentKind, THREE.InstancedMesh>>) {
+function updateRig(rig: Rig, pose: ResidentPose, layout: IslandLifeLayout, meshes: Partial<Record<ResidentKind, THREE.InstancedMesh>>, greeting={wave:0,sway:0,look:0}) {
   rig.root.position.set(pose.x, pose.y + pose.bodyOffsetY, pose.z); rig.root.rotation.set(-pose.sleepBlend * Math.PI / 2, pose.heading, 0, "YXZ"); rig.trunk.rotation.x = pose.lean;
   for (const eye of rig.eyes) eye.scale.y = .014 * (1 - pose.sleepBlend * .85);
   rig.head.rotation.x = pose.watering ? .11 : pose.seated ? -.035 : 0;
+  rig.head.rotation.y=greeting.look;
   rig.head.position.z = .008 + pose.sleepBlend * .08;
   rig.arms[0].rotation.set(pose.leftArm, 0, pose.rod ? .23 : .045); rig.arms[1].rotation.set(pose.rightArm, 0, pose.rod ? -.09 : -.045);
   rig.elbows[0].rotation.set(pose.leftElbow, 0, pose.rod ? .17 : 0); rig.elbows[1].rotation.set(pose.rightElbow, 0, 0);
+  if(greeting.wave>0){rig.arms[0].rotation.x-=greeting.wave*1.95;rig.arms[0].rotation.z-=greeting.wave*(.85+greeting.sway);rig.elbows[0].rotation.x-=greeting.wave*.8;}
   rig.legs[0].rotation.x = pose.leftLeg; rig.legs[1].rotation.x = pose.rightLeg; rig.knees[0].rotation.x = pose.leftKnee; rig.knees[1].rotation.x = pose.rightKnee;
   rig.fruit.scale.setScalar(pose.fruit ? .067 : 0);
   rig.float.position.set(...(pose.fishingTarget ?? layout.fishing.target)); rig.float.scale.setScalar(pose.rod ? .049 : 0); rig.float.updateMatrixWorld(true); rig.root.updateMatrixWorld(true);
@@ -114,8 +120,10 @@ function createWateringCanGeometry() {
 const staticColors: Record<StaticKind, string> = { oak: "#ae875b", rail: "#77684e", plaster: "#e7dfc9", roof: "#ad6246", window: "#e1e8d8", stone: "#b4ad92", snow: "#f2f3e9", grass: "#8c9d72", foliage: "#5a795b" };
 const residentColors: Record<ResidentKind, string> = { skin: "#d7a67e", coat: "#da6e42", trousers: "#40627a", dark: "#343a36", hair: "#584237", fruit: "#bf4f39" };
 
-export default function IslandLife({ companion, environment: suppliedEnvironment, layout: providedLayout, preparedGeometry, environmentState, moving = true, reducedMotion = false, quality = "high", intro = false }: IslandLifeProps) {
-  const { gl, invalidate } = useThree();
+export default function IslandLife({ onSpatialSound,interactionBlocked=false,companion, environment: suppliedEnvironment, layout: providedLayout, preparedGeometry, environmentState, moving = true, reducedMotion = false, quality = "high", intro = false }: IslandLifeProps) {
+  const { gl, invalidate,camera } = useThree();
+  const greeting=useRef(createGreeting()),greetingPose=useRef({wave:0,sway:0,look:0}),previousBite=useRef(false),residentHit=useRef<THREE.Mesh>(null);
+  const residentScreen=useMemo(()=>new THREE.Vector3(),[]);
   const environment = useMemo(() => suppliedEnvironment ?? createEnvironmentManifest(), [suppliedEnvironment]);
   const layout = useMemo(() => providedLayout ?? createIslandLifeLayout(environment), [providedLayout, environment]);
   const batches = useMemo(() => restoreLifeGeometry(preparedGeometry, layout) ?? createLifeGeometry(layout), [preparedGeometry, layout]); const state = useMemo(() => createResidentState(layout), [layout]);
@@ -136,7 +144,8 @@ export default function IslandLife({ companion, environment: suppliedEnvironment
   const context = (): ResidentContext => ({ moving, reducedMotion, intro, visible: document.visibilityState === "visible", weather: environmentState?.current.weather ?? "clear", hour: environmentState?.current.hour ?? 13, night: environmentState?.current.night ?? 0 });
 
   const updateArticulation = () => {
-    updateRig(rig, pose, layout, residentMeshes.current);
+    updateRig(rig, pose, layout, residentMeshes.current,greetingPose.current);
+    if(residentHit.current){residentHit.current.position.set(pose.x,pose.y+layout.resident.height*.5,pose.z);residentHit.current.visible=!pose.hidden&&!pose.inside&&!pose.sleeping;}
     if (door.current) door.current.rotation.y = layout.home.yaw - Math.max(0, Math.min(1, pose.doorOpen)) * 1.48;
     if(companion){
       const destination=companion.current;
@@ -201,6 +210,7 @@ export default function IslandLife({ companion, environment: suppliedEnvironment
       "data-world-resident-height": layout.resident.height.toFixed(2), "data-world-resident-scale": layout.resident.scale.toFixed(2),
       "data-world-resident-phase": state.phase, "data-world-resident-position": state.position.map(value => value.toFixed(3)).join(","),
       "data-world-resident-heading": state.heading.toFixed(3), "data-world-resident-cycle": String(state.cycle),
+      "data-world-resident-greetings":String(greeting.current.count),"data-world-resident-wave":greetingPose.current.wave.toFixed(3),
       "data-world-resident-time": state.elapsed.toFixed(3), "data-world-resident-phase-time": state.phaseTime.toFixed(3),
       "data-world-resident-distance": state.distanceMoved.toFixed(3), "data-world-resident-gait": state.gait.toFixed(3),
       "data-world-resident-gesture": state.gesture.toFixed(3), "data-world-resident-visible": String(!state.hidden),
@@ -210,6 +220,8 @@ export default function IslandLife({ companion, environment: suppliedEnvironment
       "data-world-resident-activity": pose.caughtFish ? "reeling-visible-fish" : pose.rod ? "rod-line-water-float" : pose.watering ? "watering-can-small-water-arc" : pose.fruit ? "reach-and-pick-fruit" : pose.sleeping ? "sleeping-in-bed" : pose.inside ? "seated-on-bed" : pose.seated ? "seated-on-bench" : "articulated",
     };
     for (const [key, value] of Object.entries(attributes)) gl.domElement.setAttribute(key, value);
+    const bounds=gl.domElement.getBoundingClientRect();residentScreen.set(pose.x,pose.y+layout.resident.height*.6,pose.z).project(camera);
+    gl.domElement.setAttribute('data-world-resident-hit-point',[(residentScreen.x*.5+.5)*bounds.width+bounds.left,(-residentScreen.y*.5+.5)*bounds.height+bounds.top].map(value=>value.toFixed(1)).join(','));
   };
 
   useLayoutEffect(() => {
@@ -229,7 +241,11 @@ export default function IslandLife({ companion, environment: suppliedEnvironment
   useEffect(() => () => headHairGeometry.dispose(), [headHairGeometry]);
 
   useFrame((_, delta) => {
-    advanceResident(state, delta, context(), layout); writeResidentPose(pose, state, layout); updateArticulation();
+    advanceResident(state, delta, context(), layout); writeResidentPose(pose, state, layout);
+    const available=moving&&!intro&&!interactionBlocked&&!pose.hidden&&!pose.inside&&!pose.sleeping&&!pose.rod&&!pose.watering&&!pose.fruit&&!state.shelterReason;
+    greetingPose.current=advanceGreeting(greeting.current,moving&&document.visibilityState==='visible'?delta:0,{available,distance:Math.hypot(camera.position.x-pose.x,camera.position.y-pose.y,camera.position.z-pose.z),heading:pose.heading,cameraHeading:Math.atan2(camera.position.x-pose.x,camera.position.z-pose.z)});
+    if(moving&&pose.fishingBite&&!previousBite.current&&pose.fishingTarget)onSpatialSound?.('fishing',pose.fishingTarget);
+    previousBite.current=pose.fishingBite;updateArticulation();
     const scenic = environmentState?.current, night = scenic?.night ?? 0, cover = scenic?.snow ?? 0, wetness = scenic?.wetness ?? 0;
     if (windowMaterial.current) { windowMaterial.current.emissiveIntensity = night * .85; windowMaterial.current.opacity = .10 + night * .10; }
     if (roofMaterial.current) roofMaterial.current.roughness = .90 - wetness * .32;
@@ -240,10 +256,13 @@ export default function IslandLife({ companion, environment: suppliedEnvironment
       previous.snow = cover; previous.night = night; previous.wetness = wetness;
       gl.domElement.setAttribute("data-world-life-house-snow", cover.toFixed(3)); gl.domElement.setAttribute("data-world-life-house-window", night.toFixed(3));
     }
-    report.current += Math.min(.1, Math.max(0, delta)); if (report.current >= .1) { report.current = 0; publish(); }
+    report.current += Math.min(.1, Math.max(0, delta)); if (report.current >= .2) { report.current = 0; publish(); }
   });
 
   return <group name="island_life_v20">
+    <mesh ref={residentHit} name="island_resident_greeting_target" scale={[.40,layout.resident.height*.52,.40]} onClick={event=>{event.stopPropagation();if(!interactionBlocked&&moving&&!intro){requestGreeting(greeting.current);invalidate();}}}>
+      <sphereGeometry args={[1,8,6]}/><meshBasicMaterial transparent opacity={0} depthWrite={false}/>
+    </mesh>
     {batches.map(batch => <mesh key={batch.kind} name={batch.kind === "oak" ? layout.bridge.node : `island_life_${batch.kind}`} ref={batch.kind === "snow" ? snow : undefined} geometry={batch.geometry} visible={batch.kind !== "snow"} raycast={noRaycast}>
       <meshStandardMaterial ref={batch.kind === "window" ? windowMaterial : batch.kind === "roof" ? roofMaterial : batch.kind === "snow" ? snowMaterial : undefined}
         color={staticColors[batch.kind]} vertexColors roughness={.90} emissive={batch.kind === "window" ? "#ffc87d" : "#000000"} emissiveIntensity={0}

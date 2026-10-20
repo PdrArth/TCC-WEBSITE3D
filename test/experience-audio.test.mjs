@@ -16,6 +16,7 @@ const earlyJavascript = ts.transpileModule(inlineCatalog(earlySource), { compile
 const { EARLY_AUDIO_SCRIPT } = await import("data:text/javascript;base64," + Buffer.from(earlyJavascript).toString("base64"));
 const deferred = () => { let resolve, reject; const promise = new Promise((yes, no) => { resolve = yes; reject = no; }); return { promise, resolve, reject }; };
 const flush = async () => { for (let index = 0; index < 12; index++) await Promise.resolve(); };
+const spatialFrame=()=>({active:true,listener:[20,12,30],forward:[0,-.3,-1],up:[0,1,0],birds:[[-11,2,9],[14,3,-1]],waterfall:{position:[3,-.8,18],flow:.8}});
 
 // These fakes test graph/lifecycle contracts and meter arithmetic, not audibility.
 // Real PCM output must additionally be measured with the browser's AnalyserNode.
@@ -45,6 +46,7 @@ function browser(t, options = {}) {
     sampleRate = 48000;
     state = "suspended";
     destination = new Node("destination");
+    listener = Object.fromEntries(['positionX','positionY','positionZ','forwardX','forwardY','forwardZ','upX','upY','upZ'].map(name=>[name,new Parameter()]));
     listeners = new Map();
     constructor() { if (options.contextError) throw options.contextError; contexts.push(this); calls.push("context.create"); }
     addEventListener(name, callback) { this.listeners.set(name, callback); }
@@ -60,6 +62,7 @@ function browser(t, options = {}) {
     suspend() { calls.push("context.suspend"); this.setState("suspended"); return Promise.resolve(); }
     close() { calls.push("context.close"); this.setState("closed"); return Promise.resolve(); }
     createGain() { return new Node("gain"); }
+    createPanner() {const node=new Node('panner');for(const axis of ['positionX','positionY','positionZ'])node[axis]=new Parameter();return node;}
     createMediaElementSource(player) { const node = new Node("media-source"); node.player=player; return node; }
     createOscillator() { calls.push("tone.create"); return new Node("oscillator"); }
     createBufferSource() { calls.push("buffer.create"); return new Node("source"); }
@@ -1417,4 +1420,40 @@ test("closing a context during decoding permits one fresh preparation on explici
   options.thunderDecodeGate = null;
   await audio.enable(); await flush();
   assert.equal(audio.diagnostics().thunder.status, "ready");
+});
+
+test('spatial ambience shares one gesture-owned context and follows camera position and orientation',async t=>{
+  const {audio,contexts,nodes}=browser(t),frame=spatialFrame();
+  audio.setSpatialScene(frame);assert.equal(contexts.length,0,'scene updates never unlock audio');
+  await audio.enable({music:true});audio.setSpatialScene(frame);
+  assert.equal(contexts.length,1);assert.ok(audio.diagnostics().spatial.waterfall);
+  const panner=nodes.find(node=>node.kind==='panner');assert.equal(panner.panningModel,'HRTF');assert.equal(panner.distanceModel,'inverse');assert.ok(panner.rolloffFactor>0);
+  assert.deepEqual([panner.positionX.value,panner.positionY.value,panner.positionZ.value],frame.waterfall.position);
+  frame.listener=[-15,8,4];frame.forward=[1,0,0];audio.setSpatialScene(frame);
+  assert.equal(contexts[0].listener.positionX.value,-15);assert.equal(contexts[0].listener.forwardX.value,1);
+  assert.equal(panner.positionX.value,3,'turning the camera moves the listener, not the waterfall');
+  for(const source of nodes.filter(node=>node.kind==='media-source'))assert.notEqual(source.connections[0]?.kind,'panner','music keeps its original stereo graph');
+});
+
+test('spatial fishing and water touches are short, bounded and cleared by mute or page visibility',async t=>{
+  const {audio,contexts,nodes}=browser(t),frame=spatialFrame();audio.setSpatialScene(frame);await audio.enable({music:true});audio.setSpatialScene(frame);
+  audio.playSpatial('fishing',[-5,-.16,4]);audio.playSpatial('water-touch',[2,-.16,-3]);
+  assert.equal(audio.diagnostics().spatial.events,1,'a simultaneous duplicate event is throttled');
+  const event=nodes.filter(node=>node.kind==='source'&&node.stoppedAt>0).at(-1);assert.ok(event.stoppedAt-event.startedAt<.3);
+  contexts[0].currentTime=1;audio.playSpatial('water-touch',[2,-.16,-3]);assert.equal(audio.diagnostics().spatial.events,2);
+  audio.visibility(true);assert.equal(audio.diagnostics().spatial.voices,0);assert.equal(audio.diagnostics().spatial.waterfall,false);
+  const count=nodes.length;audio.playSpatial('fishing',[0,0,0]);audio.setSpatialScene(frame);assert.equal(nodes.length,count,'a hidden page cannot start voices');
+  audio.visibility(false);await flush();audio.setSpatialScene(frame);assert.ok(audio.diagnostics().spatial.waterfall);
+  frame.waterfall.flow=0;audio.setSpatialScene(frame);assert.equal(audio.diagnostics().spatial.waterfall,false,'flow ending releases the loop');
+  audio.mute();assert.equal(audio.diagnostics().spatial.voices,0);audio.setSpatialScene(frame);assert.equal(audio.diagnostics().spatial.waterfall,false);
+});
+
+test('bird calls follow their actual moving emitters and are released when severe weather starts',async t=>{
+  t.mock.timers.enable({apis:['setTimeout']});
+  const {audio,nodes}=browser(t,{fetch:async()=>({ok:true,arrayBuffer:async()=>new ArrayBuffer(8)})}),frame=spatialFrame();frame.waterfall.flow=0;audio.setSpatialScene(frame);await audio.enable({music:true});await flush();audio.setSpatialScene(frame);
+  t.mock.timers.tick(10000);await flush();
+  const panner=nodes.find(node=>node.kind==='panner');assert.ok(panner,'a decoded bird call has a positioned emitter');
+  frame.birds=[[30,6,-12],[30,6,-12]];audio.setSpatialScene(frame);
+  assert.equal(panner.positionX.value,30);assert.equal(panner.positionZ.value,-12);
+  audio.setEnvironment('storm','day');assert.equal(audio.diagnostics().spatial.voices,0);
 });

@@ -1,6 +1,7 @@
 import catalog from "../../../public/experience/audio/audio-manifest.json";
 import type { AudioManifest } from "@/lib/experience-contract";
 import type { EntryAudioBootstrap } from "@/lib/experience/early-audio-script";
+import type {ScenicAudioFrame,ScenicSound} from './scene-signals';
 
 type SoundName = "selection" | "arrival";
 import type { Weather, WeatherPhase } from "@/lib/experience/weather.mjs";
@@ -27,6 +28,7 @@ export type AudioDiagnostics = {
   phase: WeatherPhase;
   music: { status: "off" | "loading" | "playing" | "paused" | "error"; title: string | null; currentTime: number; duration: number; error: string | null; rms: number; peak: number; signalDetected: boolean; metered: boolean };
   thunder: { status: "idle" | "loading" | "ready" | "error"; preparationMs: number | null; error: string | null; pending: number; active: number; gain: number; played: number };
+  spatial: {voices:number;waterfall:boolean;events:number;listener:number[]|null};
 
 };
 
@@ -94,8 +96,13 @@ export class ExperienceAudio {
   private meterData: Float32Array<ArrayBuffer> | null = null;
   private effects = new Set<ActiveSound>();
   private ambience = new Set<ActiveSound>();
+  private spatialFrame: ScenicAudioFrame | null = null;
+  private spatialVoices = new Map<PannerNode,{bird:number|null;position:[number,number,number]}>();
+  private waterfallVoice: {sound:ActiveSound;gain:GainNode} | null = null;
+  private spatialEvents=0;
+  private lastSpatialEventAt=-Infinity;
   private birdTimer: ReturnType<typeof setTimeout> | null = null;
-  private noiseBuffers = new Map<"rain" | "wind", AudioBuffer>();
+  private noiseBuffers = new Map<"rain" | "wind" | "water", AudioBuffer>();
   private thunderSample: AudioBuffer | null = null;
   private thunderStatus: AudioDiagnostics["thunder"]["status"] = "idle";
   private thunderError: string | null = null;
@@ -798,7 +805,7 @@ export class ExperienceAudio {
     this.stopSounds(this.thunderVoices);
     if (cancelledCount) this.record("thunder-cancelled", String(cancelledCount));
   }
-  private track(source: AudioScheduledSourceNode, nodes: AudioNode[], collection: Set<ActiveSound>) {
+  private track(source: AudioScheduledSourceNode, nodes: AudioNode[], collection: Set<ActiveSound>, onEnd?:()=>void) {
     let cleaned = false;
     const sound: ActiveSound = { source, cleanup: () => {
       if (cleaned) return;
@@ -807,9 +814,11 @@ export class ExperienceAudio {
       source.onended = null;
       source.disconnect();
       nodes.forEach(node => node.disconnect());
+      onEnd?.();
     } };
     collection.add(sound);
     source.onended = sound.cleanup;
+    return sound;
   }
   private stopSounds(collection: Set<ActiveSound>) {
     for (const sound of [...collection]) {
@@ -856,6 +865,64 @@ export class ExperienceAudio {
     this.stopAtmosphere();
     if (this.canPlay()) this.startAtmosphere();
   }
+  /** Shares the existing gesture-owned context; music stays on its stereo bus. */
+  setSpatialScene(frame:ScenicAudioFrame){
+    if(this.disposed||![frame.listener,frame.forward,frame.up,frame.waterfall.position].every(point=>point.every(Number.isFinite)))return;
+    this.spatialFrame=frame;
+    const context=this.context;
+    if(!this.canPlay()||!context)return;
+    const listener=context.listener;
+    if(listener){
+      if(listener.positionX){
+        const values=[...frame.listener,...frame.forward,...frame.up];
+        [listener.positionX,listener.positionY,listener.positionZ,listener.forwardX,listener.forwardY,listener.forwardZ,listener.upX,listener.upY,listener.upZ].forEach((parameter,index)=>parameter.setTargetAtTime(values[index],context.currentTime,.08));
+      }else{listener.setPosition?.(...frame.listener);listener.setOrientation?.(...frame.forward,...frame.up);}
+    }
+    for(const [panner,voice] of this.spatialVoices){
+      const point=voice.bird===null?voice.position:frame.birds[voice.bird%Math.max(1,frame.birds.length)]??voice.position;
+      this.positionSpatial(panner,point);
+    }
+    this.updateWaterfall();
+  }
+  private positionSpatial(panner:PannerNode,point:[number,number,number]){
+    const now=this.context?.currentTime??0;
+    if(panner.positionX)[panner.positionX,panner.positionY,panner.positionZ].forEach((parameter,index)=>parameter.setTargetAtTime(point[index],now,.08));
+    else panner.setPosition(...point);
+  }
+  private spatialNode(point:[number,number,number],bird:number|null=null){
+    if(!this.spatialFrame||!this.context?.createPanner)return null;
+    const panner=this.context.createPanner();
+    panner.panningModel='HRTF';panner.distanceModel='inverse';panner.refDistance=15;panner.maxDistance=120;panner.rolloffFactor=.85;
+    this.spatialVoices.set(panner,{bird,position:[...point]});this.positionSpatial(panner,point);return panner;
+  }
+  private updateWaterfall(){
+    const frame=this.spatialFrame,context=this.context;
+    const flow=frame?.active?volume(frame.waterfall.flow):0;
+    if(!context||!this.ambientGain||!this.canPlay())return;
+    if(flow<.004||this.ambienceVolume===0){
+      const voice=this.waterfallVoice;this.waterfallVoice=null;
+      if(voice){try{voice.sound.source.stop();}catch{}voice.sound.cleanup();}
+      return;
+    }
+    if(!this.waterfallVoice){
+      const source=context.createBufferSource(),filter=context.createBiquadFilter(),gain=context.createGain(),panner=this.spatialNode(frame!.waterfall.position);
+      source.buffer=this.noiseBuffer('rain');source.loop=true;filter.type='lowpass';filter.frequency.value=1800;gain.gain.value=0;
+      source.connect(filter);filter.connect(gain);gain.connect(panner??this.ambientGain);panner?.connect(this.ambientGain);
+      const sound=this.track(source,[filter,gain,...(panner?[panner]:[])],this.ambience,()=>{if(panner)this.spatialVoices.delete(panner);this.waterfallVoice=null;});
+      this.waterfallVoice={sound,gain};source.start(context.currentTime+.01);
+    }
+    this.waterfallVoice.gain.gain.setTargetAtTime(Math.sqrt(flow)*.65,context.currentTime,.18);
+  }
+  playSpatial(kind:ScenicSound,point:[number,number,number]){
+    const context=this.context;
+    if(!this.canPlay()||!context||!this.effectGain||!this.spatialFrame?.active||this.effectsVolume===0||!point.every(Number.isFinite)||context.currentTime-this.lastSpatialEventAt<.14)return;
+    this.lastSpatialEventAt=context.currentTime;this.spatialEvents++;
+    const source=context.createBufferSource(),filter=context.createBiquadFilter(),gain=context.createGain(),panner=this.spatialNode(point),now=context.currentTime+.01;
+    source.buffer=this.noiseBuffer('water');filter.type='lowpass';filter.frequency.value=kind==='fishing'?1200:2400;
+    gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(kind==='fishing'?.65:.40,now+.012);gain.gain.exponentialRampToValueAtTime(.0001,now+.24);
+    source.connect(filter);filter.connect(gain);gain.connect(panner??this.effectGain);panner?.connect(this.effectGain);
+    this.track(source,[filter,gain,...(panner?[panner]:[])],this.effects,()=>{if(panner)this.spatialVoices.delete(panner);});source.start(now);source.stop(now+.26);this.record('spatial-'+kind);
+  }
   private birdsAllowed() { return this.phase !== "night" && !["rain", "storm", "freezing-rain", "snow", "hail"].includes(this.weather); }
   private startAtmosphere() {
     if (!this.canPlay() || !this.context || !this.ambientGain) return;
@@ -865,13 +932,14 @@ export class ExperienceAudio {
       if (this.weather === "storm" || this.weather === "hail") this.loopNoise(this.noiseBuffer("wind"), 45, 700, .23);
     } else this.loopNoise(this.noiseBuffer("wind"), 70, 1100, this.phase === "night" ? .09 : .14);
     if (this.birdsAllowed()) this.scheduleBirds(3000 + Math.random() * 6000);
+    this.updateWaterfall();
   }
-  private noiseBuffer(kind: "rain" | "wind"): AudioBuffer {
+  private noiseBuffer(kind: "rain" | "wind" | "water"): AudioBuffer {
     const context = this.context;
     if (!context) throw cancelled();
     const cached = this.noiseBuffers.get(kind);
     if (cached) return cached;
-    const buffer = context.createBuffer(1, Math.ceil(context.sampleRate * 6), context.sampleRate);
+    const buffer = context.createBuffer(1, Math.ceil(context.sampleRate * (kind==='water'?.35:6)), context.sampleRate);
     const data = buffer.getChannelData(0);
     let previous = 0, squares = 0;
     const edge = Math.max(1, Math.floor(context.sampleRate * .015));
@@ -879,7 +947,7 @@ export class ExperienceAudio {
       const white = Math.random() * 2 - 1;
       previous = (previous + white * .055) / 1.055;
       // Rain retains detail instead of high-passing heavily smoothed brown noise.
-      const sample = kind === "rain" ? white * .8 + previous * .2 : previous;
+      const sample = kind !== "wind" ? white * .8 + previous * .2 : previous;
       data[index] = sample * Math.min(1, index / edge, (data.length - 1 - index) / edge);
       squares += data[index] * data[index];
     }
@@ -928,8 +996,10 @@ export class ExperienceAudio {
         const gain = this.context.createGain();
         source.buffer = buffer;
         gain.gain.value = sample.volume * (this.phase === "dusk" || this.weather === "drizzle" ? .45 : 1);
-        source.connect(gain); gain.connect(this.ambientGain);
-        this.track(source, [gain], this.ambience); source.start(this.context.currentTime + .02);
+        const point=this.spatialFrame?.birds[next%Math.max(1,this.spatialFrame.birds.length)];
+        const panner=point?this.spatialNode(point,next):null;
+        source.connect(gain); gain.connect(panner??this.ambientGain);panner?.connect(this.ambientGain);
+        this.track(source, [gain,...(panner?[panner]:[])], this.ambience,()=>{if(panner)this.spatialVoices.delete(panner);}); source.start(this.context.currentTime + .02);
       }
       this.scheduleBirds((this.phase === "dusk" || this.weather === "drizzle" ? 18000 : 10000) + Math.random() * 14000);
     }, delay);
@@ -999,6 +1069,7 @@ export class ExperienceAudio {
       music: { status: this.disposed || !this.desired || !this.musicEnabled ? "off" : hidden ? "paused" : this.musicError ? "error" : this.musicStatus, title: AUDIO_CATALOG.playlist![this.musicIndex]?.title ?? null, currentTime: this.music?.currentTime ?? 0, duration: Number.isFinite(this.music?.duration) ? this.music!.duration : 0, error: this.musicError, rms: musicRms, peak: musicPeak, signalDetected: metered && musicPeak > SIGNAL_THRESHOLD, metered },
       thunder: { status: this.thunderStatus, preparationMs: this.thunderPreparationMs, error: this.thunderError, pending: this.pendingThunder.length, active: this.thunderVoices.size, gain: this.thunderBus?.gain.value ?? this.thunderLevel(), played: this.thunderPlayed },
       phase: this.phase,
+      spatial:{voices:this.spatialVoices.size,waterfall:!!this.waterfallVoice,events:this.spatialEvents,listener:this.spatialFrame?[...this.spatialFrame.listener]:null},
       status, contextState, enabled: this.enabled, desired: this.desired, hidden, weather: this.weather,
       currentTime: this.context?.currentTime ?? 0, sampleRate: this.context?.sampleRate ?? 0,
       gains: { effects: this.effectGain?.gain.value ?? this.effectsVolume, ambience: this.ambientGain?.gain.value ?? this.ambienceVolume, music: this.musicEnabled ? this.musicVolume : 0 },

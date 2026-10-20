@@ -21,6 +21,7 @@ export default function GardenLife({ environment, environmentState, season, redu
   const stems = useRef<THREE.InstancedMesh>(null), petals = useRef<THREE.InstancedMesh>(null), centers = useRef<THREE.InstancedMesh>(null), leaves = useRef<THREE.InstancedMesh>(null);
   const wings = useRef<THREE.InstancedMesh>(null), bodies = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
+  const flowerClock=useRef(-Infinity),flowerUpdates=useRef(0);
   const wingGeometry = useMemo(() => {
     const wing = new THREE.Shape();
     wing.moveTo(0, 0); wing.bezierCurveTo(.32, .8, 1.12, .85, .95, .15);
@@ -38,11 +39,18 @@ export default function GardenLife({ environment, environmentState, season, redu
     }
     for (const mesh of [petals.current, wings.current]) if (mesh?.instanceColor) mesh.instanceColor.needsUpdate = true;
   }, [flowers, count]);
+  useEffect(()=>{
+    flowerClock.current=-Infinity;
+    flowers.forEach((flower,i)=>{dummy.position.set(flower.x+.065,flower.y+flower.height*.45,flower.z);dummy.rotation.set(0,flower.seed,-.35);dummy.scale.set(.11,.018,.04);dummy.updateMatrix();leaves.current?.setMatrixAt(i,dummy.matrix);});
+    if(leaves.current)leaves.current.instanceMatrix.needsUpdate=true;
+  },[flowers,season,dummy]);
   useFrame(() => {
     const state = environmentState.current;
     const time = reducedMotion ? 0 : state.elapsed;
     const bloom = (.28 + seasonInfo[season].flowerDensity * .72) * (1 - state.snow * .85);
     const wind = reducedMotion ? 0 : .025 + state.wind * .045;
+    if(time-flowerClock.current>=.05){
+    flowerClock.current=time;flowerUpdates.current++;
     flowers.forEach((flower, i) => {
       const sway = Math.sin(time * .8 + flower.seed) * wind;
       dummy.position.set(flower.x + sway * .5, flower.y + flower.height / 2, flower.z);
@@ -54,8 +62,9 @@ export default function GardenLife({ environment, environmentState, season, redu
         dummy.rotation.set(.12, -angle, 0); dummy.scale.set(.10 * bloom, .035 * bloom, .06 * bloom); dummy.updateMatrix(); petals.current?.setMatrixAt(i * 5 + p, dummy.matrix);
       }
       dummy.position.set(topX, topY + .025, flower.z); dummy.scale.set(.042 * bloom, .027 * bloom, .042 * bloom); dummy.rotation.set(0, 0, 0); dummy.updateMatrix(); centers.current?.setMatrixAt(i, dummy.matrix);
-      dummy.position.set(flower.x + .065, flower.y + flower.height * .45, flower.z); dummy.rotation.set(0, flower.seed, -.35); dummy.scale.set(.11, .018, .04); dummy.updateMatrix(); leaves.current?.setMatrixAt(i, dummy.matrix);
     });
+    for(const mesh of [stems.current,petals.current,centers.current])if(mesh)mesh.instanceMatrix.needsUpdate=true;
+    }
     const calm = !["rain", "storm", "freezing-rain", "snow", "hail"].includes(state.weather) && state.night < .3;
     for (let i = 0; i < count; i++) {
       const pose = butterflyPose(i, time, beds[(i * 3) % beds.length]);
@@ -65,9 +74,10 @@ export default function GardenLife({ environment, environmentState, season, redu
         dummy.rotation.set(0, pose.heading, side ? Math.PI - pose.flap : pose.flap); dummy.scale.set(size, size, size); dummy.updateMatrix(); wings.current?.setMatrixAt(i * 2 + side, dummy.matrix);
       }
     }
-    for (const mesh of [stems.current, petals.current, centers.current, leaves.current, wings.current, bodies.current]) if (mesh) mesh.instanceMatrix.needsUpdate = true;
+    for (const mesh of [wings.current, bodies.current]) if (mesh) mesh.instanceMatrix.needsUpdate = true;
     gl.domElement.setAttribute("data-garden-butterflies", String(calm ? count : 0));
     gl.domElement.setAttribute("data-garden-flower-beds", String(beds.length));
+    gl.domElement.setAttribute('data-garden-flower-updates',String(flowerUpdates.current));
   });
   return <group name="garden_living_accents">
     <instancedMesh ref={stems} args={[stemGeometry, undefined, flowers.length]} frustumCulled={false} raycast={noRaycast}><meshStandardMaterial color="#64805a" roughness={.88}/></instancedMesh>

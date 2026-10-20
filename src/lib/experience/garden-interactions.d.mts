@@ -1,0 +1,10 @@
+import type {Vec3,WorldEnvironmentManifest} from '../experience-contract';
+export type WaterRing={x:number;z:number;born:number;radius:number};
+export type WaterTouches={sequence:number;cursor:number;lastAt:number;rings:WaterRing[]};
+export function createWaterTouches(count?:number):WaterTouches;
+export function addWaterTouch(state:WaterTouches,point:Vec3,time:number,environment:WorldEnvironmentManifest,ice?:number):boolean;
+export function touchRipple(ring:WaterRing,time:number,echo?:number):{visible:boolean;radius:number;opacity:number};
+export type GreetingState={age:number;elapsed:number;lastAt:number;armed:boolean;requested:boolean;count:number};
+export function createGreeting():GreetingState;
+export function requestGreeting(state:GreetingState):void;
+export function advanceGreeting(state:GreetingState,seconds:number,context:{available:boolean;distance:number;heading?:number;cameraHeading?:number}):{wave:number;sway:number;look:number};

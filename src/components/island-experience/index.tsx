@@ -10,6 +10,7 @@ import { weatherKinds, weatherNames } from "@/lib/experience/weather.mjs";
 import { resolveReadingHash, readingHref } from "@/lib/reading-navigation.mjs";
 import { useScenicWeather } from "./use-scenic-weather";
 import { getSeason, seasonInfo, seasonRegion } from "@/lib/experience/seasons.mjs";
+import type {ScenicAudioFrame,ScenicSound} from '@/lib/experience/scene-signals';
 import type { IslandSceneProps, LabelPositions, ScenePerformance } from "./scene";
 import WorldMap from "./world-map";
 import EnvironmentControls from "./environment-controls";
@@ -50,7 +51,7 @@ const fallbackLabels: LabelPositions = Object.fromEntries(pavilionIds.map((id, i
 class SceneBoundary extends Component<{ children: ReactNode; onFail: () => void }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
-  componentDidCatch() { this.props.onFail(); }
+  componentDidCatch(error:Error) { console.error('Garden render failed',error);this.props.onFail(); }
   render() { return this.state.failed ? null : this.props.children; }
 }
 
@@ -189,7 +190,7 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
     });
     Promise.all([manifestTask, sceneTask]).then(([, sceneModule]) => {
       if (!controller.signal.aborted) setScene(() => sceneModule.default);
-    }).catch(error => { if (error.name !== "AbortError" && !controller.signal.aborted) setSceneState("fallback"); });
+    }).catch(error => { if (error.name !== "AbortError" && !controller.signal.aborted) {console.error('Garden loading failed',error);setSceneState("fallback");} });
     fetch("/api/updates", { signal: controller.signal }).then(async response => {
       if (!response.ok) throw new Error("Updates unavailable");
       const result = await response.json() as { updates: PublicUpdate[] };
@@ -237,6 +238,7 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
       root.current.dataset.musicTime = String(stats.music.currentTime);
       root.current.dataset.musicSignal = String(stats.music.signalDetected);
       root.current.dataset.audioEvents = JSON.stringify(stats.recentEvents.slice(-6));
+      root.current.dataset.spatialVoices=String(stats.spatial.voices);root.current.dataset.spatialWaterfall=String(stats.spatial.waterfall);root.current.dataset.spatialEvents=String(stats.spatial.events);
       root.current.dataset.thunderStatus = stats.thunder.status;
       root.current.dataset.thunderGain = String(stats.thunder.gain);
       root.current.dataset.thunderPlayed = String(stats.thunder.played);
@@ -353,6 +355,8 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
 
   const playSelection = useCallback(() => audio.current?.play("selection"), []);
   const playThunder = useCallback(() => audio.current?.thunder(), []);
+  const spatialFrame = useCallback((frame:ScenicAudioFrame)=>audio.current?.setSpatialScene(frame),[]);
+  const spatialSound = useCallback((kind:ScenicSound,point:[number,number,number])=>audio.current?.playSpatial(kind,point),[]);
   const projectLabels = useCallback((positions:LabelPositions) => {
     labels.current=positions;
     const bounds=stage.current?.getBoundingClientRect();
@@ -524,7 +528,7 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
       <div ref={stage} className="island-stage" aria-label="Sete ilhas da pesquisa" data-animation={reducedMotion ? "reduced" : "full"}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={`island-poster${sceneState === "ready" ? " is-hidden" : ""}`} src={poster} alt="Sete jardins conectados por pontes: a pesquisa, ferramentas, produtividade, validação, especificação, profissão e perspectivas." fetchPriority="high" onLoad={event => { const image = event.currentTarget; if (image.naturalHeight) setPosterAspect(image.naturalWidth / image.naturalHeight); }} />
-        {Scene && manifest && sceneState !== "fallback" && worldNavigator && (!reading || sceneHasMounted) && <div className="island-canvas" aria-hidden="true"><SceneBoundary onFail={failed}><Scene manifest={manifest} navigator={worldNavigator} active={visible && !reading} reducedMotion={reducedMotion} panelOpen={!!pavilion || mapOpen} interactionBlocked={modalOpen || !started} autoQuality={qualityPreference === "auto"} pavilionId={pavilion} resetEpoch={resetEpoch} quality={quality} weather={weather} season={season} phase={phase} clock={environment.timeRef} zoom={zoom} cameraHeight={cameraHeight} onZoom={setZoom} intro={!started} onInteract={playSelection} onThunder={playThunder} onReady={ready} onFail={failed} onArrive={arrived} onSelect={choose} onProject={projectLabels} onPerformance={recordPerformance} /></SceneBoundary></div>}
+        {Scene && manifest && sceneState !== "fallback" && worldNavigator && (!reading || sceneHasMounted) && <div className="island-canvas" aria-hidden="true"><SceneBoundary onFail={failed}><Scene manifest={manifest} navigator={worldNavigator} active={visible && !reading} reducedMotion={reducedMotion} panelOpen={!!pavilion || mapOpen} interactionBlocked={modalOpen || !started} autoQuality={qualityPreference === "auto"} pavilionId={pavilion} resetEpoch={resetEpoch} quality={quality} weather={weather} season={season} phase={phase} clock={environment.timeRef} zoom={zoom} cameraHeight={cameraHeight} onZoom={setZoom} intro={!started} onInteract={playSelection} onThunder={playThunder} onSoundFrame={spatialFrame} onSpatialSound={spatialSound} onReady={ready} onFail={failed} onArrive={arrived} onSelect={choose} onProject={projectLabels} onPerformance={recordPerformance} /></SceneBoundary></div>}
         <nav className="island-pavilions" aria-label="Ambientes da pesquisa">{pavilionIds.map(id => <button key={id} data-pavilion={id} className={`island-label${selectedIsland === id ? " is-selected" : ""}`} style={{ left: `${labelLeft(id)}%`, top: `${Math.min(93, Math.max(7, currentLabels[id].y))}%` }} aria-label={`${names[id]}: ${descriptions[id]}`} aria-current={selectedIsland === id ? "true" : undefined} onClick={event => choose(id, event.currentTarget)}><span aria-hidden="true">{pavilionIds.indexOf(id) + 1}</span><strong>{names[id]}</strong></button>)}</nav>
       </div>
       {!started && <section className="island-introduction" aria-labelledby="welcome-title">
@@ -539,7 +543,7 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
         <div className="island-world-caption"><span>ILHAS DA PESQUISA</span><button className="island-season-status" onClick={event => openCredits(event.currentTarget, "environment")} aria-label={`Ambiente: ${seasonInfo[season].name}, ${weatherNames[weather]}. Ajustar ambiente`}><WeatherIcon size={15} aria-hidden="true" /><span>{seasonInfo[season].name} · {weatherNames[weather]}</span></button><small><time>{environment.clock}</time> · Horário do jardim</small></div>
         <div className="island-zoom" aria-label="Câmera do jardim"><button aria-label="Aproximar o jardim" onClick={() => setZoom(value => Math.min(manifest?.cameraBounds?.maxZoom ?? 2, value + .15))} disabled={zoom >= (manifest?.cameraBounds?.maxZoom ?? 2)}><Plus size={17} aria-hidden="true" /></button><button aria-label="Afastar o jardim" onClick={() => setZoom(value => Math.max(manifest?.cameraBounds?.minZoom ?? .8, value - .15))} disabled={zoom <= (manifest?.cameraBounds?.minZoom ?? .8)}><Minus size={17} aria-hidden="true" /></button><button aria-label="Subir a câmera" onClick={() => setCameraHeight(value => Math.min(6,value+.8))} disabled={cameraHeight >= 6}><ArrowUp size={17} aria-hidden="true" /></button><button aria-label="Descer a câmera" onClick={() => setCameraHeight(value => Math.max(-4,value-.8))} disabled={cameraHeight <= -4}><ArrowDown size={17} aria-hidden="true" /></button><button aria-label="Restaurar enquadramento" onClick={() => { setCameraHeight(0); setZoom(1); setResetEpoch(value => value + 1); }}><RotateCcw size={15} aria-hidden="true" /></button></div>
         <div className="island-map-preview"><button ref={returnButton} className="island-map-launch" aria-label="Abrir mapa da pesquisa" onClick={event => openMap(event.currentTarget)}><span>Mapa · {visited.length ? `${visited.length}/7 visitadas` : "7 ilhas"}<kbd>M</kbd></span><WorldMap visited={visited} selected={selectedIsland} onSelect={choose} /></button></div>
-        <p className="island-status" role="status" aria-live="polite">{sceneState === "fallback" ? "Modo leve · os resumos e a leitura continuam disponíveis." : sceneState === "loading" ? "Preparando as ilhas. Os resumos já estão disponíveis." : selectedIsland ? `Ilha ${pavilionIds.indexOf(selectedIsland) + 1} · ${names[selectedIsland]}` : "Arraste para girar e inclinar · role para o zoom · ↑↓ movem a câmera"}</p>
+        <p className="island-status" role="status" aria-live="polite">{sceneState === "fallback" ? "Modo leve · os resumos e a leitura continuam disponíveis." : sceneState === "loading" ? "Preparando as ilhas. Os resumos já estão disponíveis." : selectedIsland ? `Ilha ${pavilionIds.indexOf(selectedIsland) + 1} · ${names[selectedIsland]}` : "Arraste para explorar · use os controles de câmera · toque na água ou no morador"}</p>
       </>}
     </main>
     {reading && <main ref={reader} className="island-reading" data-reader-layout="v10" inert={modalOpen} aria-label="Caderno da pesquisa"><div className="island-reading-inner">
