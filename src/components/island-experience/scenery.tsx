@@ -12,6 +12,7 @@ import { seasonInfo, vegetationDensity, vegetationGroup, type Season, type Veget
 import type { Weather } from "@/lib/experience/weather.mjs";
 import { createFishRoutes, createFishSchools, faunaCount, environmentSeconds, writeFishPose } from "./scene-motion.mjs";
 import { lakeSpillway, lakeWaveParameters } from "@/lib/experience/lake-dynamics.mjs";
+import {createFeedingFish,advanceFeedingFish,writeFeedingFishPose,type FeedSpot} from '@/lib/experience/fish-feeding.mjs';
 
 type SceneryProps = {
   world: THREE.Object3D;
@@ -23,6 +24,7 @@ type SceneryProps = {
   environment?: WorldEnvironmentManifest;
   environmentState?: MutableRefObject<EnvironmentState>;
   quality?: "low" | "high";
+  feedSpot?:MutableRefObject<FeedSpot>;
 };
 type ColorKind = "dark" | "sage" | "light" | "deep" | "dry" | "ground";
 type MaterialRecord = {
@@ -334,7 +336,7 @@ function leafGeometry() {
 }
 
 /** Real garden geometry is recolored and shaded; no suspended snow cards. */
-export default function Scenery({ world, season, reducedMotion, moving = true, windSpeed = 7, weather = "clear", environment: providedEnvironment, environmentState, quality = "high" }: SceneryProps) {
+export default function Scenery({ world, season, reducedMotion, moving = true, windSpeed = 7, weather = "clear", environment: providedEnvironment, environmentState, quality = "high",feedSpot }: SceneryProps) {
   const { invalidate, gl } = useThree();
   const environment = useMemo(() => providedEnvironment ?? createEnvironmentManifest(), [providedEnvironment]);
   const uniforms = useMemo(() => createUniforms(environment), [environment]);
@@ -346,6 +348,7 @@ export default function Scenery({ world, season, reducedMotion, moving = true, w
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const fishPose = useMemo(() => ({ x: 0, y: 0, z: 0, heading: 0, tail: 0 }), []);
   const fishCount = faunaCount("fish",quality);
+  const feedingFish=useMemo(()=>createFeedingFish(fishCount),[fishCount]);
   const fishRoutes = useMemo(() => createFishSchools(environment.fishRoutes ?? createFishRoutes(environment,fishCount),fishCount),[environment,fishCount]);
   const fishColors = useMemo(() => fishRoutes.routes.map(route => new THREE.Color(route.color)),[fishRoutes]);
   const metadata = seasonInfo[season];
@@ -455,8 +458,9 @@ export default function Scenery({ world, season, reducedMotion, moving = true, w
       falling.current.instanceMatrix.needsUpdate = true;
     }
     if (fishes.current && tails.current) {
+      if(feedSpot)advanceFeedingFish(feedingFish,feedSpot.current,time,fishRoutes,environment,state.ice);
       for (let index = 0; index < fishCount; index++) {
-        writeFishPose(fishPose, index, time,fishRoutes);
+        if(feedSpot)writeFeedingFishPose(fishPose,index,time,fishRoutes,feedingFish);else writeFishPose(fishPose, index, time,fishRoutes);
         fishPose.y += state.waterLevel - Math.max(0, state.wind - .5) * .16;
         const scale = fishRoutes.routes[index]?.scale ?? 1;
         dummy.position.set(fishPose.x, fishPose.y, fishPose.z); dummy.rotation.set(0, fishPose.heading, 0); dummy.scale.set(.105*scale, .046*scale, .235*scale); dummy.updateMatrix(); fishes.current.setMatrixAt(index, dummy.matrix);
@@ -466,6 +470,7 @@ export default function Scenery({ world, season, reducedMotion, moving = true, w
       }
       fishes.current.instanceMatrix.needsUpdate = true; tails.current.instanceMatrix.needsUpdate = true;
       if(fishes.current.instanceColor)fishes.current.instanceColor.needsUpdate = true;
+      if(feedSpot){let approaching=0;for(const fish of feedingFish.fish)if(fish.mode==='approach')approaching++;gl.domElement.setAttribute('data-garden-feeding-fish',String(feedSpot.current.eaters));gl.domElement.setAttribute('data-garden-approaching-fish',String(approaching));}
       if(tails.current.instanceColor)tails.current.instanceColor.needsUpdate = true;
     }
     const attributes = {

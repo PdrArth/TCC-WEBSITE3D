@@ -26,3 +26,12 @@ export function butterflyPose(index, seconds, bed) {
   const flight = cycle < 2 ? 0 : Math.sin((cycle - 2) / 6 * Math.PI) ** 2;
   return { x: bed.x + Math.cos(t) * flight * .9, y: bed.y + bed.height + .14 + flight * (.5 + Math.sin(t * 1.7) * .14), z: bed.z + Math.sin(t * .8) * flight * .6, heading: -t, flap: .12 + flight * (.45 + Math.sin(seconds * 12 + index) * .35) };
 }
+
+export function fireflyPresence(season,weather,night=0,wind=0){
+  if(season!=='summer'||['drizzle','rain','storm','hail','snow','freezing-rain'].includes(weather))return 0;
+  const darkness=Math.max(0,Math.min(1,(night-.35)/.45));return darkness*(1-Math.max(0,Math.min(.8,wind-.35)));
+}
+export function fireflyPose(index,seconds,bed){
+  const t=seconds*(.32+index%4*.035)+index*2.39996;
+  return {x:bed.x+Math.sin(t)*.48,y:bed.y+1.55+Math.sin(t*.63+index)*.30,z:bed.z+Math.sin(t*.77+index)*.42,glow:.26+.74*((1+Math.sin(seconds*(1.05+index%5*.13)+index*1.7))/2)**3};
+}

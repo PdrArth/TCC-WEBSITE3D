@@ -1,7 +1,7 @@
 "use client";
 
 import { Component, useCallback, useEffect, useRef, useState, useSyncExternalStore, type ComponentType, type ReactNode } from "react";
-import { ArrowLeft, ArrowRight, ArrowUp, ArrowDown, BookOpen, CloudLightning, CloudRain, Cloud, ExternalLink, Maximize, Minimize, Play, Settings2, Info, Sun, Sunset, Volume2, VolumeX, X, Minus, Plus, RotateCcw } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUp, ArrowDown, BookOpen, Camera, Download, CloudLightning, CloudRain, Cloud, ExternalLink, Maximize, Minimize, Play, Settings2, Info, Sun, Sunset, Volume2, VolumeX, X, Minus, Plus, RotateCcw } from "lucide-react";
 import { pavilionIds, islandNames as names, islandDescriptions as descriptions, type PavilionId, type WorldManifest } from "@/lib/experience-contract";
 import type { PublicUpdate } from "@/lib/update-types";
 import { WorldNavigator, type Arrival } from "@/lib/experience/navigation.mjs";
@@ -22,6 +22,7 @@ import "../research-content/pavilion-v13.css";
 import "../research-content/pavilion-v14.css";
 import "./environment-v14.css";
 import "./garden-comfort.css";
+import "./photo-mode.css";
 
 // Start the world download as soon as this client module is evaluated, before
 // hydration. The notebook is a separate chunk, fetched only when it is needed.
@@ -104,6 +105,7 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
   const [labelWidths, setLabelWidths] = useState<Record<PavilionId, number>>(Object.fromEntries(pavilionIds.map(id => [id, 150])) as Record<PavilionId, number>);
   const [posterAspect, setPosterAspect] = useState(4 / 3);
   const [started, setStarted] = useState(false);
+  const [photoMode,setPhotoMode]=useState(false),[photoRequest,setPhotoRequest]=useState(0),[photoBusy,setPhotoBusy]=useState(false),[photoNotice,setPhotoNotice]=useState(''),[feedNotice,setFeedNotice]=useState(0);
   const [mapOpen, setMapOpen] = useState(false);
   const environment = useScenicWeather(visible && !reading);
   const { weather, phase, season, setSeason, timeOfDay } = environment;
@@ -125,6 +127,20 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
   const retryController = useRef<AbortController | null>(null);
   const soundSilenced = useRef(false);
   const soundGesture = useRef(false);
+  const photoTrigger=useRef<HTMLButtonElement>(null),photoExit=useRef<HTMLButtonElement>(null),photoToolbar=useRef<HTMLDivElement>(null),photoUrls=useRef(new Set<string>());
+  const exitPhoto=useCallback(()=>{setPhotoMode(false);requestAnimationFrame(()=>photoTrigger.current?.focus({preventScroll:true}));},[]);
+  const fedFish=useCallback(()=>setFeedNotice(value=>value+1),[]);
+  const photoCaptured=useCallback((blob:Blob|null)=>{
+    setPhotoBusy(false);
+    if(!blob?.size){setPhotoNotice('Não foi possível salvar a foto. Tente novamente.');return;}
+    const url=URL.createObjectURL(blob);photoUrls.current.add(url);
+    const link=document.createElement('a');link.href=url;link.download=`ilhas-da-pesquisa-${new Date().toISOString().replace(/[:.]/g,'-')}.png`;document.body.appendChild(link);link.click();link.remove();
+    setPhotoNotice('Foto salva em PNG.');
+    window.setTimeout(()=>{URL.revokeObjectURL(url);photoUrls.current.delete(url);},1000);
+  },[]);
+  useEffect(()=>{if(photoMode)photoExit.current?.focus({preventScroll:true});},[photoMode]);
+  useEffect(()=>{if(!feedNotice)return;const timer=window.setTimeout(()=>setFeedNotice(0),7000);return()=>window.clearTimeout(timer);},[feedNotice]);
+  useEffect(()=>()=>{for(const url of photoUrls.current)URL.revokeObjectURL(url);photoUrls.current.clear();},[]);
 
   useEffect(() => {
     const id = window.setTimeout(() => {
@@ -329,6 +345,7 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
 
   useEffect(() => {
     const keys = (event: KeyboardEvent) => {
+      if(photoMode){if(event.key==='Escape'){event.preventDefault();exitPhoto();}else if(photoToolbar.current)trapFocus(event,photoToolbar.current);return;}
       if (event.key === "Escape") { event.preventDefault(); closeOverlay(); }
       else if ((pavilion || creditsOpen || mapOpen) && panel.current) trapFocus(event, panel.current);
       else if (event.ctrlKey || event.metaKey || event.altKey || /INPUT|TEXTAREA|SELECT/.test((event.target as HTMLElement)?.tagName)) return;
@@ -336,7 +353,7 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
     };
     window.addEventListener("keydown", keys);
     return () => window.removeEventListener("keydown", keys);
-  }, [pavilion, creditsOpen, reading, destination, closeOverlay, mapOpen, started]);
+  }, [pavilion, creditsOpen, reading, destination, closeOverlay, mapOpen, started,photoMode,exitPhoto]);
 
   useEffect(() => { audio.current?.setEnvironment(weather, phase); }, [weather, phase]);
   useEffect(() => {
@@ -406,6 +423,7 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
     const pending = nav.current?.destination;
     nav.current?.cancel();
     setSceneState("fallback");
+    setPhotoMode(false);setPhotoBusy(false);
     setDestination(null);
     if (pending) { setPavilion(pending); audio.current?.play("arrival"); }
   }, []);
@@ -518,17 +536,18 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
   const audioLabel = !audioInitialized ? "Ativar ou silenciar som" : audioState === "on" ? "Silenciar som" : audioState === "loading" ? "Cancelar carregamento do som" : "Ativar som";
   const audioControl = <button className="island-inline-audio" data-audio-control data-entry-audio-toggle onClick={toggleAudio} aria-label={audioLabel}><span className="island-audio-playing-icon"><Volume2 size={17} aria-hidden="true" /></span><span className="island-audio-muted-icon"><VolumeX size={17} aria-hidden="true" /></span></button>;
   const musicStatus = audioState === "on" ? audioDiagnostics?.music : undefined;
-  return <div ref={root} className={`island-experience${started ? " is-started" : " is-intro"}${reading ? " is-reading" : ""}`} onClick={anchors} data-experience-version="20" data-scene-state={sceneState} data-navigation-state={destination ? "transition" : "idle"} data-world-active={visible && !reading} data-panel-open={modalOpen} data-motion={reducedMotion ? "reduced" : "full"} data-weather={weather} data-season={season} data-phase={phase} data-time-of-day={timeOfDay.toFixed(3)} data-weather-mode={environment.mode} data-opening-weather={environment.opening?.weather ?? "pending"} data-opening-coordination={environment.opening?.coordination ?? "pending"} data-opening-position={environment.opening?.position ?? "pending"} data-options-open={creditsOpen} data-audio={audioState} data-audio-initialized={audioInitialized} data-music={musicStatus?.status ?? "off"} data-music-title={musicStatus?.title ?? ""} data-music-time={musicStatus?.currentTime ?? 0} data-quality={quality} data-zoom={zoom} data-fps={performance?.fps ?? "pending"} data-frame-ms={performance?.frameMs?.toFixed(2)} data-p95-ms={performance?.p95Ms?.toFixed(2)} data-heap-mb={performance?.heapMB} data-gpu-geometries={performance?.geometries} data-gpu-textures={performance?.textures} data-draw-calls={performance?.drawCalls ?? "pending"} data-triangles={performance?.triangles ?? "pending"}>
+  return <div ref={root} className={`island-experience${started ? " is-started" : " is-intro"}${reading ? " is-reading" : ""}`} onClick={anchors} data-photo-mode={photoMode} data-experience-version="20" data-scene-state={sceneState} data-navigation-state={destination ? "transition" : "idle"} data-world-active={visible && !reading} data-panel-open={modalOpen} data-motion={reducedMotion ? "reduced" : "full"} data-weather={weather} data-season={season} data-phase={phase} data-time-of-day={timeOfDay.toFixed(3)} data-weather-mode={environment.mode} data-opening-weather={environment.opening?.weather ?? "pending"} data-opening-coordination={environment.opening?.coordination ?? "pending"} data-opening-position={environment.opening?.position ?? "pending"} data-options-open={creditsOpen} data-audio={audioState} data-audio-initialized={audioInitialized} data-music={musicStatus?.status ?? "off"} data-music-title={musicStatus?.title ?? ""} data-music-time={musicStatus?.currentTime ?? 0} data-quality={quality} data-zoom={zoom} data-fps={performance?.fps ?? "pending"} data-frame-ms={performance?.frameMs?.toFixed(2)} data-p95-ms={performance?.p95Ms?.toFixed(2)} data-heap-mb={performance?.heapMB} data-gpu-geometries={performance?.geometries} data-gpu-textures={performance?.textures} data-draw-calls={performance?.drawCalls ?? "pending"} data-triangles={performance?.triangles ?? "pending"}>
     <a className="island-skip" href={readingHref("pesquisa")}>Ir para a leitura</a>
     <header className="island-header" inert={modalOpen}>
       <button className="island-brand" onClick={closeContent}>DO CÓDIGO<br /><span>À SUPERVISÃO</span></button>
+      {started&&!reading&&<button ref={photoTrigger} className="island-photo-trigger" aria-label="Modo foto" title="Modo foto" disabled={sceneState!=='ready'} onClick={()=>{nav.current?.cancel();setDestination(null);setPhotoNotice('');setPhotoMode(true);}}><Camera size={18} aria-hidden="true"/></button>}
       <nav aria-label="Acessos à pesquisa">{audioControl}<button className="island-header-options" onClick={event => openCredits(event.currentTarget, "environment")} aria-label="Ambiente do jardim"><Settings2 size={18} aria-hidden="true" /></button>{<button className="island-header-options" onClick={event => openCredits(event.currentTarget)} aria-label={showSettings?"Opções e créditos":"Créditos"}>{showSettings?<Settings2 size={18} aria-hidden="true" />:<Info size={18} aria-hidden="true" />}</button>}{!reading && <a href={readingHref("pesquisa")}><BookOpen size={15} aria-hidden="true" />Ler a pesquisa</a>}<a href="/tcc-pedro-arthur.pdf" target="_blank" rel="noreferrer">PDF<ExternalLink size={13} aria-hidden="true" /></a></nav>
     </header>
     <main className={`island-landing${modalOpen ? " has-panel" : ""}`} hidden={reading} inert={modalOpen} aria-label="Explore a pesquisa">
       <div ref={stage} className="island-stage" aria-label="Sete ilhas da pesquisa" data-animation={reducedMotion ? "reduced" : "full"}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={`island-poster${sceneState === "ready" ? " is-hidden" : ""}`} src={poster} alt="Sete jardins conectados por pontes: a pesquisa, ferramentas, produtividade, validação, especificação, profissão e perspectivas." fetchPriority="high" onLoad={event => { const image = event.currentTarget; if (image.naturalHeight) setPosterAspect(image.naturalWidth / image.naturalHeight); }} />
-        {Scene && manifest && sceneState !== "fallback" && worldNavigator && (!reading || sceneHasMounted) && <div className="island-canvas" aria-hidden="true"><SceneBoundary onFail={failed}><Scene manifest={manifest} navigator={worldNavigator} active={visible && !reading} reducedMotion={reducedMotion} panelOpen={!!pavilion || mapOpen} interactionBlocked={modalOpen || !started} autoQuality={qualityPreference === "auto"} pavilionId={pavilion} resetEpoch={resetEpoch} quality={quality} weather={weather} season={season} phase={phase} clock={environment.timeRef} zoom={zoom} cameraHeight={cameraHeight} onZoom={setZoom} intro={!started} onInteract={playSelection} onThunder={playThunder} onSoundFrame={spatialFrame} onSpatialSound={spatialSound} onReady={ready} onFail={failed} onArrive={arrived} onSelect={choose} onProject={projectLabels} onPerformance={recordPerformance} /></SceneBoundary></div>}
+        {Scene && manifest && sceneState !== "fallback" && worldNavigator && (!reading || sceneHasMounted) && <div className="island-canvas" aria-hidden="true"><SceneBoundary onFail={failed}><Scene manifest={manifest} navigator={worldNavigator} photoMode={photoMode} photoRequest={photoRequest} onPhotoCapture={photoCaptured} onFeed={fedFish} active={visible && !reading} reducedMotion={reducedMotion} panelOpen={!!pavilion || mapOpen} interactionBlocked={modalOpen || !started} autoQuality={qualityPreference === "auto"} pavilionId={pavilion} resetEpoch={resetEpoch} quality={quality} weather={weather} season={season} phase={phase} clock={environment.timeRef} zoom={zoom} cameraHeight={cameraHeight} onZoom={setZoom} intro={!started} onInteract={playSelection} onThunder={playThunder} onSoundFrame={spatialFrame} onSpatialSound={spatialSound} onReady={ready} onFail={failed} onArrive={arrived} onSelect={choose} onProject={projectLabels} onPerformance={recordPerformance} /></SceneBoundary></div>}
         <nav className="island-pavilions" aria-label="Ambientes da pesquisa">{pavilionIds.map(id => <button key={id} data-pavilion={id} className={`island-label${selectedIsland === id ? " is-selected" : ""}`} style={{ left: `${labelLeft(id)}%`, top: `${Math.min(93, Math.max(7, currentLabels[id].y))}%` }} aria-label={`${names[id]}: ${descriptions[id]}`} aria-current={selectedIsland === id ? "true" : undefined} onClick={event => choose(id, event.currentTarget)}><span aria-hidden="true">{pavilionIds.indexOf(id) + 1}</span><strong>{names[id]}</strong></button>)}</nav>
       </div>
       {!started && <section className="island-introduction" aria-labelledby="welcome-title">
@@ -543,9 +562,14 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
         <div className="island-world-caption"><span>ILHAS DA PESQUISA</span><button className="island-season-status" onClick={event => openCredits(event.currentTarget, "environment")} aria-label={`Ambiente: ${seasonInfo[season].name}, ${weatherNames[weather]}. Ajustar ambiente`}><WeatherIcon size={15} aria-hidden="true" /><span>{seasonInfo[season].name} · {weatherNames[weather]}</span></button><small><time>{environment.clock}</time> · Horário do jardim</small></div>
         <div className="island-zoom" aria-label="Câmera do jardim"><button aria-label="Aproximar o jardim" onClick={() => setZoom(value => Math.min(manifest?.cameraBounds?.maxZoom ?? 2, value + .15))} disabled={zoom >= (manifest?.cameraBounds?.maxZoom ?? 2)}><Plus size={17} aria-hidden="true" /></button><button aria-label="Afastar o jardim" onClick={() => setZoom(value => Math.max(manifest?.cameraBounds?.minZoom ?? .8, value - .15))} disabled={zoom <= (manifest?.cameraBounds?.minZoom ?? .8)}><Minus size={17} aria-hidden="true" /></button><button aria-label="Subir a câmera" onClick={() => setCameraHeight(value => Math.min(6,value+.8))} disabled={cameraHeight >= 6}><ArrowUp size={17} aria-hidden="true" /></button><button aria-label="Descer a câmera" onClick={() => setCameraHeight(value => Math.max(-4,value-.8))} disabled={cameraHeight <= -4}><ArrowDown size={17} aria-hidden="true" /></button><button aria-label="Restaurar enquadramento" onClick={() => { setCameraHeight(0); setZoom(1); setResetEpoch(value => value + 1); }}><RotateCcw size={15} aria-hidden="true" /></button></div>
         <div className="island-map-preview"><button ref={returnButton} className="island-map-launch" aria-label="Abrir mapa da pesquisa" onClick={event => openMap(event.currentTarget)}><span>Mapa · {visited.length ? `${visited.length}/7 visitadas` : "7 ilhas"}<kbd>M</kbd></span><WorldMap visited={visited} selected={selectedIsland} onSelect={choose} /></button></div>
-        <p className="island-status" role="status" aria-live="polite">{sceneState === "fallback" ? "Modo leve · os resumos e a leitura continuam disponíveis." : sceneState === "loading" ? "Preparando as ilhas. Os resumos já estão disponíveis." : selectedIsland ? `Ilha ${pavilionIds.indexOf(selectedIsland) + 1} · ${names[selectedIsland]}` : "Arraste para explorar · use os controles de câmera · toque na água ou no morador"}</p>
+        <p className="island-status" role="status" aria-live="polite">{sceneState === "fallback" ? "Modo leve · os resumos e a leitura continuam disponíveis." : sceneState === "loading" ? "Preparando as ilhas. Os resumos já estão disponíveis." : feedNotice?'Comida na água — os peixes próximos vão se aproximar.':selectedIsland ? `Ilha ${pavilionIds.indexOf(selectedIsland) + 1} · ${names[selectedIsland]}` : "Arraste para explorar · toque na água livre para alimentar os peixes"}</p>
       </>}
     </main>
+    {photoMode&&<div ref={photoToolbar} className="garden-photo-toolbar" role="toolbar" aria-label="Controles do modo foto">
+      <span>Arraste para enquadrar</span><button disabled={photoBusy} onClick={()=>{setPhotoBusy(true);setPhotoNotice('');setPhotoRequest(value=>value+1);}}><Download size={17} aria-hidden="true"/>{photoBusy?'Salvando…':'Salvar foto'}</button>
+      <button ref={photoExit} onClick={exitPhoto} aria-label="Sair do modo foto"><X size={18} aria-hidden="true"/>Sair <kbd>ESC</kbd></button>
+      <p role="status" aria-live="polite">{photoNotice}</p>
+    </div>}
     {reading && <main ref={reader} className="island-reading" data-reader-layout="v10" inert={modalOpen} aria-label="Caderno da pesquisa"><div className="island-reading-inner">
       <div className="island-reading-toolbar"><button onClick={() => { setStarted(true); closeContent(); }}><ArrowLeft size={16} aria-hidden="true" />Voltar às ilhas</button><span>{readingTheme === "fontes" ? "Método e fontes" : `Tema ${pavilionIds.indexOf(readingTheme) + 1} de 7 — ${names[readingTheme]}`}</span><a href="/tcc-pedro-arthur.pdf" target="_blank" rel="noreferrer">PDF<ExternalLink size={14} aria-hidden="true" /></a></div>
       <h1 className="island-visually-hidden" ref={readerHeading} tabIndex={-1}>Caderno — Do código à supervisão</h1>

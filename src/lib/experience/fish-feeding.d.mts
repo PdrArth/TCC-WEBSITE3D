@@ -1,0 +1,12 @@
+import type {Vec3,WorldEnvironmentManifest} from '../experience-contract';
+import type {FishRoutes} from '../../components/island-experience/scene-motion.mjs';
+export type FeedSpot={sequence:number;born:number;x:number;z:number;radius:number;eaters:number};
+export type FishPose={x:number;y:number;z:number;heading:number;tail:number};
+export type FeedingFish={mode:'route'|'approach'|'feeding'|'exit-orbit'|'return';offset:number;heading:number;x:number;z:number;anchorX:number;anchorZ:number;anchorTime:number;centerX:number;centerZ:number;radius:number;angle:number;entryAngle:number;born:number};
+export type FeedingState={sequence:number;lastTime:number;sample:FishPose;fish:FeedingFish[]};
+export function createFeedSpot():FeedSpot;
+export function requestFishFood(spot:FeedSpot,point:Vec3,time:number,environment:WorldEnvironmentManifest,ice?:number):boolean;
+export function createFeedingFish(count:number):FeedingState;
+export function advanceFeedingFish(state:FeedingState,spot:FeedSpot,time:number,routes:FishRoutes,environment:WorldEnvironmentManifest,ice?:number):FeedingState;
+export function writeFeedingFishPose(pose:FishPose,index:number,time:number,routes:FishRoutes,state:FeedingState):FishPose;
+export function foodCrumbPose(index:number,time:number,spot:FeedSpot):{visible:boolean;x:number;z:number;scale:number};
