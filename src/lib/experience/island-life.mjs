@@ -16,10 +16,10 @@ export function residentBed(home) {
  return { center:homeLocalPoint(home,[-.95,home.floorHeight+.36,.02]), foot:homeLocalPoint(home,[-.95,home.floorHeight+.58,1.04]), width:1.12,length:2.16,yaw:home.yaw };
 }
 /** A bite, reel and brief reveal within each existing fishing stop. */
-export function fishingMoment(seconds) {
- const t=Math.max(0,seconds),ease=v=>{const x=clamp(v,0,1);return x*x*(3-2*x);};
+export function fishingMoment(seconds,{wait=0,success=true}={}) {
+ const t=Math.max(0,seconds-wait),ease=v=>{const x=clamp(v,0,1);return x*x*(3-2*x);};
  const lift=ease((t-3.1)/1.65),release=ease((t-6.65)/.9);
- return {bite:t>=2.55&&t<3.1,lift:lift*(1-release),caught:t>=3.1&&t<7.55,show:t>=4.75&&t<6.65};
+ return {bite:t>=2.55&&t<3.1,lift:lift*(1-release)*(success?1:.18),caught:success&&t>=3.1&&t<7.55,show:success&&t>=4.75&&t<6.65};
 }
 export function pathLength(points) { let length=0; for(let i=1;i<points.length;i++)length+=distance(points[i-1],points[i]); return length; }
 export function sampleLifePath(points,metres,output=[0,0,0]) {
@@ -172,10 +172,28 @@ export function residentReturnRoute(state,layout,destination='home-door-outside'
 export function residentShelterReason(context){if(WET.has(context.weather)||(context.precipitation??0)>0)return'weather';const hour=((context.hour??13)%24+24)%24;return hour<6||hour>=19||(context.night??0)>=.7?'night':null;}
 export function residentPauseReason(context){return context.visible===false?'hidden':context.moving===false||context.panelOpen||context.reading?'paused':context.reducedMotion?'reduced-motion':null;}
 function assignRoute(state,route,phase='walking'){state.phase=phase;state.phaseTime=0;state.routeDistance=0;state.route=route.points;state.routeSteps=route.steps;state.destination=route.destination;}
-function beginActivity(state,layout){const activity=layout.activityPoints[state.activityIndex];state.activityId=activity.id;state.activityTarget=activity.target;assignRoute(state,planLifeRoute(layout,state.node,activity.node));}
+function fishingRandom(state){state.fishingSeed=(Math.imul(state.fishingSeed,1664525)+1013904223)>>>0;return state.fishingSeed/0x100000000;}
+function chooseFishing(state,layout){
+ const spots=layout.activityPoints.filter(a=>a.kind==='fishing');
+ if(!state.fishingBag.length){
+   state.fishingBag=spots.map(a=>a.id);
+   for(let i=state.fishingBag.length-1;i>0;i--){const j=Math.floor(fishingRandom(state)*(i+1));[state.fishingBag[i],state.fishingBag[j]]=[state.fishingBag[j],state.fishingBag[i]];}
+   // The first stop is near home; the remaining shores vary for each visit.
+   const first=state.fishingVisits===0?spots.find(a=>a.bridge)?.id:null;
+   if(first){const i=state.fishingBag.indexOf(first);[state.fishingBag[0],state.fishingBag[i]]=[state.fishingBag[i],state.fishingBag[0]];}
+   else if(state.fishingBag.length>1&&state.fishingBag[0]===state.lastFishing)[state.fishingBag[0],state.fishingBag[1]]=[state.fishingBag[1],state.fishingBag[0]];
+ }
+ const candidates=state.fishingBag.filter(id=>state.fishingBag.length===1||id!==state.lastFishing).map(id=>({id,distance:planLifeRoute(layout,state.node,spots.find(a=>a.id===id).node).length})).sort((a,b)=>a.distance-b.distance);
+ const id=state.fishingVisits===0?state.fishingBag[0]:candidates[candidates.length>1&&fishingRandom(state)>.75?1:0].id,activity=spots.find(a=>a.id===id);
+ state.fishingBag.splice(state.fishingBag.indexOf(id),1);
+ state.lastFishing=activity.id;state.fishingWait=state.fishingVisits===0?0:fishingRandom(state)*2.8;state.fishingSuccess=state.fishingVisits===0||fishingRandom(state)>.20;state.fishingVisits++;
+ return activity;
+}
+function currentActivity(state,layout){const slot=layout.activityPoints[state.activityIndex];return slot.kind==='fishing'?(layout.activityPoints.find(a=>a.id===state.activityId)??slot):slot;}
+function beginActivity(state,layout,resume=false){const slot=layout.activityPoints[state.activityIndex],activity=resume&&state.activityId?currentActivity(state,layout):slot.kind==='fishing'?chooseFishing(state,layout):slot;state.activityId=activity.id;state.activityTarget=activity.target;assignRoute(state,planLifeRoute(layout,state.node,activity.node));}
 function stationary(state,phase){state.phase=phase;state.phaseTime=0;state.routeSteps=[];state.route=[copy(state.position)];state.routeDistance=0;}
-export function createResidentState(layout){
- const state={phase:'walking',phaseTime:0,elapsed:0,cycle:0,distanceMoved:0,routeDistance:0,route:[],routeSteps:[],destination:'',node:'home-porch',position:copy(layout.home.porch),heading:0,gait:.8,gesture:0,hidden:false,shelterReason:null,nightRest:false,sleepBlend:0,activityIndex:0,activityId:layout.activityPoints[0].id,dryTime:8,weatherTime:0,doorOpen:0,inside:false,resumeActivityIndex:0};
+export function createResidentState(layout,seed=0x7151a7){
+ const state={phase:'walking',phaseTime:0,elapsed:0,cycle:0,distanceMoved:0,routeDistance:0,route:[],routeSteps:[],destination:'',node:'home-porch',position:copy(layout.home.porch),heading:0,gait:.8,gesture:0,hidden:false,shelterReason:null,nightRest:false,sleepBlend:0,activityIndex:0,activityId:layout.activityPoints[0].id,dryTime:8,weatherTime:0,doorOpen:0,inside:false,resumeActivityIndex:0,fishingSeed:seed>>>0,fishingBag:[],lastFishing:null,fishingVisits:0,fishingWait:0,fishingSuccess:true};
  beginActivity(state,layout);state.routeDistance=Math.min(layout.resident.initialPathDistance,pathLength(state.route));sampleLifePath(state.route,state.routeDistance,state.position);const ahead=sampleLifePath(state.route,state.routeDistance+.15);state.heading=Math.atan2(ahead[0]-state.position[0],ahead[2]-state.position[2]);return state;
 }
 function headingToward(state,target,dt){const dx=target[0]-state.position[0],dz=target[2]-state.position[2];if(Math.hypot(dx,dz)<.0001)return;const desired=Math.atan2(dx,dz),turn=Math.atan2(Math.sin(desired-state.heading),Math.cos(desired-state.heading));state.heading+=turn*(1-Math.exp(-8*dt));}
@@ -194,7 +212,7 @@ export function advanceResident(state,seconds,context,layout){
  if(state.routeDistance>=length-1e-7){state.node=state.destination;
  if(state.phase==='returning')assignRoute(state,planLifeRoute(layout,state.node,'home-interior-seat'),'entering');
  else if(state.phase==='entering'){state.inside=true;stationary(state,'interior');}
- else if(state.phase==='exiting'){state.inside=false;if(needsShelter)stationary(state,'porch');else{state.activityIndex=state.resumeActivityIndex;beginActivity(state,layout);}}
+ else if(state.phase==='exiting'){state.inside=false;if(needsShelter)stationary(state,'porch');else{state.activityIndex=state.resumeActivityIndex;beginActivity(state,layout,true);}}
  else if(state.phase==='to-porch')stationary(state,'porch');
  else if(state.phase==='walk-home'){state.cycle++;stationary(state,'porch');}
  else stationary(state,layout.activityPoints[state.activityIndex].kind);}
@@ -202,8 +220,8 @@ export function advanceResident(state,seconds,context,layout){
  state.doorOpen=Math.max(0,state.doorOpen-dt*3);headingToward(state,layout.home.window,dt);
  if(!state.nightRest&&state.sleepBlend===0&&(!needsShelter||context.weather==='drizzle'&&state.phaseTime>=5))assignRoute(state,planLifeRoute(layout,state.node,'home-seat'),'exiting');
  }else if(state.phase==='porch'){
- headingToward(state,layout.home.workPoint,dt);state.doorOpen=Math.max(0,state.doorOpen-dt*3);if(state.shelterReason==='night'&&state.phaseTime>=12)assignRoute(state,planLifeRoute(layout,state.node,'home-door-outside'),'returning');else if(!needsShelter&&state.phaseTime>=4){state.activityIndex=state.resumeActivityIndex;beginActivity(state,layout);}
- }else{const activity=layout.activityPoints[state.activityIndex];headingToward(state,activity.target,dt);if(state.phaseTime>=activity.duration){state.activityIndex++;if(state.activityIndex>=layout.activityPoints.length){state.activityIndex=0;state.resumeActivityIndex=0;assignRoute(state,planLifeRoute(layout,state.node,'home-seat'),'walk-home');}else beginActivity(state,layout);}}
+ headingToward(state,layout.home.workPoint,dt);state.doorOpen=Math.max(0,state.doorOpen-dt*3);if(state.shelterReason==='night'&&state.phaseTime>=12)assignRoute(state,planLifeRoute(layout,state.node,'home-door-outside'),'returning');else if(!needsShelter&&state.phaseTime>=4){state.activityIndex=state.resumeActivityIndex;beginActivity(state,layout,true);}
+ }else{const activity=currentActivity(state,layout),duration=state.phase==='fishing'?state.fishingWait+(state.fishingSuccess?8:5.8):activity.duration;headingToward(state,activity.target,dt);if(state.phaseTime>=duration){state.activityIndex++;if(state.activityIndex>=layout.activityPoints.length){state.activityIndex=0;state.resumeActivityIndex=0;state.activityId='';assignRoute(state,planLifeRoute(layout,state.node,'home-seat'),'walk-home');}else beginActivity(state,layout);}}
  state.gesture=Math.sin(state.phaseTime*(state.phase==='fishing'?1.55:2.3));return state;
 }
 /** Angles are radians; bodyOffsetY is world metres and target vectors are shared. */
@@ -215,7 +233,7 @@ export function writeResidentPose(output,state,layout){
  output.leftArm=fishing?-1.05+state.gesture*.16:seated?-.28:-stride*.36;output.rightArm=fishing?-1.15+state.gesture*.22:gathering?-1.20-Math.sin(state.phaseTime*1.1)*.72:watering?-.78+state.gesture*.05:seated?-.30:stride*.36;
  output.leftElbow=fishing?-.38:seated?-.9:-.10;output.rightElbow=fishing?-.48:gathering?-.55:watering?-.6:seated?-.85:-.10;output.lean=gathering?-.08:watering?-.10:fishing?-.035:0;
  output.rod=fishing;output.fruit=gathering&&state.phaseTime>1.25;output.hidden=state.hidden;output.rodTilt=fishing?state.gesture*.09:0;output.seated=seated;output.bodyOffsetY=seated?-.18:0;output.watering=watering;output.wateringTilt=watering?.48+state.gesture*.06:0;output.doorOpen=state.doorOpen;output.inside=state.inside;output.entering=state.phase==='entering'||state.phase==='exiting';
- const moment=fishing?fishingMoment(state.phaseTime):null;
+ const moment=fishing?fishingMoment(state.phaseTime,{wait:state.fishingWait,success:state.fishingSuccess}):null;
  output.catchLift=moment?.lift??0;output.caughtFish=moment?.caught??false;output.fishingBite=moment?.bite??false;
  if(fishing){output.rightArm-=output.catchLift*.72;output.leftArm-=output.catchLift*.35;output.lean-=output.catchLift*.06;}
  const easing=v=>{const t=clamp(v,0,1);return t*t*(3-2*t);};
@@ -225,7 +243,7 @@ export function writeResidentPose(output,state,layout){
  const x=home?home.position[0]-.95*c+1.04*s:state.position[0],z=home?home.position[2]+.95*s+1.04*c:state.position[2]+.36,y=home?home.position[1]+home.floorHeight+.58:state.position[1]+.568;
  output.x+=(x-output.x)*blend;output.y+=(y-output.y)*blend;output.z+=(z-output.z)*blend;output.heading=(home?.yaw??0);output.bodyOffsetY*=1-blend;
  output.leftLeg*=1-blend;output.rightLeg*=1-blend;output.leftKnee*=1-blend;output.rightKnee*=1-blend;output.leftArm=output.rightArm=-.12;output.leftElbow=output.rightElbow=-.08;}
- const activity=layout?.activityPoints[state.activityIndex];
+ const activity=layout?currentActivity(state,layout):null;
  if(state.phase==='sitting'){
    const blend=easing(Math.min(state.phaseTime,(activity?.duration??16)-state.phaseTime)/.75);
    output.bodyOffsetY=((activity?.seatHeight??state.position[1]+.56)-state.position[1]-.52*RESIDENT_SCALE)*blend;

@@ -44,9 +44,9 @@ test('wind-driven waves are finite, bounded and much stronger in storms than on 
   let calm=0,storm=0;
   for(let t=0;t<40;t+=.2)for(const [x,z] of [[0,0],[-5,3],[10,-8]]) {
     calm=Math.max(calm,Math.abs(lakeWaveHeight(x,z,t,.22)));
-    const value=lakeWaveHeight(x,z,t,1); storm=Math.max(storm,Math.abs(value)); assert.ok(Number.isFinite(value)&&Math.abs(value)<=.101);
+    const value=lakeWaveHeight(x,z,t,1); storm=Math.max(storm,Math.abs(value)); assert.ok(Number.isFinite(value)&&Math.abs(value)<=.143);
   }
-  assert.ok(storm>calm*5); assert.ok(lakeWaveParameters(1,1).amplitude<lakeWaveParameters(1,0).amplitude*.05);
+  assert.ok(storm>.12&&storm>calm*5); assert.ok(lakeWaveParameters(1,1).amplitude<lakeWaveParameters(1,0).amplitude*.05);
   assert.ok(env.water.height+.09+lakeWaveParameters(1).amplitude<Math.min(...env.land.map(land=>land.height)),'crests and water rise cannot flood the academic islands');
   const outlet=lakeSpillway(env); assert.ok(outlet.position[2]>14);
   for(const land of [...env.land,...env.decorativeLand])assert.ok(Math.hypot(outlet.position[0]-land.center[0],outlet.position[2]-land.center[1])>land.radius+1.5);

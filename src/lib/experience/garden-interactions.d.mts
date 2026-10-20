@@ -1,10 +1,13 @@
 import type {Vec3,WorldEnvironmentManifest} from '../experience-contract';
+import type {ResidentState,ResidentPose,ResidentContext,IslandLifeLayout} from './island-life.mjs';
 export type WaterRing={x:number;z:number;born:number;radius:number};
 export type WaterTouches={sequence:number;cursor:number;lastAt:number;rings:WaterRing[]};
 export function createWaterTouches(count?:number):WaterTouches;
 export function addWaterTouch(state:WaterTouches,point:Vec3,time:number,environment:WorldEnvironmentManifest,ice?:number):boolean;
 export function touchRipple(ring:WaterRing,time:number,echo?:number):{visible:boolean;radius:number;opacity:number};
-export type GreetingState={age:number;elapsed:number;lastAt:number;armed:boolean;requested:boolean;count:number};
+export type GreetingState={age:number;elapsed:number;lastAt:number;armed:boolean;requested:boolean;count:number;welcomePending:boolean;heading:number;returnHeading:number};
+export type GreetingPose={active:boolean;heading:number;still:number;wave:number;sway:number;look:number;lookPitch:number};
 export function createGreeting():GreetingState;
 export function requestGreeting(state:GreetingState):void;
-export function advanceGreeting(state:GreetingState,seconds:number,context:{available:boolean;distance:number;heading?:number;cameraHeading?:number}):{wave:number;sway:number;look:number};
+export function advanceGreeting(state:GreetingState,seconds:number,context:{available:boolean;distance:number;heading?:number;cameraHeading?:number;cameraPitch?:number}):GreetingPose;
+export function advanceResidentWithGreeting(state:ResidentState,greeting:GreetingState,pose:ResidentPose,seconds:number,context:ResidentContext,layout:IslandLifeLayout,camera:{distance:number;cameraHeading:number;cameraPitch?:number}):GreetingPose;

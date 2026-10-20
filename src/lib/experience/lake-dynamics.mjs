@@ -18,7 +18,7 @@ export function advanceLake(state, seconds, weather, melt = 0) {
 
 export function lakeWaveParameters(wind = .2, ice = 0) {
   const force = clamp(wind), thawed = 1 - clamp(ice) * .96;
-  return { amplitude: (.008 + force * force * .092) * thawed, speed: .55 + force * 1.05 };
+  return { amplitude: (.012 + force * force * .130) * thawed, speed: .60 + force * 1.15 };
 }
 
 export function lakeWaveHeight(x, z, seconds, wind = .2, ice = 0) {

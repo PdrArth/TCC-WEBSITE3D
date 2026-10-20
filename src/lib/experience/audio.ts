@@ -928,7 +928,7 @@ export class ExperienceAudio {
     if (!this.canPlay() || !this.context || !this.ambientGain) return;
     this.stopAtmosphere();
     if (["rain", "storm", "drizzle", "freezing-rain", "hail"].includes(this.weather)) {
-      this.loopNoise(this.noiseBuffer("rain"), 450, 6500, this.weather === "storm" ? .55 : this.weather === "drizzle" ? .16 : .38);
+      this.loopNoise(this.noiseBuffer("rain"), 450, 6500, (this.weather === "storm" ? .55 : this.weather === "drizzle" ? .16 : .38) * .75);
       if (this.weather === "storm" || this.weather === "hail") this.loopNoise(this.noiseBuffer("wind"), 45, 700, .23);
     } else this.loopNoise(this.noiseBuffer("wind"), 70, 1100, this.phase === "night" ? .09 : .14);
     if (this.birdsAllowed()) this.scheduleBirds(3000 + Math.random() * 6000);

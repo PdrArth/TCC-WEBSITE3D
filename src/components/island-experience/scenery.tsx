@@ -229,8 +229,8 @@ function installSurfaceShader(material: THREE.MeshStandardMaterial, uniforms: Sc
       }
       float shimmer = sin(vScenicPosition.x * 1.5 + vScenicPosition.z * .7 + scenicTime * .6) * sin(vScenicPosition.z * 1.3 - scenicTime * .35);
       diffuseColor.rgb *= .98 + shimmer * .085 * (1.0 - frozenEdge);
-      float crest = smoothstep(.30,.80,scenicWave(vScenicPosition.xz)/max(.001,scenicWaveAmplitude));
-      diffuseColor.rgb = mix(diffuseColor.rgb, vec3(.77,.89,.84), crest * pow(scenicWind,3.0) * .24 * (1.0-frozenEdge));
+      float crest = smoothstep(.18,.72,scenicWave(vScenicPosition.xz)/max(.001,scenicWaveAmplitude));
+      diffuseColor.rgb = mix(diffuseColor.rgb, vec3(.80,.92,.88), crest * (.065 + scenicWind * scenicWind * .36) * (1.0-scenicIce));
       diffuseColor.rgb = mix(diffuseColor.rgb, vec3(.63, .77, .79), frozenEdge * .88);
       diffuseColor.a = mix(diffuseColor.a, .9, frozenEdge);
       ` : `
@@ -257,7 +257,7 @@ function installSurfaceShader(material: THREE.MeshStandardMaterial, uniforms: Sc
       }
     `);
   };
-  material.customProgramCacheKey = () => `scenic-v21-water-${foliage ? 1 : 0}-${water ? 1 : 0}-${snowEligible ? 1 : 0}-${beacon ? 1 : 0}-${bank ? 1 : 0}`;
+  material.customProgramCacheKey = () => `scenic-v22-water-${foliage ? 1 : 0}-${water ? 1 : 0}-${snowEligible ? 1 : 0}-${beacon ? 1 : 0}-${bank ? 1 : 0}`;
   material.needsUpdate = true;
 }
 

@@ -6,11 +6,11 @@ import * as THREE from "three";
 import { createLifeGeometry, createCaughtFishGeometry, restoreLifeGeometry, segment, tintGeometry, mergePieces, type StaticKind, type PreparedLifeGeometry } from "@/lib/experience/life-geometry.mjs";
 import type { Vec3, WorldEnvironmentManifest } from "@/lib/experience-contract";
 import type { BirdCompanion } from "@/lib/experience/bird-life.mjs";
-import {createGreeting,requestGreeting,advanceGreeting} from '@/lib/experience/garden-interactions.mjs';
+import {createGreeting,requestGreeting,advanceResidentWithGreeting,type GreetingPose} from '@/lib/experience/garden-interactions.mjs';
 import type {ScenicSound} from '@/lib/experience/scene-signals';
 import { createEnvironmentManifest, type EnvironmentState } from "@/lib/experience/environment.mjs";
 import {
-  advanceResident, createIslandLifeLayout, createResidentState, homeLocalPoint, pathLength, residentPauseReason,
+  createIslandLifeLayout, createResidentState, homeLocalPoint, pathLength, residentPauseReason,
   writeResidentPose, type IslandLifeLayout, type ResidentContext, type ResidentPose,
 } from "@/lib/experience/island-life.mjs";
 
@@ -80,10 +80,10 @@ function createRig(scale: number) {
 }
 
 type Rig = ReturnType<typeof createRig>;
-function updateRig(rig: Rig, pose: ResidentPose, layout: IslandLifeLayout, meshes: Partial<Record<ResidentKind, THREE.InstancedMesh>>, greeting={wave:0,sway:0,look:0}) {
+function updateRig(rig: Rig, pose: ResidentPose, layout: IslandLifeLayout, meshes: Partial<Record<ResidentKind, THREE.InstancedMesh>>, greeting={wave:0,sway:0,look:0,lookPitch:0}) {
   rig.root.position.set(pose.x, pose.y + pose.bodyOffsetY, pose.z); rig.root.rotation.set(-pose.sleepBlend * Math.PI / 2, pose.heading, 0, "YXZ"); rig.trunk.rotation.x = pose.lean;
   for (const eye of rig.eyes) eye.scale.y = .014 * (1 - pose.sleepBlend * .85);
-  rig.head.rotation.x = pose.watering ? .11 : pose.seated ? -.035 : 0;
+  rig.head.rotation.x = (pose.watering ? .11 : pose.seated ? -.035 : 0)+greeting.lookPitch;
   rig.head.rotation.y=greeting.look;
   rig.head.position.z = .008 + pose.sleepBlend * .08;
   rig.arms[0].rotation.set(pose.leftArm, 0, pose.rod ? .23 : .045); rig.arms[1].rotation.set(pose.rightArm, 0, pose.rod ? -.09 : -.045);
@@ -122,11 +122,11 @@ const residentColors: Record<ResidentKind, string> = { skin: "#d7a67e", coat: "#
 
 export default function IslandLife({ onSpatialSound,interactionBlocked=false,companion, environment: suppliedEnvironment, layout: providedLayout, preparedGeometry, environmentState, moving = true, reducedMotion = false, quality = "high", intro = false }: IslandLifeProps) {
   const { gl, invalidate,camera } = useThree();
-  const greeting=useRef(createGreeting()),greetingPose=useRef({wave:0,sway:0,look:0}),previousBite=useRef(false),residentHit=useRef<THREE.Mesh>(null);
+  const greeting=useRef(createGreeting()),greetingPose=useRef<GreetingPose>({active:false,heading:0,still:0,wave:0,sway:0,look:0,lookPitch:0}),previousBite=useRef(false),residentHit=useRef<THREE.Mesh>(null);
   const residentScreen=useMemo(()=>new THREE.Vector3(),[]);
   const environment = useMemo(() => suppliedEnvironment ?? createEnvironmentManifest(), [suppliedEnvironment]);
   const layout = useMemo(() => providedLayout ?? createIslandLifeLayout(environment), [providedLayout, environment]);
-  const batches = useMemo(() => restoreLifeGeometry(preparedGeometry, layout) ?? createLifeGeometry(layout), [preparedGeometry, layout]); const state = useMemo(() => createResidentState(layout), [layout]);
+  const batches = useMemo(() => restoreLifeGeometry(preparedGeometry, layout) ?? createLifeGeometry(layout), [preparedGeometry, layout]); const state = useMemo(() => createResidentState(layout,Math.floor(Math.random()*0x100000000)), [layout]);
   const rig = useMemo(() => createRig(layout.resident.scale), [layout.resident.scale]);
   const residentMeshes = useRef<Partial<Record<ResidentKind, THREE.InstancedMesh>>>({});
   const windowMaterial = useRef<THREE.MeshStandardMaterial>(null), roofMaterial = useRef<THREE.MeshStandardMaterial>(null);
@@ -211,6 +211,8 @@ export default function IslandLife({ onSpatialSound,interactionBlocked=false,com
       "data-world-resident-phase": state.phase, "data-world-resident-position": state.position.map(value => value.toFixed(3)).join(","),
       "data-world-resident-heading": state.heading.toFixed(3), "data-world-resident-cycle": String(state.cycle),
       "data-world-resident-greetings":String(greeting.current.count),"data-world-resident-wave":greetingPose.current.wave.toFixed(3),
+      "data-world-resident-greeting-active":String(greetingPose.current.active),"data-world-resident-activity-id":state.activityId,
+      "data-world-resident-fishing-visits":String(state.fishingVisits),"data-world-resident-fishing-target":pose.fishingTarget?.map(v=>v.toFixed(3)).join(',')??'',
       "data-world-resident-time": state.elapsed.toFixed(3), "data-world-resident-phase-time": state.phaseTime.toFixed(3),
       "data-world-resident-distance": state.distanceMoved.toFixed(3), "data-world-resident-gait": state.gait.toFixed(3),
       "data-world-resident-gesture": state.gesture.toFixed(3), "data-world-resident-visible": String(!state.hidden),
@@ -241,9 +243,7 @@ export default function IslandLife({ onSpatialSound,interactionBlocked=false,com
   useEffect(() => () => headHairGeometry.dispose(), [headHairGeometry]);
 
   useFrame((_, delta) => {
-    advanceResident(state, delta, context(), layout); writeResidentPose(pose, state, layout);
-    const available=moving&&!intro&&!interactionBlocked&&!pose.hidden&&!pose.inside&&!pose.sleeping&&!pose.rod&&!pose.watering&&!pose.fruit&&!state.shelterReason;
-    greetingPose.current=advanceGreeting(greeting.current,moving&&document.visibilityState==='visible'?delta:0,{available,distance:Math.hypot(camera.position.x-pose.x,camera.position.y-pose.y,camera.position.z-pose.z),heading:pose.heading,cameraHeading:Math.atan2(camera.position.x-pose.x,camera.position.z-pose.z)});
+    greetingPose.current=advanceResidentWithGreeting(state,greeting.current,pose,delta,{...context(),panelOpen:interactionBlocked},layout,{distance:Math.hypot(camera.position.x-state.position[0],camera.position.y-state.position[1],camera.position.z-state.position[2]),cameraHeading:Math.atan2(camera.position.x-state.position[0],camera.position.z-state.position[2]),cameraPitch:Math.atan2(camera.position.y-state.position[1]-layout.resident.height*.85,Math.hypot(camera.position.x-state.position[0],camera.position.z-state.position[2]))});
     if(moving&&pose.fishingBite&&!previousBite.current&&pose.fishingTarget)onSpatialSound?.('fishing',pose.fishingTarget);
     previousBite.current=pose.fishingBite;updateArticulation();
     const scenic = environmentState?.current, night = scenic?.night ?? 0, cover = scenic?.snow ?? 0, wetness = scenic?.wetness ?? 0;

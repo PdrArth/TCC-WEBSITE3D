@@ -32,6 +32,7 @@ export type ResidentState = {
  position: Vec3; heading: number; gait: number; gesture: number; hidden: boolean;
  shelterReason: 'weather' | 'night' | null; nightRest: boolean; sleepBlend: number; activityIndex: number; activityId: string; activityTarget: Vec3;
  dryTime: number; weatherTime: number; doorOpen: number; inside: boolean; resumeActivityIndex: number;
+ fishingSeed:number; fishingBag:string[]; lastFishing:string|null; fishingVisits:number; fishingWait:number; fishingSuccess:boolean;
 };
 export type ResidentPose = {
  x: number; y: number; z: number; heading: number; leftLeg: number; rightLeg: number;
@@ -42,7 +43,7 @@ export type ResidentPose = {
  doorOpen: number; inside: boolean; entering: boolean; activityTarget: Vec3 | null; fishingTarget: Vec3 | null;
 };
 export function residentBed(home: IslandLifeLayout['home']): { center: Vec3; foot: Vec3; width: number; length: number; yaw: number };
-export function fishingMoment(seconds: number): { bite: boolean; lift: number; caught: boolean; show: boolean };
+export function fishingMoment(seconds: number,options?:{wait?:number;success?:boolean}): { bite: boolean; lift: number; caught: boolean; show: boolean };
 export function createIslandLifeLayout(environment: WorldEnvironmentManifest): IslandLifeLayout;
 export function homeLocalPoint(home: Pick<IslandLifeLayout['home'], 'position' | 'yaw'>, local: Vec3, output?: Vec3): Vec3;
 export function bridgeSurfaceSegments(layout: IslandLifeLayout): WorldEnvironmentManifest['bridges'];
@@ -58,7 +59,7 @@ export function planLifeRoute(layout: IslandLifeLayout, from: string, to: string
 export function residentReturnRoute(state: ResidentState, layout: IslandLifeLayout, destination?: string): LifeRoute;
 export function residentShelterReason(context: ResidentContext): 'weather' | 'night' | null;
 export function residentPauseReason(context: ResidentContext): 'hidden' | 'paused' | 'reduced-motion' | null;
-export function createResidentState(layout: IslandLifeLayout): ResidentState;
+export function createResidentState(layout: IslandLifeLayout,seed?:number): ResidentState;
 /** dt is bounded to 100 ms; pause consumes neither movement nor dry/weather time. */
 export function advanceResident(state: ResidentState, seconds: number, context: ResidentContext, layout: IslandLifeLayout): ResidentState;
 export function writeResidentPose<T extends Partial<ResidentPose>>(output: T, state: ResidentState, layout?: IslandLifeLayout): T & ResidentPose;

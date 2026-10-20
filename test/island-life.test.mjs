@@ -52,11 +52,40 @@ test('arc-length interpolation crosses corners, clamps safely and reuses the cal
 
 test('complete daytime routine visits all islands, fishing shores and existing furniture via safe routes',()=>{
  const state=createResidentState(layout),activities=new Set(),bridges=new Set(),phases=new Set(),poses=new Set();let firstFish=Infinity;
- while(state.cycle<1&&state.elapsed<450){const before=[...state.position];advanceResident(state,1/30,daytime,layout);assert.ok(dist(before,state.position)<=layout.resident.walkSpeed/30+.00001);assert.ok(onFirmGround(state.position));phases.add(state.phase);
+ while(state.cycle<1&&state.elapsed<600){const before=[...state.position];advanceResident(state,1/30,daytime,layout);assert.ok(dist(before,state.position)<=layout.resident.walkSpeed/30+.00001);assert.ok(onFirmGround(state.position));phases.add(state.phase);
  if(['watering','gathering','observing','fishing','sitting'].includes(state.phase)){activities.add(state.activityId);if(state.phase==='fishing'){firstFish=Math.min(firstFish,state.elapsed);const pose=writeResidentPose({},state);assert.equal(pose.rod,true);assert.deepEqual(pose.fishingTarget,state.activityTarget);}poses.add(writeResidentPose({},state).rightArm.toFixed(2));}
  if(state.phase==='walking'||state.phase==='walk-home'){let covered=0;for(const step of state.routeSteps){if(state.routeDistance>=covered-.001&&state.routeDistance<=covered+step.length+.001){const edge=layout.walkingGraph.edges.find(e=>e.id===step.edgeId);if(edge.bridge)bridges.add(edge.bridge);break;}covered+=step.length;}}
  }
- assert.equal(state.cycle,1);assert.ok(state.elapsed>=250&&state.elapsed<450,`cycle took ${state.elapsed}s`);assert.ok(firstFish<6);assert.equal(activities.size,layout.activityPoints.length);assert.equal(bridges.size,7);assert.ok(state.distanceMoved>130);assert.ok(poses.size>50);assert.ok(phases.has('watering')&&phases.has('gathering')&&phases.has('observing'));assert.deepEqual(state.position,layout.home.seated);assert.equal(state.shelterReason,null);
+ assert.equal(state.cycle,1);assert.ok(state.elapsed>=250&&state.elapsed<600,`varied fishing cycle took ${state.elapsed}s`);assert.ok(firstFish<6);assert.equal(activities.size,layout.activityPoints.length);assert.equal(bridges.size,7);assert.ok(state.distanceMoved>130);assert.ok(poses.size>50);assert.ok(phases.has('watering')&&phases.has('gathering')&&phases.has('observing'));assert.deepEqual(state.position,layout.home.seated);assert.equal(state.shelterReason,null);
+});
+
+test('fishing varies between visits without repeating a shore or crossing land, and covers every spot in each bag',()=>{
+ const sequences=[];
+ for(const seed of [1,3]){
+  const state=createResidentState(layout,seed),visits=[];let lastPhase='',failures=0;
+  while(state.cycle<2&&state.elapsed<1300){
+   const before=[...state.position];advanceResident(state,.1,daytime,layout);
+   assert.ok(dist(before,state.position)<=layout.resident.walkSpeed*.1+.00001);assert.ok(onFirmGround(state.position));
+   if(state.phase==='fishing'&&lastPhase!=='fishing'){
+    const activity=layout.activityPoints.find(a=>a.id===state.activityId),pose=writeResidentPose({},state,layout);
+    assert.ok(activity&&activity.kind==='fishing');near(dist(state.position,activity.position),0);assert.deepEqual(pose.fishingTarget,activity.target);
+    assert.notEqual(state.activityId,visits.at(-1));visits.push(state.activityId);failures+=Number(!state.fishingSuccess);
+   }
+   lastPhase=state.phase;
+  }
+  assert.equal(state.cycle,2);assert.equal(visits.length,16);
+  for(const start of [0,8])assert.equal(new Set(visits.slice(start,start+8)).size,8);
+  assert.ok(failures>0&&failures<16);sequences.push(visits);
+ }
+ assert.notDeepEqual(sequences[0],sequences[1]);
+});
+
+test('weather shelter resumes the selected fishing shore and wait without drawing another destination',()=>{
+ const state=createResidentState(layout,3);until(state,s=>s.phase==='fishing'&&s.fishingVisits===2);
+ const chosen={id:state.activityId,target:[...state.activityTarget],visits:state.fishingVisits,wait:state.fishingWait,success:state.fishingSuccess};
+ until(state,s=>s.phase==='interior',{...daytime,weather:'rain'});until(state,s=>s.phase==='fishing',daytime);
+ assert.equal(state.activityId,chosen.id);assert.deepEqual(writeResidentPose({},state,layout).fishingTarget,chosen.target);
+ assert.equal(state.fishingVisits,chosen.visits);assert.equal(state.fishingWait,chosen.wait);assert.equal(state.fishingSuccess,chosen.success);
 });
 
 test('rain chooses the shortest safe return from every physical edge, in both directions, including the farthest island',()=>{
