@@ -69,6 +69,7 @@ export class CameraOrbit {
     return true;
   }
   end() { this.suppressClick ||= this.dragging; if (this.anchor || this.pinchHeld) this.pause(); this.anchor = null; this.pinchHeld = false; this.dragging = false; return this.suppressClick; }
+  cancel() { this.end(); this.suppressClick = true; }
   consumeClick() { const suppressed = this.suppressClick; this.suppressClick = false; return suppressed; }
 }
 

@@ -22,6 +22,7 @@ import "../research-content/pavilion-v13.css";
 import "../research-content/pavilion-v14.css";
 import "./environment-v14.css";
 import "./garden-comfort.css";
+import "./mobile-garden.css";
 
 // Start the world download as soon as this client module is evaluated, before
 // hydration. The notebook is a separate chunk, fetched only when it is needed.

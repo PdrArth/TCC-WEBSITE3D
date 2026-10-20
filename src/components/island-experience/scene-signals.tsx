@@ -6,13 +6,13 @@ import type {EnvironmentState} from '@/lib/experience/environment.mjs';
 import type {WorldEnvironmentManifest,Vec3} from '@/lib/experience-contract';
 import type {ScenicAudioFrame,ScenicActors} from '@/lib/experience/scene-signals';
 import {lakeSpillway} from '@/lib/experience/lake-dynamics.mjs';
-import {createRenderBudget,advanceRenderBudget,resolutionLimits} from '@/lib/experience/render-budget.mjs';
+import {createRenderBudget,advanceRenderBudget,resolutionLimits,mobileViewport} from '@/lib/experience/render-budget.mjs';
 export default function SceneSignals({actors,environment,environmentState,active,intro,quality,onSoundFrame,onPixelRatio}:{
   actors:MutableRefObject<ScenicActors>;environment:WorldEnvironmentManifest;environmentState:MutableRefObject<EnvironmentState>;
   active:boolean;intro:boolean;quality:'high'|'low';onSoundFrame?: (frame:ScenicAudioFrame)=>void;onPixelRatio:(ratio:number)=>void;
 }){
   const {camera,gl,size}=useThree(),budget=useRef(createRenderBudget(intro?.7:1)),clock=useRef(0),forward=useMemo(()=>new THREE.Vector3(),[]),up=useMemo(()=>new THREE.Vector3(),[]);
-  const mobile=size.width<760||(typeof window!=='undefined'&&window.matchMedia('(pointer: coarse)').matches);
+  const mobile=mobileViewport(size.width,size.height,typeof window!=='undefined'&&window.matchMedia('(pointer: coarse)').matches);
   const limits=useMemo(()=>resolutionLimits(size.width,size.height,quality,mobile,intro),[size.width,size.height,quality,mobile,intro]);
   const frame=useMemo<ScenicAudioFrame>(()=>{
     const outlet=lakeSpillway(environment),point:Vec3=[outlet.position[0]+outlet.direction[0]*outlet.length,outlet.position[1]-outlet.drop*.5,outlet.position[2]+outlet.direction[1]*outlet.length];

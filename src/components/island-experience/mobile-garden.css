@@ -1,0 +1,31 @@
+/* Keep the existing controls, with room for thumbs and device cutouts. */
+@media (max-width:600px) {
+  .island-header { height:calc(72px + env(safe-area-inset-top,0px)); padding-top:env(safe-area-inset-top,0px); padding-left:max(18px,env(safe-area-inset-left,0px)); padding-right:max(18px,env(safe-area-inset-right,0px)); }
+  .island-header nav button,.island-header nav a { min-width:44px; min-height:44px; }
+  .island-world-caption { top:calc(84px + env(safe-area-inset-top,0px)); }
+  .is-started .island-stage { top:calc(70px + env(safe-area-inset-top,0px)); bottom:calc(20px + env(safe-area-inset-bottom,0px)); }
+  .island-zoom { left:max(16px,env(safe-area-inset-left,0px)); bottom:calc(128px + env(safe-area-inset-bottom,0px)); }
+  .island-zoom button { width:44px; height:44px; }
+  .island-map-preview { right:max(16px,env(safe-area-inset-right,0px)); bottom:calc(20px + env(safe-area-inset-bottom,0px)); }
+  .island-status { left:max(18px,env(safe-area-inset-left,0px)); bottom:calc(22px + env(safe-area-inset-bottom,0px)); max-width:calc(100% - 144px); line-height:1.5; }
+}
+@media (max-width:360px) {
+  .island-header { padding-left:max(10px,env(safe-area-inset-left,0px)); padding-right:max(10px,env(safe-area-inset-right,0px)); gap:4px; }
+  .island-header nav { gap:0; }
+}
+@media (max-height:500px) and (min-width:601px) {
+  .island-header { height:64px; padding-left:max(18px,env(safe-area-inset-left,0px)); padding-right:max(18px,env(safe-area-inset-right,0px)); }
+  .island-header nav button,.island-header nav a { min-width:44px; min-height:44px; }
+  .island-world-caption { top:68px; }
+  .island-label { display:grid; place-items:center; min-width:44px; min-height:44px; padding:6px!important; border:0!important; background:transparent!important; box-shadow:none; backdrop-filter:none; }
+  .island-label>span { width:30px; height:30px; font-size:12px; border:1px solid #fff; border-radius:50%; background:#fffdf3f5; color:#344f3e; box-shadow:0 2px 8px #24342a30; }
+  .island-label strong { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+  .island-label:hover>span,.island-label:focus-visible>span { background:#294b41; color:white; }
+  .island-zoom { bottom:calc(20px + env(safe-area-inset-bottom,0px)); left:max(18px,env(safe-area-inset-left,0px)); }
+  .island-zoom button { width:44px; height:44px; }
+  .island-map-preview { width:99px; bottom:calc(16px + env(safe-area-inset-bottom,0px)); right:max(18px,env(safe-area-inset-right,0px)); }
+  .island-map-launch { padding:7px!important; }
+  .island-map-launch>span { font-size:9px; }
+  .island-map-launch kbd { display:none; }
+  .island-status { bottom:calc(82px + env(safe-area-inset-bottom,0px)); left:max(18px,env(safe-area-inset-left,0px)); max-width:230px; }
+}

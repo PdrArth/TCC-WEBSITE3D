@@ -1,5 +1,7 @@
 # Validações
 
+A [revisão de eventos raros e ajustes móveis de 20/10/2026](garden-sky-mobile-20261020.md) registra o arco-íris após a chuva, as estrelas cadentes ocasionais, as áreas de toque, a disposição em telas pequenas e o reaproveitamento das sombras. Ela diferencia a verificação emulada de um teste físico no celular.
+
 Os relatórios registram verificações da experiência por versão. A [revisão de alimentação, foto e vagalumes de 20/10/2026](garden-visitors-20261020.md) registra a interação com os peixes, a captura de PNG e as noites de verão; seu ajuste posterior documenta a retirada do modo foto a pedido do autor. Alimentação e vagalumes continuam disponíveis. A [revisão de cumprimento, ondas e pesca de 20/10/2026](garden-polish-20261020.md) registra o aceno com parada, a água mais visível, a variedade dos pontos de pesca e a chuva mais baixa. A [revisão anterior de 20/10/2026](garden-20261020.md) cobre renderização no celular, áudio espacial e microinterações. A [revisão de 17–18/10/2026](garden-20261017.md) registra ambiente, rotina do morador, fauna, câmera e playlist. A [validação v20](validation-v20.md) e os documentos anteriores permanecem como histórico de decisões e regressões corrigidas.
 
 As verificações foram feitas em navegador e, quando indicado, em emulação móvel. Cada relatório delimita o que foi testado; eles não comprovam desempenho em todos os aparelhos nem substituem testes físicos.

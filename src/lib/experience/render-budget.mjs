@@ -1,4 +1,5 @@
 /** Adjust only pixel cost; every season, weather effect and simulation stays active. */
+export function mobileViewport(width,height,coarse=false){return coarse||width<760||(width<1000&&height<500);}
 export function resolutionLimits(width,height,quality='low',mobile=false,intro=false){
   const ceiling=intro?.75:quality==='high'?1.35:1;
   const pixels=Math.max(1,width*height),budget=mobile?720000:2300000;
@@ -16,4 +17,13 @@ export function advanceRenderBudget(state,seconds,limits,eligible=true){
   if(state.slow>=2){state.value=Math.max(limits.min,state.value-.1);state.slow=0;state.fast=0;}
   else if(state.fast>=6){state.value=Math.min(limits.max,state.value+.05);state.fast=0;}
   state.elapsed=0;state.frames=0;return state.value;
+}
+
+export function createShadowBudget(){return {elapsed:0,dirty:true};}
+export function advanceShadowBudget(state,seconds,moving=true){
+  if(!moving&&!state.dirty)return false;
+  state.elapsed+=Math.min(.1,Math.max(0,Number.isFinite(seconds)?seconds:0));
+  if(!state.dirty&&state.elapsed+1e-8<1/15)return false;
+  state.elapsed=state.dirty?0:Math.max(0,state.elapsed-1/15);state.dirty=false;
+  return true;
 }

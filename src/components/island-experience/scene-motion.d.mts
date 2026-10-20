@@ -6,7 +6,7 @@ export function fieldOfView(fov: number, width: number, height: number, detail?:
 export function overviewDistanceScale(fov: number, width: number, height: number): number;
 export function clampZoom(value: number, bounds?: { minZoom: number; maxZoom: number }): number;
 export function wheelZoom(value: number, delta: number, bounds?: { minZoom: number; maxZoom: number }): number;
-export class CameraOrbit { yaw: number; pitch: number; dragging: boolean; suppressClick: boolean; pauseRemaining: number; autoMode: "paused" | "gesture" | "cooldown" | "rotating"; reset(pauseSeconds?: number): void; pause(seconds?: number): void; advanceAuto(seconds: number,enabled?: boolean): boolean; begin(x: number,y: number): void; beginPinch(): void; move(x: number,y: number,width?: number,height?: number): boolean; end(): boolean; consumeClick(): boolean; }
+export class CameraOrbit { yaw: number; pitch: number; dragging: boolean; suppressClick: boolean; pauseRemaining: number; autoMode: "paused" | "gesture" | "cooldown" | "rotating"; reset(pauseSeconds?: number): void; pause(seconds?: number): void; advanceAuto(seconds: number,enabled?: boolean): boolean; begin(x: number,y: number): void; beginPinch(): void; move(x: number,y: number,width?: number,height?: number): boolean; end(): boolean; cancel(): void; consumeClick(): boolean; }
 export function orbitPosition(position: number[], target: number[], yaw?: number, pitch?: number, zoom?: number): [number,number,number];
 export function environmentSeconds(seconds: number, reduced?: boolean): number;
 export type WeatherVisualProfile = { cloudClusters: number; cloudScale: number; rainRatio: number; dropWidthPx: number; dropLengthPx: number; dropOpacity: number; rainSpeed: number };

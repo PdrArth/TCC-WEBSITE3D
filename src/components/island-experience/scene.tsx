@@ -27,6 +27,8 @@ import WaterTouchesView from './water-touches';
 import {createFeedSpot,requestFishFood} from '@/lib/experience/fish-feeding.mjs';
 import FishFood from './fish-food';
 import Fireflies from './fireflies';
+import RareSky from './rare-sky';
+import MobileShadows from './mobile-shadows';
 import { optimizeWorld, selectedBatchPavilion } from "./optimize-world.mjs";
 import { FrameStalls, prepareEffectMaterials, type PreparationProgress } from "./render-preparation.mjs";
 import { CameraOrbit, environmentSeconds, orbitPosition, clampZoom, easeCamera, fieldOfView, mayAdaptQuality, overviewDistanceScale, restingPose, wheelZoom } from "./scene-motion.mjs";
@@ -299,11 +301,12 @@ function LiveWorld({ world, ...props }: IslandSceneProps & { world: GLTF }) {
       if(!allowed() || event.button!==0) return;
       pointers.set(event.pointerId,{x:event.clientX,y:event.clientY}); canvas.setPointerCapture?.(event.pointerId);
       if(pointers.size===1) controller.begin(event.clientX,event.clientY);
-      else { controller.beginPinch(); pinch={distance:pairDistance(),zoom:zoomRef.current}; }
+      else if(pointers.size===2) { controller.beginPinch(); pinch={distance:pairDistance(),zoom:zoomRef.current}; }
     };
     const move=(event:PointerEvent)=> {
       if(!allowed() || !pointers.has(event.pointerId)) return;
       pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
+      if(pointers.size>2) { event.preventDefault(); return; }
       if(pointers.size===2 && pinch && onZoom) { event.preventDefault(); change(pinch.zoom*pairDistance()/Math.max(1,pinch.distance)); return; }
       if(controller.move(event.clientX,event.clientY,size.width,size.height)) { event.preventDefault(); projectionNeeded.current=true; canvas.style.setProperty("cursor","grabbing"); invalidate(); }
     };
@@ -314,10 +317,15 @@ function LiveWorld({ world, ...props }: IslandSceneProps & { world: GLTF }) {
       if(pointers.size===1) { const remaining=[...pointers.values()][0]; const suppressed=controller.suppressClick; controller.begin(remaining.x,remaining.y); controller.suppressClick=suppressed; }
       else if(pointers.size===2) { controller.beginPinch(); pinch={distance:pairDistance(),zoom:zoomRef.current}; }
     };
+    const cancel=()=> {
+      const held=[...pointers.keys()];pointers.clear();controller.cancel();pinch=null;canvas.style.removeProperty("cursor");
+      for(const id of held)if(canvas.hasPointerCapture?.(id))canvas.releasePointerCapture(id);
+    };
+    const lost=(event:PointerEvent)=> { if(pointers.has(event.pointerId))cancel(); };
     const click=(event:MouseEvent)=> { if(controller.consumeClick()) { event.preventDefault(); event.stopImmediatePropagation(); } };
     const previousTouchAction=canvas.style.touchAction; canvas.style.setProperty("touch-action","none");
-    canvas.addEventListener("wheel",wheel,{passive:false}); canvas.addEventListener("pointerdown",down); canvas.addEventListener("pointermove",move,{passive:false}); canvas.addEventListener("pointerup",up); canvas.addEventListener("pointercancel",up); canvas.addEventListener("click",click,true);
-    return()=> { pointers.clear(); controller.end(); canvas.style.setProperty("touch-action",previousTouchAction); canvas.removeEventListener("wheel",wheel); canvas.removeEventListener("pointerdown",down); canvas.removeEventListener("pointermove",move); canvas.removeEventListener("pointerup",up); canvas.removeEventListener("pointercancel",up); canvas.removeEventListener("click",click,true); };
+    canvas.addEventListener("wheel",wheel,{passive:false}); canvas.addEventListener("pointerdown",down); canvas.addEventListener("pointermove",move,{passive:false}); canvas.addEventListener("pointerup",up); canvas.addEventListener("pointercancel",cancel); canvas.addEventListener("lostpointercapture",lost); canvas.addEventListener("click",click,true); window.addEventListener("blur",cancel);
+    return()=> { cancel(); canvas.style.setProperty("touch-action",previousTouchAction); canvas.removeEventListener("wheel",wheel); canvas.removeEventListener("pointerdown",down); canvas.removeEventListener("pointermove",move); canvas.removeEventListener("pointerup",up); canvas.removeEventListener("pointercancel",cancel); canvas.removeEventListener("lostpointercapture",lost); canvas.removeEventListener("click",click,true); window.removeEventListener("blur",cancel); };
   }, [gl,active,panelOpen,interactionBlocked,onZoom,manifest.cameraBounds,size.width,size.height,invalidate]);
   useEffect(() => () => { gl.domElement.style.cursor = ""; }, [gl]);
 
@@ -479,6 +487,8 @@ function LiveWorld({ world, ...props }: IslandSceneProps & { world: GLTF }) {
   }, [active, panelOpen, props.interactionBlocked, props.onSpatialSound,props.onFeed,intro, onInteract, reducedMotion, manifest, onSelect, ambient, invalidate,environment]);
 
   return <>
+    <MobileShadows active={active} moving={animateWorld}/>
+    <RareSky environmentState={environmentState} active={animateWorld&&!intro} reducedMotion={reducedMotion}/>
     <Atmosphere actors={actors} companion={companion} weather={props.weather ?? "clear"} phase={props.phase} timeOfDay={props.timeOfDay} environment={environment} environmentState={environmentState} windSpeed={props.windSpeed} precipitation={props.precipitation} snowfall={props.snowfall} birdPerches={manifest.birdPerches} birdShelters={manifest.birdShelters} strikeTargets={strikeTargets} season={season} quality={props.quality} active={active && !panelOpen} moving={animateWorld} reducedMotion={reducedMotion} onInteract={!props.intro && !props.interactionBlocked && !panelOpen ? props.onInteract : undefined} onThunder={props.onThunder} />
     <Scenery feedSpot={feedSpot} world={world.scene} environment={environment} environmentState={environmentState} quality={props.quality} weather={props.weather??"clear"} season={season} moving={animateWorld} windSpeed={props.windSpeed} reducedMotion={reducedMotion} />
     <GardenLife environment={environment} environmentState={environmentState} season={season} reducedMotion={reducedMotion} quality={props.quality} />
