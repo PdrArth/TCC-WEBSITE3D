@@ -27,3 +27,9 @@ No navegador, um toque real gerou doze grãos e três peixes em aproximação. A
 O verão com céu limpo à noite registrou 24 vagalumes e intensidade 1,000; após trocar para tempestade, a contagem chegou a zero e a intensidade a 0,000. Nenhum erro de renderização foi registrado na verificação. A revisão móvel usa emulação de viewport, não um aparelho físico.
 
 Capturas e PNGs locais em `outputs/garden-visitors-20261020/`. Logs em `.sites-runtime/garden-visitors-all-tests.log` e `.sites-runtime/garden-visitors-build.log`.
+
+## Ajuste posterior — retirada do modo foto
+
+Ainda em 20/10/2026, o autor pediu para tirar a câmera de foto. Foram removidos o botão, a barra, a exportação de PNG e os estados e estilos exclusivos desse modo. Os controles de navegação da cena (arraste, aproximação e altura), a alimentação dos peixes e os vagalumes permanecem. Modelos das ilhas, climas, estações, conteúdo e áudio não foram alterados.
+
+Os 252 testes existentes, o build de produção e a verificação TypeScript passaram novamente. No navegador, a cena ficou pronta sem botão ou barra de foto, mantendo as sete etiquetas e os cinco controles de navegação. No viewport móvel de 390 × 844, o cabeçalho coube sem rolagem horizontal; o painel manteve os onze climas, o modo automático e as quatro estações. A verificação móvel foi emulada. Capturas em `outputs/garden-no-photo-20261020/`; logs em `.sites-runtime/no-photo-tests.log` e `.sites-runtime/no-photo-build.log`.
