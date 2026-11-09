@@ -1,7 +1,7 @@
 "use client";
 
 import { Component, useCallback, useEffect, useRef, useState, useSyncExternalStore, type ComponentType, type ReactNode } from "react";
-import { ArrowLeft, ArrowRight, ArrowUp, ArrowDown, BookOpen, CloudLightning, CloudRain, Cloud, ExternalLink, Maximize, Minimize, Play, Settings2, Info, Sun, Sunset, Volume2, VolumeX, X, Minus, Plus, RotateCcw } from "lucide-react";
+import { Accessibility, Pause, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, BookOpen, CloudLightning, CloudRain, Cloud, ExternalLink, Maximize, Minimize, Play, Settings2, Sun, Sunset, Volume2, VolumeX, X, Minus, Plus, RotateCcw } from "lucide-react";
 import { pavilionIds, islandNames as names, islandDescriptions as descriptions, type PavilionId, type WorldManifest } from "@/lib/experience-contract";
 import type { PublicUpdate } from "@/lib/update-types";
 import { WorldNavigator, type Arrival } from "@/lib/experience/navigation.mjs";
@@ -14,6 +14,10 @@ import type {ScenicAudioFrame,ScenicSound} from '@/lib/experience/scene-signals'
 import type { IslandSceneProps, LabelPositions, ScenePerformance } from "./scene";
 import WorldMap from "./world-map";
 import EnvironmentControls from "./environment-controls";
+import {useAccessibility} from './use-accessibility';
+import {discoveryCatalog} from '@/lib/experience/discoveries.mjs';
+import {useGardenSession} from './use-garden-session';
+import {AccessibilityControls,GardenPanel,DiscoveryBook,AccessibleGarden,GuidedVisit,gardenPanelTitles,type GardenPanelSection} from './garden-panels';
 import "../research-content/content.css";
 import "./island.css";
 import "../research-content/reading-v10.css";
@@ -23,12 +27,12 @@ import "../research-content/pavilion-v14.css";
 import "./environment-v14.css";
 import "./garden-comfort.css";
 import "./mobile-garden.css";
+import "./garden-accessibility.css";
 
-// Start the world download as soon as this client module is evaluated, before
-// hydration. The notebook is a separate chunk, fetched only when it is needed.
+// The manifest is shared by both views. Load WebGL only when the visitor uses it.
+// The notebook stays a separate chunk, fetched only when it is needed.
 let sceneModule: Promise<typeof import("./scene")> | undefined;
 const loadScene = () => sceneModule ??= import("./scene").catch(error => { sceneModule = undefined; throw error; });
-if (typeof window !== "undefined") void loadScene().catch(() => {});
 let contentModule: Promise<typeof import("@/components/research-content")> | undefined;
 const loadContent = () => contentModule ??= import("@/components/research-content").catch(error => { contentModule = undefined; throw error; });
 function DeferredResearch({ children }: { children: (module: typeof import("@/components/research-content")) => ReactNode }) {
@@ -67,8 +71,9 @@ function trapFocus(event: KeyboardEvent, node: HTMLElement) {
   else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
 }
 
-export default function IslandExperience({showSettings=false}:{showSettings?:boolean}) {
-  const reducedMotion = false;
+export default function IslandExperience({showSettings=false,initialTextView=false}:{showSettings?:boolean;initialTextView?:boolean}) {
+  const access=useAccessibility(initialTextView);
+  const reducedMotion=access.reducedMotion;
   const visible = useSyncExternalStore(visibilitySubscribe, visibilitySnapshot, () => true);
   const [manifest, setManifest] = useState<WorldManifest | null>(null);
   const [worldNavigator, setWorldNavigator] = useState<WorldNavigator | null>(null);
@@ -91,7 +96,7 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
   const [audioState, setAudioState] = useState<"off" | "loading" | "on" | "error">("off");
   const [audioInitialized, setAudioInitialized] = useState(false);
   const [creditsOpen, setCreditsOpen] = useState(false);
-  const [panelSection, setPanelSection] = useState<"credits" | "environment">("credits");
+  const [panelSection, setPanelSection] = useState<GardenPanelSection>("credits");
   const [readingQuiet, setReadingQuiet] = useState(true);
   const [visited, setVisited] = useState<PavilionId[]>([]);
   const [musicVolume, setMusicVolume] = useState(.68);
@@ -104,11 +109,14 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
   const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
   const [labelWidths, setLabelWidths] = useState<Record<PavilionId, number>>(Object.fromEntries(pavilionIds.map(id => [id, 150])) as Record<PavilionId, number>);
   const [posterAspect, setPosterAspect] = useState(4 / 3);
-  const [started, setStarted] = useState(false);
+  const [started, setStarted] = useState(initialTextView);
+  const [tourActive,setTourActive]=useState(false);
+  const previousMotion=useRef<'system'|'reduced'>('system');
   const [feedNotice,setFeedNotice]=useState(0);
   const [mapOpen, setMapOpen] = useState(false);
-  const environment = useScenicWeather(visible && !reading);
+  const environment = useScenicWeather(visible && !reading && !access.paused);
   const { weather, phase, season, setSeason, timeOfDay } = environment;
+  const session=useGardenSession({manifest,weather,season,hour:timeOfDay,visible:visible&&!reading,started,rendererActive:sceneState==='ready'&&!access.textView,paused:access.paused,reducedMotion});
   const [fullscreen, setFullscreen] = useState(false);
   const [screenNotice, setScreenNotice] = useState("");
   const root = useRef<HTMLDivElement>(null);
@@ -127,8 +135,16 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
   const retryController = useRef<AbortController | null>(null);
   const soundSilenced = useRef(false);
   const soundGesture = useRef(false);
-  const fedFish=useCallback(()=>setFeedNotice(value=>value+1),[]);
+  const {fed:recordFishFeeding,announce:announceGarden}=session;
+  const fedFish=useCallback(()=>{setFeedNotice(value=>value+1);recordFishFeeding();},[recordFishFeeding]);
   useEffect(()=>{if(!feedNotice)return;const timer=window.setTimeout(()=>setFeedNotice(0),7000);return()=>window.clearTimeout(timer);},[feedNotice]);
+  useEffect(()=>{if(!access.textView)return;let active=true;queueMicrotask(()=>{if(active)setStarted(true);});return()=>{active=false;};},[access.textView]);
+  useEffect(()=>{
+    if(!access.loaded||access.textView)return;
+    let cancelled=false;
+    void loadScene().then(module=>{if(cancelled)return;if(root.current)root.current.dataset.sceneModuleReadyMs=window.performance.now().toFixed(1);setScene(()=>module.default);}).catch(()=>{if(!cancelled)setSceneState('fallback');});
+    return()=>{cancelled=true;};
+  },[access.loaded,access.textView]);
 
   useEffect(() => {
     const id = window.setTimeout(() => {
@@ -188,13 +204,7 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
       setManifest(data);
       if (root.current) root.current.dataset.manifestReadyMs = window.performance.now().toFixed(1);
     });
-    const sceneTask = loadScene().then(sceneModule => {
-      if (root.current && !controller.signal.aborted) root.current.dataset.sceneModuleReadyMs = window.performance.now().toFixed(1);
-      return sceneModule;
-    });
-    Promise.all([manifestTask, sceneTask]).then(([, sceneModule]) => {
-      if (!controller.signal.aborted) setScene(() => sceneModule.default);
-    }).catch(error => { if (error.name !== "AbortError" && !controller.signal.aborted) {console.error('Garden loading failed',error);setSceneState("fallback");} });
+    void manifestTask.catch(error=>{if(error.name!=='AbortError'&&!controller.signal.aborted){console.error('Garden loading failed',error);setSceneState('fallback');}});
     fetch("/api/updates", { signal: controller.signal }).then(async response => {
       if (!response.ok) throw new Error("Updates unavailable");
       const result = await response.json() as { updates: PublicUpdate[] };
@@ -202,27 +212,8 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
       setUpdates(result.updates);
       setNewsState("ready");
     }).catch(error => { if (error.name !== "AbortError") setNewsState("error"); });
-    // Autoplay is attempted honestly. If blocked, the first real gesture retries.
-    if (!soundSilenced.current) void engine.enable({ music: true }).catch(() => { if (!controller.signal.aborted && !soundGesture.current) setAudioState("off"); });
-    const unlock = (event: Event) => {
-      if (soundSilenced.current || (event.target as HTMLElement)?.closest("[data-audio-control]")) return;
-      if (event instanceof KeyboardEvent && !["Enter", " "].includes(event.key)) return;
-      const hadGesture = soundGesture.current;
-      soundGesture.current = true;
-      const state = engine.diagnostics();
-      if (state.music.status === "playing" && !state.music.metered) return;
-      if (state.status === "starting" && hadGesture) return;
-      if (!state.enabled || state.music.status === "error") {
-        audioRequest.current++;
-        // Cancel a suspended automatic attempt so resume() runs in this gesture.
-        engine.mute();
-        setAudioState("loading");
-        void engine.enable({ music: true }).catch(() => {});
-      }
-    };
-    document.addEventListener("pointerdown", unlock);
-    document.addEventListener("keydown", unlock);
-    return () => { document.removeEventListener("pointerdown", unlock); document.removeEventListener("keydown", unlock); controller.abort(); retryController.current?.abort(); nav.current?.cancel(); engine.dispose(); };
+    // Sound starts only through the explicitly named sound control.
+    return () => { controller.abort(); retryController.current?.abort(); nav.current?.cancel(); engine.dispose(); };
   }, []);
 
   useEffect(() => {
@@ -267,6 +258,7 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
   }, [reading, started]);
 
   const closeContent = useCallback(() => {
+    setTourActive(false);
     setPavilion(null);
     setCreditsOpen(false);
     setMapOpen(false);
@@ -276,7 +268,10 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
     nav.current?.cancel();
     if (resolveReadingHash(window.location.hash)) window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-    requestAnimationFrame(() => (lastTrigger.current?.isConnected ? lastTrigger.current : returnButton.current ?? document.querySelector<HTMLElement>(".island-enter, .island-brand"))?.focus({ preventScroll: true }));
+    requestAnimationFrame(() => {
+      const candidates = [lastTrigger.current, document.getElementById('garden-text-title'), returnButton.current, document.querySelector<HTMLElement>(".island-enter, .island-brand")];
+      candidates.find(node => node?.isConnected && node.getClientRects().length > 0 && !node.closest('[inert],[hidden]'))?.focus({ preventScroll:true });
+    });
   }, []);
 
   const closeOverlay = useCallback(() => {
@@ -324,7 +319,7 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
 
   useEffect(() => {
     if (pavilion || creditsOpen || mapOpen) { panel.current?.scrollTo(0, 0); panelHeading.current?.focus({ preventScroll: true }); }
-  }, [pavilion, creditsOpen, mapOpen]);
+  }, [pavilion, creditsOpen, mapOpen,panelSection]);
 
   useEffect(() => {
     audio.current?.visibility(!visible);
@@ -335,8 +330,8 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
     const keys = (event: KeyboardEvent) => {
       if (event.key === "Escape") { event.preventDefault(); closeOverlay(); }
       else if ((pavilion || creditsOpen || mapOpen) && panel.current) trapFocus(event, panel.current);
-      else if (event.ctrlKey || event.metaKey || event.altKey || /INPUT|TEXTAREA|SELECT/.test((event.target as HTMLElement)?.tagName)) return;
-      else if (event.key.toLowerCase() === "m" && started && !reading && !pavilion && !creditsOpen) { event.preventDefault(); lastTrigger.current = document.activeElement as HTMLElement; setMapOpen(value => !value); }
+      else if (event.ctrlKey || event.metaKey || /INPUT|TEXTAREA|SELECT/.test((event.target as HTMLElement)?.tagName)) return;
+      else if (event.altKey && event.key.toLowerCase() === "m" && started && !reading && !pavilion && !creditsOpen) { event.preventDefault(); lastTrigger.current = document.activeElement as HTMLElement; setMapOpen(value => !value); }
     };
     window.addEventListener("keydown", keys);
     return () => window.removeEventListener("keydown", keys);
@@ -358,9 +353,9 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
   }, []);
 
   const playSelection = useCallback(() => audio.current?.play("selection"), []);
-  const playThunder = useCallback(() => audio.current?.thunder(), []);
+  const playThunder = useCallback(() => {audio.current?.thunder();if(access.captions)announceGarden('Trovão ao longe.');}, [access.captions,announceGarden]);
   const spatialFrame = useCallback((frame:ScenicAudioFrame)=>audio.current?.setSpatialScene(frame),[]);
-  const spatialSound = useCallback((kind:ScenicSound,point:[number,number,number])=>audio.current?.playSpatial(kind,point),[]);
+  const spatialSound = useCallback((kind:ScenicSound,point:[number,number,number])=>{audio.current?.playSpatial(kind,point);if(kind==='fishing'&&access.captions)announceGarden('A boia mexeu: um peixe tocou a isca.');},[access.captions,announceGarden]);
   const projectLabels = useCallback((positions:LabelPositions) => {
     labels.current=positions;
     const bounds=stage.current?.getBoundingClientRect();
@@ -380,6 +375,8 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
     setCreditsOpen(false);
     setMapOpen(false);
     setStarted(true);
+    setReading(false);readingActive.current=false;
+    if(resolveReadingHash(window.location.hash))window.history.replaceState(null,'',`${window.location.pathname}${window.location.search}`);
     setPavilion(id);
     setSelectedIsland(id);
     audio.current?.play("selection");
@@ -451,7 +448,6 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
   };
 
   const start = () => {
-    if (!soundSilenced.current && !audio.current?.diagnostics().desired && audioState !== "on" && audioState !== "loading") void toggleAudio();
     setStarted(true);
     setResetEpoch(value => value + 1);
     requestAnimationFrame(() => returnButton.current?.focus({ preventScroll: true }));
@@ -469,7 +465,7 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
     audio.current?.play("selection");
   };
 
-  const openCredits = (trigger: HTMLElement, section: "credits" | "environment" = "credits") => {
+  const openCredits = (trigger: HTMLElement, section: GardenPanelSection = "credits") => {
     setPanelSection(section);
     lastTrigger.current = trigger;
     nav.current?.cancel();
@@ -478,6 +474,10 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
     setMapOpen(false);
     setCreditsOpen(true);
   };
+  const startTour=()=>{setTourActive(true);choose(pavilionIds[0]);};
+  const performGardenAction=(action:()=>boolean)=>{if(action()&&creditsOpen){setCreditsOpen(false);requestAnimationFrame(()=>{const target=access.textView?document.getElementById('garden-text-title'):returnButton.current;target?.focus({preventScroll:true});});}};
+  const toggleMotion=()=>{if(access.paused)access.update({motion:previousMotion.current});else{previousMotion.current=access.preferences.motion==='reduced'?'reduced':'system';access.update({motion:'paused'});}};
+  const gardenActions={manifest,residentText:session.residentText,eventText:access.captions?session.captions.at(-1):undefined,feedingPoints:session.feedingPoints,paused:access.paused,onFeed:(index:number)=>performGardenAction(()=>session.feed(index)),onCommand:(id:string)=>performGardenAction(()=>session.command(id)),onWave:()=>performGardenAction(session.wave),onTour:startTour,onObserve:(id:import('@/lib/experience/discoveries.mjs').DiscoveryId)=>{session.discover(id);session.announce(discoveryCatalog.find(item=>item.id===id)?.description??'Nova descoberta no jardim.');}};
 
   const anchors = (event: React.MouseEvent<HTMLElement>) => {
     const link = (event.target as HTMLElement).closest<HTMLAnchorElement>('a[href^="#"]');
@@ -522,45 +522,53 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
   const audioLabel = !audioInitialized ? "Ativar ou silenciar som" : audioState === "on" ? "Silenciar som" : audioState === "loading" ? "Cancelar carregamento do som" : "Ativar som";
   const audioControl = <button className="island-inline-audio" data-audio-control data-entry-audio-toggle onClick={toggleAudio} aria-label={audioLabel}><span className="island-audio-playing-icon"><Volume2 size={17} aria-hidden="true" /></span><span className="island-audio-muted-icon"><VolumeX size={17} aria-hidden="true" /></span></button>;
   const musicStatus = audioState === "on" ? audioDiagnostics?.music : undefined;
-  return <div ref={root} className={`island-experience${started ? " is-started" : " is-intro"}${reading ? " is-reading" : ""}`} onClick={anchors} data-experience-version="20" data-scene-state={sceneState} data-navigation-state={destination ? "transition" : "idle"} data-world-active={visible && !reading} data-panel-open={modalOpen} data-motion={reducedMotion ? "reduced" : "full"} data-weather={weather} data-season={season} data-phase={phase} data-time-of-day={timeOfDay.toFixed(3)} data-weather-mode={environment.mode} data-opening-weather={environment.opening?.weather ?? "pending"} data-opening-coordination={environment.opening?.coordination ?? "pending"} data-opening-position={environment.opening?.position ?? "pending"} data-options-open={creditsOpen} data-audio={audioState} data-audio-initialized={audioInitialized} data-music={musicStatus?.status ?? "off"} data-music-title={musicStatus?.title ?? ""} data-music-time={musicStatus?.currentTime ?? 0} data-quality={quality} data-zoom={zoom} data-fps={performance?.fps ?? "pending"} data-frame-ms={performance?.frameMs?.toFixed(2)} data-p95-ms={performance?.p95Ms?.toFixed(2)} data-heap-mb={performance?.heapMB} data-gpu-geometries={performance?.geometries} data-gpu-textures={performance?.textures} data-draw-calls={performance?.drawCalls ?? "pending"} data-triangles={performance?.triangles ?? "pending"}>
-    <a className="island-skip" href={readingHref("pesquisa")}>Ir para a leitura</a>
+  return <div id="island-experience" data-a11y-theme={access.theme} data-a11y-palette={access.palette} data-a11y-text={access.textSize} data-a11y-spacing={access.spacing} data-view={access.textView?"text":"scene"} data-paused={access.paused} ref={root} className={`island-experience${started ? " is-started" : " is-intro"}${reading ? " is-reading" : ""}`} onClick={anchors} data-experience-version="20" data-scene-state={sceneState} data-navigation-state={destination ? "transition" : "idle"} data-world-active={visible && !reading} data-panel-open={modalOpen} data-motion={reducedMotion ? "reduced" : "full"} data-weather={weather} data-season={season} data-phase={phase} data-time-of-day={timeOfDay.toFixed(3)} data-weather-mode={environment.mode} data-opening-weather={environment.opening?.weather ?? "pending"} data-opening-coordination={environment.opening?.coordination ?? "pending"} data-opening-position={environment.opening?.position ?? "pending"} data-options-open={creditsOpen} data-audio={audioState} data-audio-initialized={audioInitialized} data-music={musicStatus?.status ?? "off"} data-music-title={musicStatus?.title ?? ""} data-music-time={musicStatus?.currentTime ?? 0} data-quality={quality} data-zoom={zoom} data-fps={performance?.fps ?? "pending"} data-frame-ms={performance?.frameMs?.toFixed(2)} data-p95-ms={performance?.p95Ms?.toFixed(2)} data-heap-mb={performance?.heapMB} data-gpu-geometries={performance?.geometries} data-gpu-textures={performance?.textures} data-draw-calls={performance?.drawCalls ?? "pending"} data-triangles={performance?.triangles ?? "pending"}>
+    <a className="island-skip" inert={modalOpen} href={readingHref("pesquisa")}>Ir para a leitura</a>
     <header className="island-header" inert={modalOpen}>
       <button className="island-brand" onClick={closeContent}>DO CÓDIGO<br /><span>À SUPERVISÃO</span></button>
-      <nav aria-label="Acessos à pesquisa">{audioControl}<button className="island-header-options" onClick={event => openCredits(event.currentTarget, "environment")} aria-label="Ambiente do jardim"><Settings2 size={18} aria-hidden="true" /></button>{<button className="island-header-options" onClick={event => openCredits(event.currentTarget)} aria-label={showSettings?"Opções e créditos":"Créditos"}>{showSettings?<Settings2 size={18} aria-hidden="true" />:<Info size={18} aria-hidden="true" />}</button>}{!reading && <a href={readingHref("pesquisa")}><BookOpen size={15} aria-hidden="true" />Ler a pesquisa</a>}<a href="/tcc-pedro-arthur.pdf" target="_blank" rel="noreferrer">PDF<ExternalLink size={13} aria-hidden="true" /></a></nav>
+      <nav aria-label="Acessos à pesquisa">{audioControl}<button className="island-header-options" onClick={event => openCredits(event.currentTarget, "environment")} aria-label="Ambiente do jardim"><Settings2 size={18} aria-hidden="true" /></button>{<button className="island-header-options" onClick={event => openCredits(event.currentTarget,showSettings?"credits":"accessibility")} aria-label={showSettings?"Opções e créditos":"Acessibilidade"}>{showSettings?<Settings2 size={18} aria-hidden="true" />:<Accessibility size={18} aria-hidden="true" />}</button>}{!reading && <a href={readingHref("pesquisa")}><BookOpen size={15} aria-hidden="true" />Ler a pesquisa</a>}<a href="/tcc-pedro-arthur.pdf" target="_blank" rel="noreferrer">PDF<ExternalLink size={13} aria-hidden="true" /></a></nav>
     </header>
     <main className={`island-landing${modalOpen ? " has-panel" : ""}`} hidden={reading} inert={modalOpen} aria-label="Explore a pesquisa">
-      <div ref={stage} className="island-stage" aria-label="Sete ilhas da pesquisa" data-animation={reducedMotion ? "reduced" : "full"}>
+      {started&&!access.textView&&<h1 className="island-visually-hidden">Jardim da pesquisa — Do código à supervisão</h1>}
+      {access.textView&&<AccessibleGarden {...gardenActions} description={`${seasonInfo[season].name}. ${weatherNames[weather]}. Horário do jardim: ${environment.clock}. Sete ilhas são ligadas por pontes em torno de um lago, com uma casa e seu morador.`} visited={visited} onChoose={choose} onOptions={(section,trigger)=>openCredits(trigger,section)}/>}
+      <div hidden={access.textView} ref={stage} className="island-stage" aria-label="Sete ilhas da pesquisa" data-animation={reducedMotion ? "reduced" : "full"}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={`island-poster${sceneState === "ready" ? " is-hidden" : ""}`} src={poster} alt="Sete jardins conectados por pontes: a pesquisa, ferramentas, produtividade, validação, especificação, profissão e perspectivas." fetchPriority="high" onLoad={event => { const image = event.currentTarget; if (image.naturalHeight) setPosterAspect(image.naturalWidth / image.naturalHeight); }} />
-        {Scene && manifest && sceneState !== "fallback" && worldNavigator && (!reading || sceneHasMounted) && <div className="island-canvas" aria-hidden="true"><SceneBoundary onFail={failed}><Scene manifest={manifest} navigator={worldNavigator} onFeed={fedFish} active={visible && !reading} reducedMotion={reducedMotion} panelOpen={!!pavilion || mapOpen} interactionBlocked={modalOpen || !started} autoQuality={qualityPreference === "auto"} pavilionId={pavilion} resetEpoch={resetEpoch} quality={quality} weather={weather} season={season} phase={phase} clock={environment.timeRef} zoom={zoom} cameraHeight={cameraHeight} onZoom={setZoom} intro={!started} onInteract={playSelection} onThunder={playThunder} onSoundFrame={spatialFrame} onSpatialSound={spatialSound} onReady={ready} onFail={failed} onArrive={arrived} onSelect={choose} onProject={projectLabels} onPerformance={recordPerformance} /></SceneBoundary></div>}
+        {Scene && manifest && sceneState !== "fallback" && worldNavigator && (!access.textView || sceneHasMounted) && (!reading || sceneHasMounted) && <div className="island-canvas" aria-hidden="true"><SceneBoundary onFail={failed}><Scene manifest={manifest} navigator={worldNavigator} gardenRuntime={session.runtime??undefined} paused={access.paused} allowFlashes={access.allowFlashes} interactionEpoch={session.epoch} onDiscovery={session.discover} onResidentActivity={id=>performGardenAction(()=>session.command(id))} onFeed={fedFish} active={visible && !reading && !access.textView} reducedMotion={reducedMotion} panelOpen={!!pavilion || mapOpen} interactionBlocked={modalOpen || !started} autoQuality={qualityPreference === "auto"} pavilionId={pavilion} resetEpoch={resetEpoch} quality={quality} weather={weather} season={season} phase={phase} clock={environment.timeRef} zoom={zoom} cameraHeight={cameraHeight} onZoom={setZoom} intro={!started} onInteract={playSelection} onThunder={playThunder} onSoundFrame={spatialFrame} onSpatialSound={spatialSound} onReady={ready} onFail={failed} onArrive={arrived} onSelect={choose} onProject={projectLabels} onPerformance={recordPerformance} /></SceneBoundary></div>}
         <nav className="island-pavilions" aria-label="Ambientes da pesquisa">{pavilionIds.map(id => <button key={id} data-pavilion={id} className={`island-label${selectedIsland === id ? " is-selected" : ""}`} style={{ left: `${labelLeft(id)}%`, top: `${Math.min(93, Math.max(7, currentLabels[id].y))}%` }} aria-label={`${names[id]}: ${descriptions[id]}`} aria-current={selectedIsland === id ? "true" : undefined} onClick={event => choose(id, event.currentTarget)}><span aria-hidden="true">{pavilionIds.indexOf(id) + 1}</span><strong>{names[id]}</strong></button>)}</nav>
       </div>
-      {!started && <section className="island-introduction" aria-labelledby="welcome-title">
+      {!started && !access.textView && <section className="island-introduction" aria-labelledby="welcome-title">
         <p className="island-eyebrow"><span /> UMA PESQUISA PARA EXPLORAR</p>
         <h1 id="welcome-title">Se a IA escreve código,<br /><em>o que cabe a nós?</em></h1>
         <p className="island-welcome-copy">Sou Pedro Arthur. No meu TCC, investiguei como a inteligência artificial muda o trabalho de quem desenvolve software.</p>
         <p className="island-welcome-detail">Sete ilhas contam essa investigação, da pergunta inicial às conclusões.</p>
         <div className="island-start-actions"><button className="island-enter" onClick={start}><Play size={17} fill="currentColor" aria-hidden="true" />Explorar as ilhas<ArrowRight size={18} aria-hidden="true" /></button><a className="island-read-start" href={readingHref("pesquisa")}><BookOpen size={17} aria-hidden="true" />Ler a pesquisa</a></div>
-        <p className="island-loading-note" role="status">{sceneState === "loading" ? "Preparando o jardim… você já pode entrar." : "Explore com música e sons da natureza. Você pode ajustar ou silenciar a qualquer momento."}</p>
+        <p className="island-loading-note" role="status">{sceneState === "loading" ? "Preparando o jardim… você já pode entrar." : "Som opcional: ative música e natureza pelo botão de som. Você pode ajustar ou silenciar a qualquer momento."}</p>
+        <a className="garden-text-entry" href="/explorar">Explorar em texto, sem depender do 3D</a>
       </section>}
-      {started && <>
-        <div className="island-world-caption"><span>ILHAS DA PESQUISA</span><button className="island-season-status" onClick={event => openCredits(event.currentTarget, "environment")} aria-label={`Ambiente: ${seasonInfo[season].name}, ${weatherNames[weather]}. Ajustar ambiente`}><WeatherIcon size={15} aria-hidden="true" /><span>{seasonInfo[season].name} · {weatherNames[weather]}</span></button><small><time>{environment.clock}</time> · Horário do jardim</small></div>
-        <div className="island-zoom" aria-label="Câmera do jardim"><button aria-label="Aproximar o jardim" onClick={() => setZoom(value => Math.min(manifest?.cameraBounds?.maxZoom ?? 2, value + .15))} disabled={zoom >= (manifest?.cameraBounds?.maxZoom ?? 2)}><Plus size={17} aria-hidden="true" /></button><button aria-label="Afastar o jardim" onClick={() => setZoom(value => Math.max(manifest?.cameraBounds?.minZoom ?? .8, value - .15))} disabled={zoom <= (manifest?.cameraBounds?.minZoom ?? .8)}><Minus size={17} aria-hidden="true" /></button><button aria-label="Subir a câmera" onClick={() => setCameraHeight(value => Math.min(6,value+.8))} disabled={cameraHeight >= 6}><ArrowUp size={17} aria-hidden="true" /></button><button aria-label="Descer a câmera" onClick={() => setCameraHeight(value => Math.max(-4,value-.8))} disabled={cameraHeight <= -4}><ArrowDown size={17} aria-hidden="true" /></button><button aria-label="Restaurar enquadramento" onClick={() => { setCameraHeight(0); setZoom(1); setResetEpoch(value => value + 1); }}><RotateCcw size={15} aria-hidden="true" /></button></div>
-        <div className="island-map-preview"><button ref={returnButton} className="island-map-launch" aria-label="Abrir mapa da pesquisa" onClick={event => openMap(event.currentTarget)}><span>Mapa · {visited.length ? `${visited.length}/7 visitadas` : "7 ilhas"}<kbd>M</kbd></span><WorldMap visited={visited} selected={selectedIsland} onSelect={choose} /></button></div>
+      {started && !access.textView && <>
+        <div className="island-world-caption"><span>ILHAS DA PESQUISA</span><button className="island-season-status" onClick={event => openCredits(event.currentTarget, "environment")} aria-label={`Ambiente: ${seasonInfo[season].name}, ${weatherNames[weather]}. Ajustar ambiente`}><WeatherIcon size={15} aria-hidden="true" /><span>{seasonInfo[season].name} · {weatherNames[weather]}</span></button><small><time>{environment.clock}</time> · Horário do jardim</small><button className="garden-hub-launch" onClick={event=>openCredits(event.currentTarget,"garden")}>Vida e descobertas do jardim</button></div>
+        <div className="island-zoom" aria-label="Câmera e movimento do jardim"><button aria-label={access.paused?"Retomar animações":"Pausar animações"} aria-pressed={access.paused} onClick={toggleMotion}>{access.paused?<Play size={17} aria-hidden="true"/>:<Pause size={17} aria-hidden="true"/>}</button><button aria-label="Aproximar o jardim" onClick={() => setZoom(value => Math.min(manifest?.cameraBounds?.maxZoom ?? 2, value + .15))} disabled={zoom >= (manifest?.cameraBounds?.maxZoom ?? 2)}><Plus size={17} aria-hidden="true" /></button><button aria-label="Afastar o jardim" onClick={() => setZoom(value => Math.max(manifest?.cameraBounds?.minZoom ?? .8, value - .15))} disabled={zoom <= (manifest?.cameraBounds?.minZoom ?? .8)}><Minus size={17} aria-hidden="true" /></button><button aria-label="Subir a câmera" onClick={() => setCameraHeight(value => Math.min(6,value+.8))} disabled={cameraHeight >= 6}><ArrowUp size={17} aria-hidden="true" /></button><button aria-label="Descer a câmera" onClick={() => setCameraHeight(value => Math.max(-4,value-.8))} disabled={cameraHeight <= -4}><ArrowDown size={17} aria-hidden="true" /></button><button aria-label="Restaurar enquadramento" onClick={() => { setCameraHeight(0); setZoom(1); setResetEpoch(value => value + 1); }}><RotateCcw size={15} aria-hidden="true" /></button></div>
+        <div className="island-map-preview"><button ref={returnButton} className="island-map-launch" aria-label="Abrir mapa da pesquisa" onClick={event => openMap(event.currentTarget)}><span>Mapa · {visited.length ? `${visited.length}/7 visitadas` : "7 ilhas"}<kbd>Alt+M</kbd></span><WorldMap palette={access.palette} visited={visited} selected={selectedIsland} onSelect={choose} /></button></div>
         <p className="island-status" role="status" aria-live="polite">{sceneState === "fallback" ? "Modo leve · os resumos e a leitura continuam disponíveis." : sceneState === "loading" ? "Preparando as ilhas. Os resumos já estão disponíveis." : feedNotice?'Comida na água — os peixes próximos vão se aproximar.':selectedIsland ? `Ilha ${pavilionIds.indexOf(selectedIsland) + 1} · ${names[selectedIsland]}` : "Arraste para explorar · toque na água livre para alimentar os peixes"}</p>
       </>}
     </main>
     {reading && <main ref={reader} className="island-reading" data-reader-layout="v10" inert={modalOpen} aria-label="Caderno da pesquisa"><div className="island-reading-inner">
       <div className="island-reading-toolbar"><button onClick={() => { setStarted(true); closeContent(); }}><ArrowLeft size={16} aria-hidden="true" />Voltar às ilhas</button><span>{readingTheme === "fontes" ? "Método e fontes" : `Tema ${pavilionIds.indexOf(readingTheme) + 1} de 7 — ${names[readingTheme]}`}</span><a href="/tcc-pedro-arthur.pdf" target="_blank" rel="noreferrer">PDF<ExternalLink size={14} aria-hidden="true" /></a></div>
-      <h1 className="island-visually-hidden" ref={readerHeading} tabIndex={-1}>Caderno — Do código à supervisão</h1>
+      <h1 className="island-visually-hidden" ref={readerHeading} tabIndex={-1}>Caderno — Do código à supervisão</h1><p className="garden-fulltext-link">Este caderno apresenta a síntese da pesquisa. <a href="/texto-completo">Ler o TCC integral em HTML</a>.</p>
       <DeferredResearch>{({ ResearchReading }) => <ResearchReading initialSection={readingAnchor} updates={updates} newsState={newsState} onThemeChange={theme => { setReadingTheme(theme); if (theme !== "fontes") setSelectedIsland(theme); }} />}</DeferredResearch>
     </div></main>}
     {modalOpen && <div className={`island-dialog-backdrop${creditsOpen ? " island-dialog-backdrop--options" : pavilion ? " island-dialog-backdrop--station" : ""}`} data-panel-layout={pavilion?"v14":undefined} onPointerDown={event => { if (event.target === event.currentTarget) closeOverlay(); }}>
-      <aside ref={panel} className={`island-panel${mapOpen ? " island-panel--map" : ""}${pavilion ? " island-panel--station" : ""}${creditsOpen ? " island-panel--options" : ""}`} data-pavilion-panel={pavilion ?? ""} data-panel-layout={pavilion ? "v14" : undefined} role="dialog" aria-modal="true" aria-labelledby="island-panel-title" tabIndex={-1}>
+      <aside data-garden-panel={creditsOpen?panelSection:undefined} ref={panel} className={`island-panel${mapOpen ? " island-panel--map" : ""}${pavilion ? " island-panel--station" : ""}${creditsOpen ? " island-panel--options" : ""}`} data-pavilion-panel={pavilion ?? ""} data-panel-layout={pavilion ? "v14" : undefined} role="dialog" aria-modal="true" aria-labelledby="island-panel-title" tabIndex={-1}>
         <div className="island-panel-bar"><span>{creditsOpen ? "" : mapOpen ? "SETE ILHAS, UMA PESQUISA" : `${String(pavilionIds.indexOf(pavilion!) + 1).padStart(2, "0")} / 07 · ${names[pavilion!].toUpperCase()}`}</span><div className="island-panel-controls">{audioControl}<button onClick={closeOverlay} aria-label={creditsOpen && reading ? "Fechar e voltar à leitura" : "Fechar e voltar às ilhas"}><kbd>ESC</kbd><X size={22} aria-hidden="true" /></button></div></div>
-        <h2 id="island-panel-title" ref={panelHeading} tabIndex={-1}>{creditsOpen ? (panelSection === "environment" ? "Ambiente do jardim" : showSettings ? "Opções e créditos" : "Créditos") : mapOpen ? "Escolha uma ilha" : names[pavilion!]}</h2>
-        {mapOpen && <><p className="island-panel-deck">Siga as pontes de 1 a 7 ou escolha um tema para começar.</p><WorldMap visited={visited} selected={selectedIsland} onSelect={id => choose(id)} expanded /><p className="island-map-note">Cada ilha traz uma síntese do TCC e o acesso ao capítulo correspondente.</p></>}
+        <h2 id="island-panel-title" ref={panelHeading} tabIndex={-1}>{creditsOpen ? gardenPanelTitles[panelSection] : mapOpen ? "Escolha uma ilha" : names[pavilion!]}</h2>
+        {creditsOpen&&<nav className="garden-panel-nav" aria-label="Opções do jardim">{(Object.keys(gardenPanelTitles) as GardenPanelSection[]).map(section=><button key={section} aria-pressed={section===panelSection} onClick={()=>setPanelSection(section)}>{gardenPanelTitles[section]}</button>)}</nav>}
+        {creditsOpen&&panelSection==="accessibility"&&<AccessibilityControls preferences={access.preferences} onChange={access.update} onReset={access.reset} persistent={access.persistent}/>}
+        {creditsOpen&&panelSection==="garden"&&<GardenPanel {...gardenActions}/>}
+        {creditsOpen&&panelSection==="discoveries"&&<DiscoveryBook ledger={session.ledger}/>}
+        {mapOpen && <><p className="island-panel-deck">Siga as pontes de 1 a 7 ou escolha um tema para começar.</p><WorldMap palette={access.palette} visited={visited} selected={selectedIsland} onSelect={id => choose(id)} expanded /><p className="island-map-note">Cada ilha traz uma síntese do TCC e o acesso ao capítulo correspondente.</p></>}
         {pavilion && <>
+          {tourActive&&<GuidedVisit pavilion={pavilion} onPrevious={()=>choose(pavilionIds[Math.max(0,pavilionIds.indexOf(pavilion)-1)])} onEnd={closeContent}/>}
           <DeferredResearch>{({ PavilionContent }) => <PavilionContent key={pavilion} pavilionId={pavilion} updates={updates} newsState={newsState} onInteract={playSelection} />}</DeferredResearch>
           <nav className="island-chapter-navigation" aria-label="Sequência da pesquisa">
             <a className="rc-summary-read" href={readingHref(pavilion)}><BookOpen size={24} aria-hidden="true" />Ler este tema no caderno</a>
@@ -587,6 +595,8 @@ export default function IslandExperience({showSettings=false}:{showSettings?:boo
         </div>}
       </aside>
     </div>}
-    {(audioState === "error" || screenNotice) && <div className="island-toast" role="status">{audioState === "error" ? "O som não iniciou. Tente novamente pelo controle de som." : screenNotice}<button aria-label="Fechar aviso" onClick={() => { setScreenNotice(""); if (audioState === "error") setAudioState("off"); }}><X size={14} /></button></div>}
+    <div className="island-visually-hidden" role="status" aria-live={access.announcements?"polite":"off"} aria-atomic="true"><span key={session.announcement.serial}>{session.announcement.text}</span></div>
+    {access.captions&&started&&!reading&&!modalOpen&&!access.textView&&<div className="garden-caption" role="log" aria-live="off" aria-label="Legendas de sons e eventos"><span>Ambiente: {weatherNames[weather]}. {phase==="night"?"Jardim à noite.":""}</span>{session.captions.length>0&&<p>{session.captions.at(-1)}</p>}</div>}
+    {(audioState === "error" || screenNotice) && <div className="island-toast" inert={modalOpen} role="status">{audioState === "error" ? "O som não iniciou. Tente novamente pelo controle de som." : screenNotice}<button aria-label="Fechar aviso" onClick={() => { setScreenNotice(""); if (audioState === "error") setAudioState("off"); }}><X size={14} /></button></div>}
   </div>;
 }

@@ -6,8 +6,9 @@ import {flowerBeds,fireflyPresence,fireflyPose} from '@/lib/experience/garden-li
 import type {WorldEnvironmentManifest} from '@/lib/experience-contract';
 import type {EnvironmentState} from '@/lib/experience/environment.mjs';
 import type {Season} from '@/lib/experience/seasons.mjs';
+import type {DiscoveryId} from '@/lib/experience/discoveries.mjs';
 
-export default function Fireflies({environment,environmentState,season,quality,moving,reducedMotion}:{environment:WorldEnvironmentManifest;environmentState:MutableRefObject<EnvironmentState>;season:Season;quality:'high'|'low';moving:boolean;reducedMotion:boolean}){
+export default function Fireflies({environment,environmentState,season,quality,moving,reducedMotion,onDiscovery}:{environment:WorldEnvironmentManifest;environmentState:MutableRefObject<EnvironmentState>;season:Season;quality:'high'|'low';moving:boolean;reducedMotion:boolean;onDiscovery?:(id:DiscoveryId)=>void}){
   const {gl,invalidate}=useThree(),points=useRef<THREE.Points>(null),presence=useRef(0),lastUpdate=useRef(-Infinity),lastCount=useRef(-1);
   const count=quality==='high'?42:24,beds=useMemo(()=>flowerBeds(environment,'high'),[environment]);
   const geometry=useMemo(()=>{const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(count*3),3));g.setAttribute('fireflyGlow',new THREE.BufferAttribute(new Float32Array(count),1));return g;},[count]);
@@ -23,6 +24,7 @@ export default function Fireflies({environment,environmentState,season,quality,m
     if(!points.current||!beds.length)return;
     const state=environmentState.current,target=fireflyPresence(season,state.weather,state.night,state.wind),dt=moving?Math.min(.1,Math.max(0,delta)):0;
     presence.current+=(target-presence.current)*(1-Math.exp(-dt*1.5));
+    if(moving&&presence.current>.12)onDiscovery?.('fireflies');
     if(target===0&&presence.current<.004){presence.current=0;points.current.visible=false;if(lastCount.current!==0){lastCount.current=0;gl.domElement.setAttribute('data-garden-fireflies','0');gl.domElement.setAttribute('data-garden-firefly-intensity','0.000');}return;}
     points.current.visible=presence.current>.004;material.uniforms.presence.value=presence.current;material.uniforms.pixelRatio.value=gl.getPixelRatio();
     if(points.current.visible&&(reducedMotion||state.elapsed-lastUpdate.current>=.05)){

@@ -1,0 +1,68 @@
+{
+  "sourcePdfSha256": "59d208f910c5cec1bb951025a9d643e11e33f82e8dea86ec7c6e2105b96fe257",
+  "figures": [
+    {
+      "figure": 1,
+      "pdfPage": 15,
+      "printedPage": 14,
+      "title": "Lançamentos oficiais ao público de ferramentas de desenvolvimento com IA",
+      "shortDescription": "Linha do tempo vertical com oito marcos públicos de ferramentas, de junho de 2022 a novembro de 2025. Os intervalos visuais não representam uma escala temporal proporcional.",
+      "items": [
+        "21/06/2022: GitHub Copilot, disponibilidade geral.",
+        "24/10/2024: Augment Code, lançamento comercial.",
+        "Janeiro de 2025: Trae, lançamento público; a fonte informa apenas mês e ano.",
+        "22/05/2025: Claude Code, disponibilidade geral.",
+        "19/06/2025: OpenCode, lançamento para uso geral da versão reescrita.",
+        "06/10/2025: Codex, disponibilidade geral.",
+        "17/11/2025: Kiro, disponibilidade geral.",
+        "18/11/2025: Antigravity, lançamento em prévia pública."
+      ],
+      "notes": "Cursor permanece na contextualização textual, sem data de estreia confirmada nessa figura. Preservar a fonte e as notas originais. A figura organiza lançamentos; não mede produtividade ou compara recursos disponíveis em cada estreia."
+    },
+    {
+      "figure": 2,
+      "pdfPage": 20,
+      "printedPage": 19,
+      "title": "Ciclo simplificado de desenvolvimento orientado por especificação",
+      "shortDescription": "Quatro caixas ligadas por setas formam um ciclo: especificação, planejamento, geração ou adaptação do código e validação. A última seta retorna da validação à especificação.",
+      "items": [
+        "Especificação: objetivos e contexto.",
+        "Planejamento: tarefas e restrições.",
+        "Geração ou adaptação do código.",
+        "Validação: testes e revisão.",
+        "O retorno da validação à especificação representa a revisão da própria especificação com base no que foi verificado."
+      ],
+      "notes": "Figura elaborada pelo autor com base em Piskala (2026), Delimarsky (2025) e Böckeler (2025); preservar essa atribuição. Os rótulos extraídos sem as setas não descrevem por si só o ciclo."
+    },
+    {
+      "figure": 3,
+      "pdfPage": 21,
+      "printedPage": 20,
+      "title": "Níveis observados de Spec-Driven Development",
+      "shortDescription": "Diagrama em três faixas que compara o papel da especificação na criação de uma funcionalidade e em sua evolução e manutenção. Os níveis são spec-first, spec-anchored e spec-as-source.",
+      "items": [
+        "Spec-first: uma especificação orienta a criação inicial de código. No diagrama, a especificação inicial aparece descartada; uma nova especificação descreve uma alteração posterior.",
+        "Spec-anchored: a especificação permanece como referência e é editada durante a evolução e manutenção, orientando a atualização do código.",
+        "Spec-as-source: a especificação funciona como fonte central para gerar e atualizar o código. A edição é indicada nos documentos de especificação, enquanto marcas junto ao código representam restrição à edição direta.",
+        "As setas entre documentos e código mostram a relação da especificação com a geração ou atualização da implementação."
+      ],
+      "notes": "A descrição dos níveis é sustentada também pelo parágrafo imediatamente anterior à figura, na página impressa 19. Preservar a atribuição a Böckeler (2025). Não transformar os níveis observados em recomendação universal ou classificação obrigatória de maturidade. Os rótulos dentro dessa figura não aparecem na extração de texto examinada."
+    },
+    {
+      "figure": 4,
+      "pdfPage": 23,
+      "printedPage": 22,
+      "title": "Visão geral de Harness Engineering para usuários de agentes de código",
+      "shortDescription": "Uma pessoa orienta um conjunto de guias e sensores ao redor de um agente de código. Os guias fornecem orientação antecipada, chamada feedforward; os sensores oferecem feedback para o ciclo de autocorreção.",
+      "items": [
+        "À esquerda, o bloco Human/Steering representa a orientação humana, com setas para os guias e os sensores.",
+        "O bloco Guides lista Principles, CfRs, Rules, Ref Docs, How-tos, Language Servers, CLIs/scripts e Code mods, além de reticências que indicam outros recursos.",
+        "O bloco Sensors lista Static analysis, Review agents, Logs e Browser, também com reticências.",
+        "Uma seta feedforward liga os guias ao agente. Uma seta feedback liga os sensores ao agente.",
+        "À direita, o bloco Coding Agent representa geração inicial e autocorreção com símbolos de ciclos.",
+        "A legenda distingue recursos inferenciais, marcados por um símbolo em forma de brilho, e recursos computacionais, marcados por engrenagens. Essa distinção usa forma além de cor."
+      ],
+      "notes": "Preservar a atribuição a Böckeler (2026). A sigla CfRs aparece no original sem expansão; não inventar seu significado. O conteúdo interno do diagrama é uma imagem e não integra o texto extraído."
+    }
+  ]
+}

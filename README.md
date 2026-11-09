@@ -22,6 +22,10 @@ O percurso começa na pergunta do trabalho, passa pela evolução das ferramenta
 
 Entre uma leitura e outra, o cenário continua vivo: o horário avança, o clima muda, um morador percorre as pontes e os animais ocupam o lago e as ilhas. A experiência pode ser explorada com a câmera ou acessada diretamente pela leitura, sem depender da navegação em 3D.
 
+Patinhos e tartarugas também habitam o jardim. Em **Vida e descobertas**, o visitante pode pedir uma atividade ao morador, alimentar os peixes, consultar o caderno de encontros e iniciar uma visita guiada no próprio ritmo. As sete ilhas, os onze climas, o modo automático e as quatro estações permanecem disponíveis.
+
+A [exploração em texto](https://tcc-pdrarth.vercel.app/explorar) oferece as ilhas e suas interações sem exigir WebGL. O [TCC completo em HTML](https://tcc-pdrarth.vercel.app/texto-completo) inclui capítulos, referências, tabela e descrições dos quatro diagramas. Preferências de contraste, cores, leitura, movimento e legendas ficam no navegador; som e tradução automática em Libras são opcionais. Os recursos e os limites verificados estão na [página de acessibilidade](https://tcc-pdrarth.vercel.app/acessibilidade) e no [registro da implementação](docs/validation/garden-accessibility-20261109.md).
+
 ## A pesquisa por trás do cenário
 
 O TCC de **Pedro Arthur Oliveira Januário** é uma revisão narrativa da literatura com apoio documental. Seu núcleo reúne **11 fontes — cinco acadêmicas e seis técnicas, críticas e jornalísticas**. Outros 13 documentos complementam a contextualização das ferramentas e dos trabalhos futuros.

@@ -20,7 +20,7 @@ export function touchRipple(ring,time,echo=0){
   return {visible:t>=0&&t<1,radius:Math.max(0,ring.radius*(.12+.88*t)),opacity:t>=0&&t<1?Math.min(1,t/.08)*(1-t)**1.25*(.94-echo*.12):0};
 }
 export function createGreeting(){return {age:10,elapsed:0,lastAt:-Infinity,armed:true,requested:false,count:0,welcomePending:true,heading:0,returnHeading:0};}
-export function requestGreeting(state){state.requested=true;}
+export function requestGreeting(state){state.requested=true;state.manual=true;}
 export function advanceGreeting(state,seconds,{available,distance,heading=0,cameraHeading=0,cameraPitch=0}){
   const dt=Math.min(.1,Math.max(0,Number.isFinite(seconds)?seconds:0));state.elapsed+=dt;state.age+=dt;
   if(distance>14)state.armed=true;
@@ -42,8 +42,10 @@ export function advanceGreeting(state,seconds,{available,distance,heading=0,came
 /** A greeting owns only a short stationary pause; weather and bedtime retain priority. */
 export function advanceResidentWithGreeting(state,greeting,pose,seconds,context,layout,camera){
   writeResidentPose(pose,state,layout);
-  const running=!residentPauseReason(context),free=['walking','observing','returning'].includes(state.phase),available=running&&free&&!context.intro&&!pose.hidden&&!pose.inside&&!pose.sleeping&&!pose.rod&&!pose.watering&&!pose.fruit&&!pose.seated&&!state.shelterReason&&!residentShelterReason(context);
+  const effective=greeting.manual?{...context,reducedMotion:false}:context;
+  const running=!residentPauseReason(effective),free=['walking','observing','returning'].includes(state.phase),available=running&&free&&!context.intro&&!pose.hidden&&!pose.inside&&!pose.sleeping&&!pose.rod&&!pose.watering&&!pose.fruit&&!pose.seated&&!state.shelterReason&&!residentShelterReason(context);
   const gesture=advanceGreeting(greeting,running?seconds:0,{available,heading:state.heading,...camera});
+  if(greeting.manual&&!gesture.active&&!greeting.requested)greeting.manual=false;
   if(gesture.active)state.heading=gesture.heading;
   else advanceResident(state,seconds,context,layout);
   writeResidentPose(pose,state,layout);

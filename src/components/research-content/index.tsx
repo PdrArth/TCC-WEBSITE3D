@@ -89,7 +89,7 @@ function SourceLink({
   if (!source) return null;
 
   return (
-    <a className="rc-source-link" href={source.url} target="_blank" rel="noreferrer">
+    <a className="rc-source-link" href={source.url} target="_blank" rel="noreferrer" aria-label={`${label}: ${source.title} (abre em nova aba)`}>
       {label}
       <ArrowUpRight size={14} aria-hidden="true" />
     </a>

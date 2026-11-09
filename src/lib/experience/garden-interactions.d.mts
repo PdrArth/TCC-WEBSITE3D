@@ -5,7 +5,7 @@ export type WaterTouches={sequence:number;cursor:number;lastAt:number;rings:Wate
 export function createWaterTouches(count?:number):WaterTouches;
 export function addWaterTouch(state:WaterTouches,point:Vec3,time:number,environment:WorldEnvironmentManifest,ice?:number):boolean;
 export function touchRipple(ring:WaterRing,time:number,echo?:number):{visible:boolean;radius:number;opacity:number};
-export type GreetingState={age:number;elapsed:number;lastAt:number;armed:boolean;requested:boolean;count:number;welcomePending:boolean;heading:number;returnHeading:number};
+export type GreetingState={age:number;elapsed:number;lastAt:number;armed:boolean;requested:boolean;count:number;welcomePending:boolean;heading:number;returnHeading:number;manual?:boolean};
 export type GreetingPose={active:boolean;heading:number;still:number;wave:number;sway:number;look:number;lookPitch:number};
 export function createGreeting():GreetingState;
 export function requestGreeting(state:GreetingState):void;

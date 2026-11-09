@@ -33,6 +33,7 @@ export type ResidentState = {
  shelterReason: 'weather' | 'night' | null; nightRest: boolean; sleepBlend: number; activityIndex: number; activityId: string; activityTarget: Vec3;
  dryTime: number; weatherTime: number; doorOpen: number; inside: boolean; resumeActivityIndex: number;
  fishingSeed:number; fishingBag:string[]; lastFishing:string|null; fishingVisits:number; fishingWait:number; fishingSuccess:boolean;
+ manualActive?:boolean;
 };
 export type ResidentPose = {
  x: number; y: number; z: number; heading: number; leftLeg: number; rightLeg: number;
@@ -60,6 +61,7 @@ export function residentReturnRoute(state: ResidentState, layout: IslandLifeLayo
 export function residentShelterReason(context: ResidentContext): 'weather' | 'night' | null;
 export function residentPauseReason(context: ResidentContext): 'hidden' | 'paused' | 'reduced-motion' | null;
 export function createResidentState(layout: IslandLifeLayout,seed?:number): ResidentState;
+export function requestResidentActivity(state:ResidentState,id:string,layout:IslandLifeLayout,context?:ResidentContext):{accepted:boolean;reason:'unknown'|'weather'|'night'|'paused'|'sheltered'|'busy'|null;waiting?:boolean};
 /** dt is bounded to 100 ms; pause consumes neither movement nor dry/weather time. */
 export function advanceResident(state: ResidentState, seconds: number, context: ResidentContext, layout: IslandLifeLayout): ResidentState;
 export function writeResidentPose<T extends Partial<ResidentPose>>(output: T, state: ResidentState, layout?: IslandLifeLayout): T & ResidentPose;

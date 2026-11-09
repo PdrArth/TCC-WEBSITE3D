@@ -171,6 +171,23 @@ export function residentReturnRoute(state,layout,destination='home-door-outside'
 }
 export function residentShelterReason(context){if(WET.has(context.weather)||(context.precipitation??0)>0)return'weather';const hour=((context.hour??13)%24+24)%24;return hour<6||hour>=19||(context.night??0)>=.7?'night':null;}
 export function residentPauseReason(context){return context.visible===false?'hidden':context.moving===false||context.panelOpen||context.reading?'paused':context.reducedMotion?'reduced-motion':null;}
+/** A visitor selects an authored destination; retain the exact occupied walking edge. */
+export function requestResidentActivity(state,id,layout,context={}){
+ const activity=layout.activityPoints.find(point=>point.id===id&&['sitting','fishing','observing','watering','gathering'].includes(point.kind));
+ if(!activity)return {accepted:false,reason:'unknown'};
+ const shelter=residentShelterReason(context);
+ if(shelter)return {accepted:false,reason:shelter};
+ if(context.moving===false||context.visible===false)return {accepted:false,reason:'paused'};
+ const waiting=state.inside||['entering','exiting','interior'].includes(state.phase)||state.dryTime<layout.resident.dryDelay;
+ if(state.phase==='gathering'&&state.phaseTime<1.5)return {accepted:false,reason:'busy'};
+ const route=residentReturnRoute(state,layout,activity.node);
+ state.activityIndex=layout.activityPoints.indexOf(activity);state.activityId=activity.id;state.activityTarget=activity.target;
+ state.resumeActivityIndex=state.activityIndex;state.manualActive=true;
+ if(activity.kind==='fishing'){state.fishingWait=.5;state.fishingSuccess=true;state.lastFishing=activity.id;state.fishingVisits++;}
+ // An explicit request may finish the safe return/exit sequence even when
+ // automatic walking is reduced. Keep the occupied route and door animation.
+ if(!waiting)assignRoute(state,route);return {accepted:true,reason:null,waiting};
+}
 function assignRoute(state,route,phase='walking'){state.phase=phase;state.phaseTime=0;state.routeDistance=0;state.route=route.points;state.routeSteps=route.steps;state.destination=route.destination;}
 function fishingRandom(state){state.fishingSeed=(Math.imul(state.fishingSeed,1664525)+1013904223)>>>0;return state.fishingSeed/0x100000000;}
 function chooseFishing(state,layout){
@@ -199,7 +216,7 @@ export function createResidentState(layout,seed=0x7151a7){
 function headingToward(state,target,dt){const dx=target[0]-state.position[0],dz=target[2]-state.position[2];if(Math.hypot(dx,dz)<.0001)return;const desired=Math.atan2(dx,dz),turn=Math.atan2(Math.sin(desired-state.heading),Math.cos(desired-state.heading));state.heading+=turn*(1-Math.exp(-8*dt));}
 function isMovingPhase(phase){return['walking','returning','entering','exiting','to-porch','walk-home'].includes(phase);}
 export function advanceResident(state,seconds,context,layout){
- if(residentPauseReason(context))return state;const dt=clamp(Number.isFinite(seconds)?seconds:0,0,.1);if(!dt)return state;
+ if(residentPauseReason(state.manualActive?{...context,reducedMotion:false}:context))return state;const dt=clamp(Number.isFinite(seconds)?seconds:0,0,.1);if(!dt)return state;
  const hour=((context.hour??13)%24+24)%24;state.nightRest=hour<6||hour>=19||(context.night??0)>=.7;
  state.sleepBlend=clamp((state.sleepBlend??0)+(state.phase==='interior'&&state.nightRest?1:-1)*dt/.95,0,1);
  const wet=WET.has(context.weather)||(context.precipitation??0)>0,reason=residentShelterReason(context);state.dryTime=wet?0:Math.min(layout.resident.dryDelay,state.dryTime+dt);state.weatherTime=wet?state.weatherTime+dt:0;state.shelterReason=wet||state.dryTime<layout.resident.dryDelay?'weather':reason;const needsShelter=state.shelterReason!==null;
@@ -221,7 +238,7 @@ export function advanceResident(state,seconds,context,layout){
  if(!state.nightRest&&state.sleepBlend===0&&(!needsShelter||context.weather==='drizzle'&&state.phaseTime>=5))assignRoute(state,planLifeRoute(layout,state.node,'home-seat'),'exiting');
  }else if(state.phase==='porch'){
  headingToward(state,layout.home.workPoint,dt);state.doorOpen=Math.max(0,state.doorOpen-dt*3);if(state.shelterReason==='night'&&state.phaseTime>=12)assignRoute(state,planLifeRoute(layout,state.node,'home-door-outside'),'returning');else if(!needsShelter&&state.phaseTime>=4){state.activityIndex=state.resumeActivityIndex;beginActivity(state,layout,true);}
- }else{const activity=currentActivity(state,layout),duration=state.phase==='fishing'?state.fishingWait+(state.fishingSuccess?8:5.8):activity.duration;headingToward(state,activity.target,dt);if(state.phaseTime>=duration){state.activityIndex++;if(state.activityIndex>=layout.activityPoints.length){state.activityIndex=0;state.resumeActivityIndex=0;state.activityId='';assignRoute(state,planLifeRoute(layout,state.node,'home-seat'),'walk-home');}else beginActivity(state,layout);}}
+ }else{const activity=currentActivity(state,layout),duration=state.phase==='fishing'?state.fishingWait+(state.fishingSuccess?8:5.8):activity.duration;headingToward(state,activity.target,dt);if(state.phaseTime>=duration){if(state.manualActive&&context.reducedMotion){state.manualActive=false;stationary(state,'observing');}else{state.manualActive=false;state.activityIndex++;if(state.activityIndex>=layout.activityPoints.length){state.activityIndex=0;state.resumeActivityIndex=0;state.activityId='';assignRoute(state,planLifeRoute(layout,state.node,'home-seat'),'walk-home');}else beginActivity(state,layout);}}}
  state.gesture=Math.sin(state.phaseTime*(state.phase==='fishing'?1.55:2.3));return state;
 }
 /** Angles are radians; bodyOffsetY is world metres and target vectors are shared. */

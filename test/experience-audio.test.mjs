@@ -193,13 +193,15 @@ function earlyBrowser(options = {}) {
     emit: (name, event) => dispatch(listeners, name, event), metadata() { element.readyState = 1; dispatch(mediaListeners, "loadedmetadata"); } };
 }
 
-test("startup can select each approved track and uses that track's cue before React", async () => {
+test("silent startup retains every approved track and cue until explicit sound activation", async () => {
   for (let index = 0; index < AUDIO_CATALOG.playlist.length; index++) {
     const env = earlyBrowser({ random: () => (index + .5) / AUDIO_CATALOG.playlist.length, readyState: 0 });
     assert.equal(env.state.trackIndex, index);
     assert.equal(env.element.src, AUDIO_CATALOG.playlist[index].url);
     env.metadata(); await flush();
     assert.equal(env.element.currentTime, AUDIO_CATALOG.playlist[index].startAtSeconds);
+    assert.equal(env.element.playCalls, 0, "metadata cannot activate sound");
+    env.emit("click", { target: { closest: selector => selector === "[data-entry-audio-toggle]" } }); await flush();
     assert.equal(env.element.playCalls, 1);
     env.state.rememberTrack((index + 1) % AUDIO_CATALOG.playlist.length, 37);
     assert.equal(env.element.src, AUDIO_CATALOG.playlist[(index + 1) % AUDIO_CATALOG.playlist.length].url);
@@ -236,86 +238,62 @@ test("native-only playback also rotates through all five songs when Web Audio is
   assert.equal(new Set(heard).size, 5);
 });
 
-test("the static SSR bootstrap starts without React, positions the catalog cue and is idempotent", async () => {
-  const { element, state, document, runAgain, metadata } = earlyBrowser({ readyState: 0 });
-  assert.equal(element.playCalls, 1, "play must be requested immediately, without waiting for metadata or React");
-  assert.equal(element.currentTime, 0);
-  metadata();
+test("the static SSR bootstrap remains silent, preserves the cue and does not replay after hydration", async () => {
+  const { element, state, document, runAgain, metadata, emit } = earlyBrowser({ readyState: 0 });
+  assert.equal(element.playCalls, 0); assert.equal(state.status, "off"); assert.equal(state.desired, false);
+  assert.equal(element.currentTime, 0); metadata();
   assert.equal(element.currentTime, AUDIO_CATALOG.music.startAtSeconds);
   assert.equal(element.volume, AUDIO_CATALOG.music.volume);
-  await flush();
-  assert.equal(state.status, "playing");
-  assert.equal(document.documentElement.dataset.entryAudioBootMs, "25");
+  assert.equal(document.documentElement.dataset.entryAudioFirstPlayMs, undefined);
+  emit("pointerdown"); emit("keydown", {key:"Enter"}); await flush(); assert.equal(element.playCalls, 0);
+  emit("click", {target:{closest:selector=>selector==="[data-entry-audio-toggle]"}}); await flush();
+  assert.equal(state.status, "playing"); assert.equal(element.playCalls, 1);
   assert.equal(document.documentElement.dataset.entryAudioFirstPlayMs, "25");
-  element.currentTime = 60;
-  runAgain(); metadata();
-  assert.equal(element.playCalls, 1);
-  assert.equal(element.currentTime, 60, "re-evaluating the script must not reset the cue");
+  element.currentTime = 60; runAgain(); metadata();
+  assert.equal(element.playCalls, 1); assert.equal(element.currentTime, 60);
 });
 
-test("the early bootstrap reports blocked autoplay and retries only an eligible gesture", async () => {
-  const env = earlyBrowser({ error: new DOMException("Gesture required", "NotAllowedError") });
-  await flush();
-  assert.equal(env.state.status, "blocked");
-  assert.equal(env.document.documentElement.dataset.entryAudioStatus, "blocked");
-  env.options.error = null;
-  env.emit("keydown", { key: "Escape" });
-  env.emit("pointerdown", { target: { closest: selector => selector === "[data-audio-control]" } });
-  assert.equal(env.element.playCalls, 1);
-  env.emit("keydown", { key: "Enter" }); await flush();
-  assert.equal(env.state.status, "playing");
-  assert.equal(env.state.gesture, true);
-  assert.equal(env.element.playCalls, 2);
+test("blocked explicit sound retries only through the sound control", async () => {
+  const env=earlyBrowser({error:new DOMException("Gesture required", "NotAllowedError")});
+  const button={closest:selector=>selector==="[data-entry-audio-toggle]"};
+  assert.equal(env.element.playCalls,0); env.emit("click",{target:button}); await flush();
+  assert.equal(env.state.status,"blocked"); assert.equal(env.element.playCalls,1);
+  env.options.error=null; env.emit("keydown",{key:"Enter"}); env.emit("pointerdown"); await flush();
+  assert.equal(env.element.playCalls,1,"an unrelated action cannot unexpectedly start music");
+  env.emit("click",{target:button}); await flush();
+  assert.equal(env.state.status,"playing");assert.equal(env.state.gesture,true);assert.equal(env.element.playCalls,2);
 });
 
-test("the early sound button activates a blocked track and then silences active playback", async () => {
-  const env = earlyBrowser({ error: new DOMException("Gesture required", "NotAllowedError") }); await flush();
-  const button = { closest: selector => selector === "[data-entry-audio-toggle]" };
-  env.options.error = null;
-  let prevented = false, consumed = false;
-  env.emit("click", { target: button, preventDefault() { prevented = true; }, stopImmediatePropagation() { consumed = true; } }); await flush();
-  assert.equal(env.element.playCalls, 2);
-  assert.equal(env.state.status, "playing");
-  assert.equal(env.state.silenced, false);
-  assert.equal(prevented && consumed, true, "an early button click cannot also be replayed as a hydrated toggle");
-  env.emit("click", { target: button });
-  assert.equal(env.state.silenced, true);
-  assert.equal(env.element.paused, true);
+test("the early sound button starts and silences playback without a duplicate hydrated toggle", async () => {
+  const env=earlyBrowser(); const button={closest:selector=>selector==="[data-entry-audio-toggle]"};
+  let prevented=false,consumed=false;
+  env.emit("click",{target:button,preventDefault(){prevented=true;},stopImmediatePropagation(){consumed=true;}});await flush();
+  assert.equal(env.element.playCalls,1);assert.equal(env.state.status,"playing");assert.equal(env.state.silenced,false);
+  assert.equal(prevented&&consumed,true);env.emit("click",{target:button});
+  assert.equal(env.state.silenced,true);assert.equal(env.element.paused,true);
 });
 
-test("pre-hydration silence, entry intent and hidden tabs survive late play promises", async () => {
-  const gate = deferred();
-  const env = earlyBrowser({ gate });
-  env.emit("click", { target: { closest: selector => selector === ".island-enter" } });
-  assert.equal(env.state.entryRequested, true);
-  assert.equal(env.document.documentElement.dataset.entryRequested, "true");
-  env.emit("click", { target: { closest: selector => selector === "[data-entry-audio-toggle]" } });
-  assert.equal(env.state.silenced, true);
-  gate.resolve(); await flush();
-  assert.equal(env.element.paused, true);
-  env.emit("pointerdown");
-  assert.equal(env.element.playCalls, 1);
-  env.document.hidden = true; env.emit("visibilitychange");
-  env.document.hidden = false; env.emit("visibilitychange");
-  assert.equal(env.element.playCalls, 1, "visibility cannot override a visitor's silence choice");
-  assert.equal(env.state.status, "off");
+test("silent entry and a later mute survive pre-hydration play promises and hidden tabs", async () => {
+  const gate=deferred(),env=earlyBrowser({gate});const button={closest:selector=>selector==="[data-entry-audio-toggle]"};
+  env.emit("click",{target:{closest:selector=>selector===".island-enter"}});
+  assert.equal(env.state.entryRequested,true);assert.equal(env.document.documentElement.dataset.entryRequested,"true");
+  assert.equal(env.element.playCalls,0,"entering does not request sound");
+  env.emit("click",{target:button});assert.equal(env.element.playCalls,1);
+  env.emit("click",{target:button});assert.equal(env.state.silenced,true);
+  gate.resolve();await flush();assert.equal(env.element.paused,true);
+  env.emit("pointerdown");env.document.hidden=true;env.emit("visibilitychange");env.document.hidden=false;env.emit("visibilitychange");
+  assert.equal(env.element.playCalls,1);assert.equal(env.state.status,"off");
 });
 
-test("hidden early playback is paused, visibility resumes it, and claim stops bootstrap gestures", async () => {
-  const env = earlyBrowser(); await flush();
-  env.element.currentTime = 64;
-  env.document.hidden = true; env.emit("visibilitychange");
-  assert.equal(env.element.paused, true);
-  env.document.hidden = false; env.emit("visibilitychange"); await flush();
-  assert.equal(env.element.currentTime, 64);
-  assert.equal(env.element.playCalls, 2);
-  const owner = {};
-  assert.equal(env.state.claim(owner), env.element);
-  env.emit("click", { target: { closest: selector => selector === "[data-entry-audio-toggle]" } });
-  assert.equal(env.state.silenced, false, "hydrated controls belong to the engine, not both listeners");
-  env.state.release(owner);
-  env.emit("pointerdown");
-  assert.equal(env.element.playCalls, 2, "cleanup never re-arms the independent bootstrap");
+test("an explicit sound choice resumes after visibility, while claim prevents duplicate bootstrap controls", async () => {
+  const env=earlyBrowser();const button={closest:selector=>selector==="[data-entry-audio-toggle]"};
+  env.emit("click",{target:button});await flush();env.element.currentTime=64;
+  env.document.hidden=true;env.emit("visibilitychange");assert.equal(env.element.paused,true);
+  env.document.hidden=false;env.emit("visibilitychange");await flush();
+  assert.equal(env.element.currentTime,64);assert.equal(env.element.playCalls,2);
+  const owner={};assert.equal(env.state.claim(owner),env.element);
+  env.emit("click",{target:button});assert.equal(env.state.silenced,false);
+  env.state.release(owner);env.emit("pointerdown");assert.equal(env.element.playCalls,2);
 });
 
 test("the engine adopts running SSR music without creating, seeking, replaying or graph-binding it", async t => {

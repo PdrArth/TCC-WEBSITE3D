@@ -1,0 +1,16 @@
+import type { WorldEnvironmentManifest } from '../experience-contract';
+import type { Weather } from './weather.mjs';
+export type PondVisitorContext={weather?:Weather;hour?:number;ice?:number;wind?:number;waterLevel?:number;active?:boolean;moving?:boolean;reducedMotion?:boolean};
+export type DuckRoute={points:[number,number][];cumulative:number[];headings:number[];length:number;homeDistance:number;speed:number;direction:number;phase:number;scale:number};
+export type TurtleRoute={island:string;points:[number,number][];height:number;length:number;heading:number;speed:number;restDuration:number;scale:number};
+export type PreparedPondVisitors={ducks:DuckRoute[];turtles:TurtleRoute[];waterHeight:number};
+export type PondVisitorState={elapsed:number;ducks:{distance:number;heading:number;mode:'swimming'|'sheltering'|'resting';tuck:number}[];turtles:{distance:number;direction:number;heading:number;rest:number;mode:'crawling'|'sheltering'|'resting';tuck:number}[]};
+export type PondVisitorPose={x:number;y:number;z:number;heading:number;roll:number;tuck:number;gait:number;scale:number;mode:string;visible:boolean};
+export function duckSegmentIsClear(a:[number,number],b:[number,number],environment:WorldEnvironmentManifest,clearance?:number):boolean;
+export function turtleGroundIsClear(point:[number,number],island:WorldEnvironmentManifest['land'][number],environment:WorldEnvironmentManifest):boolean;
+export function createPondVisitors(environment:WorldEnvironmentManifest,quality?:'high'|'low'):PreparedPondVisitors;
+export function createPondVisitorState(prepared:PreparedPondVisitors):PondVisitorState;
+export function pondVisitorsNeedShelter(context:PondVisitorContext):boolean;
+export function advancePondVisitors(state:PondVisitorState,seconds:number,context:PondVisitorContext,prepared:PreparedPondVisitors):PondVisitorState;
+export function writeDuckPose<T extends Partial<PondVisitorPose>>(output:T,index:number,state:PondVisitorState,prepared:PreparedPondVisitors,context?:PondVisitorContext):T&PondVisitorPose;
+export function writeTurtlePose<T extends Partial<PondVisitorPose>>(output:T,index:number,state:PondVisitorState,prepared:PreparedPondVisitors,context?:PondVisitorContext):T&PondVisitorPose;

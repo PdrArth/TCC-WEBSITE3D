@@ -8,6 +8,7 @@ import type { Vec3, WorldEnvironmentManifest } from "@/lib/experience-contract";
 import type { BirdCompanion } from "@/lib/experience/bird-life.mjs";
 import {createGreeting,requestGreeting,advanceResidentWithGreeting,type GreetingPose} from '@/lib/experience/garden-interactions.mjs';
 import type {ScenicSound} from '@/lib/experience/scene-signals';
+import type {GardenRuntime} from '@/lib/experience/garden-runtime';
 import { createEnvironmentManifest, type EnvironmentState } from "@/lib/experience/environment.mjs";
 import {
   createIslandLifeLayout, createResidentState, homeLocalPoint, pathLength, residentPauseReason,
@@ -18,6 +19,7 @@ import {
  * Door and utensils have real pivots. No new lights, shadows, event targets,
  * external assets or React state in the render loop. */
 export type IslandLifeProps = {
+  runtime?:GardenRuntime;
   onSpatialSound?: (kind:ScenicSound,point:Vec3)=>void;
   interactionBlocked?:boolean;
   companion?: MutableRefObject<BirdCompanion>;
@@ -120,13 +122,14 @@ function createWateringCanGeometry() {
 const staticColors: Record<StaticKind, string> = { oak: "#ae875b", rail: "#77684e", plaster: "#e7dfc9", roof: "#ad6246", window: "#e1e8d8", stone: "#b4ad92", snow: "#f2f3e9", grass: "#8c9d72", foliage: "#5a795b" };
 const residentColors: Record<ResidentKind, string> = { skin: "#d7a67e", coat: "#da6e42", trousers: "#40627a", dark: "#343a36", hair: "#584237", fruit: "#bf4f39" };
 
-export default function IslandLife({ onSpatialSound,interactionBlocked=false,companion, environment: suppliedEnvironment, layout: providedLayout, preparedGeometry, environmentState, moving = true, reducedMotion = false, quality = "high", intro = false }: IslandLifeProps) {
+export default function IslandLife({ runtime,onSpatialSound,interactionBlocked=false,companion, environment: suppliedEnvironment, layout: providedLayout, preparedGeometry, environmentState, moving = true, reducedMotion = false, quality = "high", intro = false }: IslandLifeProps) {
   const { gl, invalidate,camera } = useThree();
-  const greeting=useRef(createGreeting()),greetingPose=useRef<GreetingPose>({active:false,heading:0,still:0,wave:0,sway:0,look:0,lookPitch:0}),previousBite=useRef(false),residentHit=useRef<THREE.Mesh>(null);
+  const ownGreeting=useRef(createGreeting()),greetingPose=useRef<GreetingPose>({active:false,heading:0,still:0,wave:0,sway:0,look:0,lookPitch:0}),previousBite=useRef(false),residentHit=useRef<THREE.Mesh>(null);
   const residentScreen=useMemo(()=>new THREE.Vector3(),[]);
   const environment = useMemo(() => suppliedEnvironment ?? createEnvironmentManifest(), [suppliedEnvironment]);
   const layout = useMemo(() => providedLayout ?? createIslandLifeLayout(environment), [providedLayout, environment]);
-  const batches = useMemo(() => restoreLifeGeometry(preparedGeometry, layout) ?? createLifeGeometry(layout), [preparedGeometry, layout]); const state = useMemo(() => createResidentState(layout,Math.floor(Math.random()*0x100000000)), [layout]);
+  const batches = useMemo(() => restoreLifeGeometry(preparedGeometry, layout) ?? createLifeGeometry(layout), [preparedGeometry, layout]); const ownState = useMemo(() => createResidentState(layout,Math.floor(Math.random()*0x100000000)), [layout]);
+  const state=runtime?.resident??ownState,greeting=useMemo(()=>({current:runtime?.greeting??ownGreeting.current}),[runtime]);
   const rig = useMemo(() => createRig(layout.resident.scale), [layout.resident.scale]);
   const residentMeshes = useRef<Partial<Record<ResidentKind, THREE.InstancedMesh>>>({});
   const windowMaterial = useRef<THREE.MeshStandardMaterial>(null), roofMaterial = useRef<THREE.MeshStandardMaterial>(null);

@@ -5,10 +5,12 @@ import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { EnvironmentState } from '@/lib/experience/environment.mjs';
 import { createSkyEvents, advanceSkyEvents, METEOR_SECONDS, type SkyEvents } from '@/lib/experience/sky-events.mjs';
+import type {DiscoveryId} from '@/lib/experience/discoveries.mjs';
 
 /** One sky-only quad, hidden between events; the world depth occludes it. */
-export default function RareSky({ environmentState, active, reducedMotion }: {
+export default function RareSky({ environmentState, active, reducedMotion,state,onDiscovery }: {
   environmentState:MutableRefObject<EnvironmentState>; active:boolean; reducedMotion:boolean;
+  state?:SkyEvents;onDiscovery?:(id:DiscoveryId)=>void;
 }) {
   const { gl, size } = useThree();
   const mesh = useRef<THREE.Mesh>(null), events = useRef<SkyEvents | null>(null), report = useRef(0);
@@ -43,8 +45,9 @@ export default function RareSky({ environmentState, active, reducedMotion }: {
   }), []);
   useEffect(() => () => { geometry.dispose(); material.dispose(); }, [geometry, material]);
   useFrame((_, delta) => {
-    const event = events.current ??= createSkyEvents(), environment = environmentState.current;
+    const event = state ?? (events.current ??= createSkyEvents()), environment = environmentState.current;
     advanceSkyEvents(event, delta, {weather:environment.weather,hour:environment.hour,active,reducedMotion});
+    if(active&&event.rainbowOpacity>.12)onDiscovery?.('rainbow');if(active&&event.meteorOpacity>.12)onDiscovery?.('meteor');
     if (mesh.current) mesh.current.visible = event.rainbowOpacity > .002 || event.meteorOpacity > .002;
     if (mesh.current?.visible) {
       const u = material.uniforms;

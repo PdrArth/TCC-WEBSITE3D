@@ -29,6 +29,11 @@ import FishFood from './fish-food';
 import Fireflies from './fireflies';
 import RareSky from './rare-sky';
 import MobileShadows from './mobile-shadows';
+import PondVisitors from './pond-visitors';
+import ResidentHotspots from './resident-hotspots';
+import GardenObservations from './garden-observations';
+import type {GardenRuntime} from '@/lib/experience/garden-runtime';
+import type {DiscoveryId} from '@/lib/experience/discoveries.mjs';
 import { optimizeWorld, selectedBatchPavilion } from "./optimize-world.mjs";
 import { FrameStalls, prepareEffectMaterials, type PreparationProgress } from "./render-preparation.mjs";
 import { CameraOrbit, environmentSeconds, orbitPosition, clampZoom, easeCamera, fieldOfView, mayAdaptQuality, overviewDistanceScale, restingPose, wheelZoom } from "./scene-motion.mjs";
@@ -44,6 +49,12 @@ export type IslandSceneProps = {
   interactionBlocked?: boolean;
   autoQuality?: boolean;
   onFeed?:()=>void;
+  gardenRuntime?:GardenRuntime;
+  paused?:boolean;
+  allowFlashes?:boolean;
+  interactionEpoch?:number;
+  onDiscovery?:(id:DiscoveryId)=>void;
+  onResidentActivity?:(id:string)=>void;
   pavilionId: PavilionId | null;
   resetEpoch: number;
   quality: "high" | "low";
@@ -118,11 +129,11 @@ function LiveWorld({ world, ...props }: IslandSceneProps & { world: GLTF }) {
   const desiredFrameLoop = useRef<"never" | "demand" | "always">("never");
   const adaptation = useRef({good:0,age:0,lastQuality:props.quality,upgradeBlocked:false,frameTimes:[] as number[]});
   const environment = useMemo(()=>manifestEnvironment(props.manifest),[props.manifest]);
-  const environmentState = useRef(createEnvironmentState(props.weather??"clear",props.season??"spring",props.clock?.current??props.timeOfDay??13));
+  const environmentState = useMemo(()=>({current:props.gardenRuntime?.environment??createEnvironmentState(props.weather??"clear",props.season??"spring",props.clock?.current??props.timeOfDay??13)}),[props.gardenRuntime]);
   const companion = useRef<BirdCompanion>({available:false,position:[0,0,0],heading:0});
   const actors=useRef<ScenicActors>({birds:[]});
-  const touches=useRef(createWaterTouches());
-  const feedSpot=useRef(createFeedSpot());
+  const touches=useMemo(()=>({current:props.gardenRuntime?.touches??createWaterTouches()}),[props.gardenRuntime]);
+  const feedSpot=useMemo(()=>({current:props.gardenRuntime?.feedSpot??createFeedSpot()}),[props.gardenRuntime]);
   const clockSample = useRef({hour:props.clock?.current??props.timeOfDay??13,at:0});
   const points = useMemo(() => pavilionIds.map(id => ({ id, point: new THREE.Vector3(...props.manifest.pavilions[id].focus) })), [props.manifest]);
   const ambient = useMemo(() => {
@@ -136,9 +147,9 @@ function LiveWorld({ world, ...props }: IslandSceneProps & { world: GLTF }) {
   const desiredTarget = useMemo(() => new THREE.Vector3(), []);
   const projectPoint = useMemo(() => new THREE.Vector3(), []);
   const { navigator: navigation, onFail, onReady, onSelect, manifest, active, panelOpen, reducedMotion, intro, onInteract, onZoom, interactionBlocked } = props;
-  const animateWorld = active && !panelOpen;
+  const animateWorld = active && !panelOpen && !props.paused;
   const stallContext = useMemo(()=>`${props.weather??"clear"}/${props.phase??"day"}/${props.pavilionId??"overview"}`,[props.weather,props.phase,props.pavilionId]);
-  const autoOrbitPause = !active ? "inactive" : reducedMotion ? "reduced" : props.pavilionId || panelOpen ? "detail" : interactionBlocked && !intro ? "blocked" : null;
+  const autoOrbitPause = !active ? "inactive" : props.paused ? "paused" : reducedMotion ? "reduced" : props.pavilionId || panelOpen ? "detail" : interactionBlocked && !intro ? "blocked" : null;
   useEffect(() => { const next=clampZoom(props.zoom ?? zoomRef.current, manifest.cameraBounds); if(next!==previousZoom.current) orbit.current.pause(); previousZoom.current=next; zoomRef.current=next; projectionNeeded.current = true; invalidate(); }, [props.zoom,manifest.cameraBounds,invalidate]);
   const season = props.season ?? getSeason();
   const strikeTargets = (manifest as WorldManifest & { weatherScenery?: { lightningTargets?: [number,number,number][] } }).weatherScenery?.lightningTargets;
@@ -243,7 +254,7 @@ function LiveWorld({ world, ...props }: IslandSceneProps & { world: GLTF }) {
     projectionNeeded.current = true;
     previousPositions.current = null;
     previousAvatarPosition.current = null;
-    desiredFrameLoop.current = !active ? "never" : reducedMotion || panelOpen ? "demand" : "always";
+    desiredFrameLoop.current = !active ? "never" : reducedMotion || props.paused || panelOpen ? "demand" : "always";
     const desiredLoop = renderReady.current ? desiredFrameLoop.current : "never";
     const current = get();
     if (current.frameloop !== desiredLoop || active && !current.clock.running) current.setFrameloop(desiredLoop);
@@ -268,8 +279,9 @@ function LiveWorld({ world, ...props }: IslandSceneProps & { world: GLTF }) {
       followup = requestAnimationFrame(() => { projectionNeeded.current = true; invalidate(); });
     });
     return () => { cancelAnimationFrame(frame); cancelAnimationFrame(followup); };
-  }, [active, reducedMotion, panelOpen, props.pavilionId, props.resetEpoch, intro, size.width, size.height, gl, get, setSize, camera, invalidate]);
+  }, [active, reducedMotion, props.paused,panelOpen, props.pavilionId, props.resetEpoch, intro, size.width, size.height, gl, get, setSize, camera, invalidate]);
   useEffect(() => { reportRuntime(); }, [reportRuntime]);
+  useEffect(()=>{invalidate();},[props.interactionEpoch,props.paused,props.allowFlashes,invalidate]);
   useEffect(() => { projectionNeeded.current = true; invalidate(); }, [props.zoom, invalidate]);
   useEffect(() => {
     if (lastReset.current === props.resetEpoch) return;
@@ -281,10 +293,10 @@ function LiveWorld({ world, ...props }: IslandSceneProps & { world: GLTF }) {
     previousPavilion.current=props.pavilionId;
   },[props.pavilionId]);
   useEffect(() => {
-    if (!active || panelOpen || !reducedMotion) return;
+    if (!active || panelOpen || !reducedMotion || props.paused) return;
     const timer = window.setInterval(() => { if (!document.hidden) invalidate(); }, 50);
     return () => window.clearInterval(timer);
-  }, [active,panelOpen,reducedMotion,invalidate]);
+  }, [active,panelOpen,reducedMotion,props.paused,invalidate]);
   useEffect(() => {
     const canvas = gl.domElement;
     const controller=orbit.current;
@@ -353,7 +365,7 @@ function LiveWorld({ world, ...props }: IslandSceneProps & { world: GLTF }) {
       const position=orbitPosition(restingCamera.position,restingCamera.target,orbit.current.yaw,orbit.current.pitch,zoomRef.current/overviewDistanceScale(restingCamera.fov,framing.width,framing.height)); cameraPosition.set(...position);
       cameraPosition.y+=props.cameraHeight??0; desiredTarget.y+=props.cameraHeight??0;
     }
-    const unsettled = easeCamera(camera, cameraTarget, cameraPosition, desiredTarget, fieldOfView(restingCamera.fov, framing.width, framing.height, !!props.pavilionId), transitionDt, reducedMotion, props.intro ? 2.8 : 7);
+    const unsettled = easeCamera(camera, cameraTarget, cameraPosition, desiredTarget, fieldOfView(restingCamera.fov, framing.width, framing.height, !!props.pavilionId), transitionDt, reducedMotion || !!props.paused, props.intro ? 2.8 : 7);
     if (unsettled && active) invalidate();
     if (!unsettled && cameraSettling.current) projectionNeeded.current = true;
     if(!unsettled&&returningOverview.current){returningOverview.current=false;projectionNeeded.current=true;}
@@ -473,6 +485,7 @@ function LiveWorld({ world, ...props }: IslandSceneProps & { world: GLTF }) {
     }
     event.stopPropagation();
     if(Math.abs(event.point.y-environment.water.height)<.35&&surfaceAt(event.point.x,event.point.z,environment).kind==='water'){
+      if(props.paused)return;
       const point:[number,number,number]=[event.point.x,environment.water.height,event.point.z],state=environmentState.current;
       if(addWaterTouch(touches.current,point,state.elapsed,environment,state.ice)){
         props.onSpatialSound?.('water-touch',point);
@@ -484,21 +497,24 @@ function LiveWorld({ world, ...props }: IslandSceneProps & { world: GLTF }) {
     pulseState.current.position.copy(event.point).y += .035;
     onInteract?.();
     invalidate();
-  }, [active, panelOpen, props.interactionBlocked, props.onSpatialSound,props.onFeed,intro, onInteract, reducedMotion, manifest, onSelect, ambient, invalidate,environment]);
+  }, [active, panelOpen, props.interactionBlocked, props.paused,props.onSpatialSound,props.onFeed,intro, onInteract, reducedMotion, manifest, onSelect, ambient, invalidate,environment]);
 
   return <>
     <MobileShadows active={active} moving={animateWorld}/>
-    <RareSky environmentState={environmentState} active={animateWorld&&!intro} reducedMotion={reducedMotion}/>
-    <Atmosphere actors={actors} companion={companion} weather={props.weather ?? "clear"} phase={props.phase} timeOfDay={props.timeOfDay} environment={environment} environmentState={environmentState} windSpeed={props.windSpeed} precipitation={props.precipitation} snowfall={props.snowfall} birdPerches={manifest.birdPerches} birdShelters={manifest.birdShelters} strikeTargets={strikeTargets} season={season} quality={props.quality} active={active && !panelOpen} moving={animateWorld} reducedMotion={reducedMotion} onInteract={!props.intro && !props.interactionBlocked && !panelOpen ? props.onInteract : undefined} onThunder={props.onThunder} />
+    <RareSky state={props.gardenRuntime?.sky} onDiscovery={props.onDiscovery} environmentState={environmentState} active={animateWorld&&!intro} reducedMotion={reducedMotion}/>
+    <Atmosphere allowFlashes={props.allowFlashes} actors={actors} companion={companion} weather={props.weather ?? "clear"} phase={props.phase} timeOfDay={props.timeOfDay} environment={environment} environmentState={environmentState} windSpeed={props.windSpeed} precipitation={props.precipitation} snowfall={props.snowfall} birdPerches={manifest.birdPerches} birdShelters={manifest.birdShelters} strikeTargets={strikeTargets} season={season} quality={props.quality} active={active && !panelOpen} moving={animateWorld} reducedMotion={reducedMotion} onInteract={!props.intro && !props.interactionBlocked && !panelOpen ? props.onInteract : undefined} onThunder={props.onThunder} />
     <Scenery feedSpot={feedSpot} world={world.scene} environment={environment} environmentState={environmentState} quality={props.quality} weather={props.weather??"clear"} season={season} moving={animateWorld} windSpeed={props.windSpeed} reducedMotion={reducedMotion} />
     <GardenLife environment={environment} environmentState={environmentState} season={season} reducedMotion={reducedMotion} quality={props.quality} />
     <LakeOverflow environment={environment} environmentState={environmentState} quality={props.quality} />
     <WaterTouchesView touches={touches} environmentState={environmentState} height={environment.water.height}/>
     <FishFood spot={feedSpot} environmentState={environmentState} height={environment.water.height}/>
-    <Fireflies environment={environment} environmentState={environmentState} season={season} quality={props.quality} moving={animateWorld} reducedMotion={reducedMotion}/>
+    <PondVisitors environment={environment} environmentState={environmentState} quality={props.quality} active={active&&!panelOpen&&!intro&&!props.interactionBlocked} moving={animateWorld} reducedMotion={reducedMotion} onDiscovery={props.onDiscovery}/>
+    <GardenObservations active={active&&!panelOpen&&!intro&&!props.interactionBlocked} actors={actors} environment={environment} environmentState={environmentState} onDiscovery={props.onDiscovery}/>
+    <ResidentHotspots layout={manifest.islandLife} disabled={!active||panelOpen||!!intro||!!props.interactionBlocked||!!props.paused} onActivity={props.onResidentActivity}/>
+    <Fireflies onDiscovery={props.onDiscovery} environment={environment} environmentState={environmentState} season={season} quality={props.quality} moving={animateWorld} reducedMotion={reducedMotion}/>
     {props.onPixelRatio&&<SceneSignals actors={actors} environment={environment} environmentState={environmentState} active={active&&!panelOpen&&!props.interactionBlocked} intro={!!intro} quality={props.quality} onSoundFrame={props.onSoundFrame} onPixelRatio={props.onPixelRatio}/ >}
     <NightLighting environment={environment} environmentState={environmentState} quality={props.quality} moving={animateWorld} reducedMotion={reducedMotion}/>
-    <IslandLife onSpatialSound={props.onSpatialSound} interactionBlocked={!!props.interactionBlocked||panelOpen} companion={companion} layout={manifest.islandLife} preparedGeometry={manifest.preparedLifeGeometry} environment={environment} environmentState={environmentState} quality={props.quality} moving={animateWorld} reducedMotion={reducedMotion} intro={!!intro}/>
+    <IslandLife runtime={props.gardenRuntime} onSpatialSound={props.onSpatialSound} interactionBlocked={!!props.interactionBlocked||panelOpen} companion={companion} layout={manifest.islandLife} preparedGeometry={manifest.preparedLifeGeometry} environment={environment} environmentState={environmentState} quality={props.quality} moving={animateWorld} reducedMotion={reducedMotion} intro={!!intro}/>
     <primitive object={world.scene} onClick={selectMesh} onPointerOver={(event: ThreeEvent<PointerEvent>) => { if (active && !panelOpen && !intro) { event.stopPropagation(); gl.domElement.style.setProperty("cursor", "pointer"); } }} onPointerOut={() => { gl.domElement.style.removeProperty("cursor"); }} />
     <mesh ref={pulse} rotation={[-Math.PI / 2, 0, 0]} visible={false} raycast={() => {}}><ringGeometry args={[.24, .31, 32]} /><meshBasicMaterial color="#f2c577" transparent opacity={0} depthWrite={false} side={THREE.DoubleSide} /></mesh>
     <pointLight ref={pulseLight} intensity={0} color="#ffcf8e" distance={3.2} decay={2} />
@@ -588,7 +604,7 @@ function IslandScene(props: IslandSceneProps) {
   return <Canvas camera={initialCamera}
     dpr={pixelRatio}
     shadows={{ type: THREE.PCFShadowMap }}
-    frameloop={compiledWorld!==assets.world||!props.active ? "never" : props.reducedMotion||props.panelOpen ? "demand" : "always"}
+    frameloop={compiledWorld!==assets.world||!props.active ? "never" : props.reducedMotion||props.paused||props.panelOpen ? "demand" : "always"}
     gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
     onCreated={({ gl }) => { gl.outputColorSpace = THREE.SRGBColorSpace; gl.toneMapping = THREE.ACESFilmicToneMapping; gl.toneMappingExposure = 1.15; }}>
     <LiveWorld {...props} onPixelRatio={setPixelRatio} onReady={worldReady} world={assets.world} />

@@ -34,12 +34,12 @@ export const EARLY_AUDIO_SCRIPT = String.raw`(() => {
   const track = tracks[trackIndex];
   let cue = track.startAtSeconds || 0;
   element.src = track.url;
-  element.preload = "auto";
+  element.preload = "none";
   let positioned = false, claimedOnce = false, epoch = 0;
   const publish = () => { document.documentElement.dataset.entryAudioStatus = state.status; document.documentElement.dataset.entryAudioTrack = String(state.trackIndex); };
   const state = window.__tccEntryAudio = {
-    element, trackIndex, desired: true, silenced: false, gesture: false, entryRequested: false,
-    status: "loading", error: null, pending: null, owner: null, startedAtMs: null,
+    element, trackIndex, desired: false, silenced: true, gesture: false, entryRequested: false,
+    status: "off", error: null, pending: null, owner: null, startedAtMs: null,
     claim(owner) { epoch++; claimedOnce = true; this.owner = owner; return element; },
     release(owner) { if (this.owner === owner) { this.owner = null; this.pending = null; epoch++; } },
     rememberTrack(index, time) {
@@ -91,18 +91,6 @@ export const EARLY_AUDIO_SCRIPT = String.raw`(() => {
     }).finally(() => { if (state.pending === pending) state.pending = null; });
     state.pending = pending;
   }
-  const gesture = event => {
-    if (claimedOnce || event.type === "keydown" && event.key !== "Enter" && event.key !== " ") return;
-    const toggle = event.target && event.target.closest && event.target.closest("[data-entry-audio-toggle]");
-    if (toggle) return; // The actual click below owns this button until hydration.
-    if (state.silenced || event.target && event.target.closest && event.target.closest("[data-audio-control]")) return;
-    state.gesture = true;
-    // A pending automatic play may be blocked. Retry synchronously in this gesture.
-    if (state.pending && element.paused) { epoch++; state.pending = null; }
-    attempt();
-  };
-  document.addEventListener("pointerdown", gesture, true);
-  document.addEventListener("keydown", gesture, true);
   document.addEventListener("click", event => {
     if (claimedOnce) return;
     if (event.target && event.target.closest && event.target.closest("[data-entry-audio-toggle]")) {
@@ -133,5 +121,4 @@ export const EARLY_AUDIO_SCRIPT = String.raw`(() => {
   });
   publish();
   document.documentElement.dataset.entryAudioBootMs = String(performance.now());
-  attempt();
 })();`;

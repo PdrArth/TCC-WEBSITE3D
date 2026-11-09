@@ -14,6 +14,7 @@ import { faunaCount, rainDropScale, weatherVisualProfile, atmospherePalette, adv
 import type {ScenicActors} from '@/lib/experience/scene-signals';
 export type { Weather } from "@/lib/experience/weather.mjs";
 type AtmosphereProps = {
+  allowFlashes?:boolean;
   actors?: MutableRefObject<ScenicActors>;
   companion?: MutableRefObject<BirdCompanion>;
   weather: Weather; phase?: WeatherPhase; timeOfDay?: number; windSpeed?: number; precipitation?: number; snowfall?: number;
@@ -156,7 +157,7 @@ function Clouds({weather,active,moving,reducedMotion,windSpeed=7,palette}:Pick<A
 }
 
 /* eslint-disable react-hooks/immutability -- R3F owns mutable scene objects and GPU buffers outside React state. */
-export default function Atmosphere({actors,companion,weather,phase,windSpeed,precipitation,snowfall,birdPerches,birdShelters,strikeTargets,timeOfDay,environment=defaultEnvironment,environmentState,season,quality,active,moving,reducedMotion,onInteract,onThunder}:AtmosphereProps) {
+export default function Atmosphere({allowFlashes=false,actors,companion,weather,phase,windSpeed,precipitation,snowfall,birdPerches,birdShelters,strikeTargets,timeOfDay,environment=defaultEnvironment,environmentState,season,quality,active,moving,reducedMotion,onInteract,onThunder}:AtmosphereProps) {
   const {gl,scene,camera,size,invalidate} = useThree();
   const lightningTargets = strikeTargets?.length ? strikeTargets : defaultLightningTargets;
   const hemisphere = useRef<THREE.HemisphereLight>(null), sun = useRef<THREE.DirectionalLight>(null), fill = useRef<THREE.DirectionalLight>(null);
@@ -213,7 +214,7 @@ export default function Atmosphere({actors,companion,weather,phase,windSpeed,pre
 
   useFrame((_,delta) => {
     if (!active || !hemisphere.current || !sun.current || !fill.current || !rain.current) return;
-    const alpha = !initialized.current ? 1 : 1-Math.exp(-1.5*Math.min(2,Math.max(1/120,delta)));
+    const alpha = !initialized.current || !moving || reducedMotion ? 1 : 1-Math.exp(-1.5*Math.min(2,Math.max(1/120,delta)));
     const dt = moving ? environmentSeconds(cadence.current.sample(delta).elapsed,reducedMotion) : 0;
     clock.current += dt; initialized.current = true;
     const liveWeather = environmentState?.current.weather ?? weather;
@@ -311,7 +312,8 @@ export default function Atmosphere({actors,companion,weather,phase,windSpeed,pre
       scene.userData.lastWeatherStrike={at:performance.now(),index:strikeIndex.current};
     }
     if (thunderEnabled && thunder.current.takeThunder()) onThunder?.();
-    const glow = thunderEnabled ? thunder.current.glow : 0;
+    const glow = thunderEnabled && allowFlashes ? thunder.current.glow : 0;
+    gl.domElement.setAttribute('data-world-flashes-enabled',String(!!allowFlashes&&!reducedMotion));
     if (lightning.current && lightningLight.current && lightningVolume.current) {
       lightning.current.visible = glow>.01; lightningVolume.current.visible = glow>.01;
       (lightning.current.material as THREE.LineBasicMaterial).opacity = glow*.95; (lightningVolume.current.material as THREE.MeshBasicMaterial).opacity = glow*.58;
