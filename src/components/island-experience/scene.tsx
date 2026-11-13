@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable react-hooks/immutability -- Three.js camera vectors and simulation counters are imperative resources owned by the R3F frame loop. */
+
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
@@ -19,6 +21,8 @@ import { createEnvironmentManifest, createEnvironmentState, advanceEnvironment }
 import type { BirdCompanion } from "@/lib/experience/bird-life.mjs";
 import LakeOverflow from "./lake-overflow";
 import { groundShoreStones } from "@/lib/experience/shore-stones.mjs";
+import {createTreeHabitat,attachTrunkFruit} from '@/lib/experience/tree-habitat.mjs';
+import LivingTrees from './living-trees';
 import {createWaterTouches,addWaterTouch} from '@/lib/experience/garden-interactions.mjs';
 import {surfaceAt} from '@/lib/experience/environment.mjs';
 import type {ScenicActors,ScenicAudioFrame,ScenicSound} from '@/lib/experience/scene-signals';
@@ -129,6 +133,8 @@ function LiveWorld({ world, ...props }: IslandSceneProps & { world: GLTF }) {
   const desiredFrameLoop = useRef<"never" | "demand" | "always">("never");
   const adaptation = useRef({good:0,age:0,lastQuality:props.quality,upgradeBlocked:false,frameTimes:[] as number[]});
   const environment = useMemo(()=>manifestEnvironment(props.manifest),[props.manifest]);
+  const treeHabitat=useMemo(()=>createTreeHabitat(world.scene),[world]);
+  const birdPerches=useMemo(()=>[...treeHabitat.perches,...(props.manifest.birdPerches??[])],[treeHabitat,props.manifest]);
   const environmentState = useMemo(()=>({current:props.gardenRuntime?.environment??createEnvironmentState(props.weather??"clear",props.season??"spring",props.clock?.current??props.timeOfDay??13)}),[props.gardenRuntime]);
   const companion = useRef<BirdCompanion>({available:false,position:[0,0,0],heading:0});
   const actors=useRef<ScenicActors>({birds:[]});
@@ -147,7 +153,7 @@ function LiveWorld({ world, ...props }: IslandSceneProps & { world: GLTF }) {
   const desiredTarget = useMemo(() => new THREE.Vector3(), []);
   const projectPoint = useMemo(() => new THREE.Vector3(), []);
   const { navigator: navigation, onFail, onReady, onSelect, manifest, active, panelOpen, reducedMotion, intro, onInteract, onZoom, interactionBlocked } = props;
-  const animateWorld = active && !panelOpen && !props.paused;
+  const animateWorld = active && !props.paused;
   const stallContext = useMemo(()=>`${props.weather??"clear"}/${props.phase??"day"}/${props.pavilionId??"overview"}`,[props.weather,props.phase,props.pavilionId]);
   const autoOrbitPause = !active ? "inactive" : props.paused ? "paused" : reducedMotion ? "reduced" : props.pavilionId || panelOpen ? "detail" : interactionBlocked && !intro ? "blocked" : null;
   useEffect(() => { const next=clampZoom(props.zoom ?? zoomRef.current, manifest.cameraBounds); if(next!==previousZoom.current) orbit.current.pause(); previousZoom.current=next; zoomRef.current=next; projectionNeeded.current = true; invalidate(); }, [props.zoom,manifest.cameraBounds,invalidate]);
@@ -254,7 +260,7 @@ function LiveWorld({ world, ...props }: IslandSceneProps & { world: GLTF }) {
     projectionNeeded.current = true;
     previousPositions.current = null;
     previousAvatarPosition.current = null;
-    desiredFrameLoop.current = !active ? "never" : reducedMotion || props.paused || panelOpen ? "demand" : "always";
+    desiredFrameLoop.current = !active ? "never" : props.paused ? "demand" : "always";
     const desiredLoop = renderReady.current ? desiredFrameLoop.current : "never";
     const current = get();
     if (current.frameloop !== desiredLoop || active && !current.clock.running) current.setFrameloop(desiredLoop);
@@ -502,13 +508,14 @@ function LiveWorld({ world, ...props }: IslandSceneProps & { world: GLTF }) {
   return <>
     <MobileShadows active={active} moving={animateWorld}/>
     <RareSky state={props.gardenRuntime?.sky} onDiscovery={props.onDiscovery} environmentState={environmentState} active={animateWorld&&!intro} reducedMotion={reducedMotion}/>
-    <Atmosphere allowFlashes={props.allowFlashes} actors={actors} companion={companion} weather={props.weather ?? "clear"} phase={props.phase} timeOfDay={props.timeOfDay} environment={environment} environmentState={environmentState} windSpeed={props.windSpeed} precipitation={props.precipitation} snowfall={props.snowfall} birdPerches={manifest.birdPerches} birdShelters={manifest.birdShelters} strikeTargets={strikeTargets} season={season} quality={props.quality} active={active && !panelOpen} moving={animateWorld} reducedMotion={reducedMotion} onInteract={!props.intro && !props.interactionBlocked && !panelOpen ? props.onInteract : undefined} onThunder={props.onThunder} />
+    <Atmosphere allowFlashes={props.allowFlashes} actors={actors} companion={companion} weather={props.weather ?? "clear"} phase={props.phase} timeOfDay={props.timeOfDay} environment={environment} environmentState={environmentState} windSpeed={props.windSpeed} precipitation={props.precipitation} snowfall={props.snowfall} birdPerches={birdPerches} birdShelters={manifest.birdShelters} strikeTargets={strikeTargets} season={season} quality={props.quality} active={active} moving={animateWorld} reducedMotion={reducedMotion} onInteract={!props.intro && !props.interactionBlocked && !panelOpen ? props.onInteract : undefined} onThunder={props.onThunder} />
     <Scenery feedSpot={feedSpot} world={world.scene} environment={environment} environmentState={environmentState} quality={props.quality} weather={props.weather??"clear"} season={season} moving={animateWorld} windSpeed={props.windSpeed} reducedMotion={reducedMotion} />
     <GardenLife environment={environment} environmentState={environmentState} season={season} reducedMotion={reducedMotion} quality={props.quality} />
+    <LivingTrees habitat={treeHabitat} season={season} environmentState={environmentState}/>
     <LakeOverflow environment={environment} environmentState={environmentState} quality={props.quality} />
     <WaterTouchesView touches={touches} environmentState={environmentState} height={environment.water.height}/>
     <FishFood spot={feedSpot} environmentState={environmentState} height={environment.water.height}/>
-    <PondVisitors environment={environment} environmentState={environmentState} quality={props.quality} active={active&&!panelOpen&&!intro&&!props.interactionBlocked} moving={animateWorld} reducedMotion={reducedMotion} onDiscovery={props.onDiscovery}/>
+    <PondVisitors environment={environment} environmentState={environmentState} quality={props.quality} active={active} moving={animateWorld} reducedMotion={reducedMotion} onDiscovery={!intro&&!props.interactionBlocked?props.onDiscovery:undefined}/>
     <GardenObservations active={active&&!panelOpen&&!intro&&!props.interactionBlocked} actors={actors} environment={environment} environmentState={environmentState} onDiscovery={props.onDiscovery}/>
     <ResidentHotspots layout={manifest.islandLife} disabled={!active||panelOpen||!!intro||!!props.interactionBlocked||!!props.paused} onActivity={props.onResidentActivity}/>
     <Fireflies onDiscovery={props.onDiscovery} environment={environment} environmentState={environmentState} season={season} quality={props.quality} moving={animateWorld} reducedMotion={reducedMotion}/>
@@ -552,6 +559,7 @@ function IslandScene(props: IslandSceneProps) {
       if (cancelled) {disposeScene(asset.scene);return;}
       const optimizationStarted=performance.now();
       groundShoreStones(asset.scene,manifestEnvironment(props.manifest));
+      attachTrunkFruit(asset.scene);
       if(asset.scene.userData.runtimePrepared?.version===1 && asset.scene.userData.runtimePrepared.quality===props.quality){
         asset.scene.traverse(object=>{
           const mesh=object as THREE.Mesh;
@@ -604,7 +612,7 @@ function IslandScene(props: IslandSceneProps) {
   return <Canvas camera={initialCamera}
     dpr={pixelRatio}
     shadows={{ type: THREE.PCFShadowMap }}
-    frameloop={compiledWorld!==assets.world||!props.active ? "never" : props.reducedMotion||props.paused||props.panelOpen ? "demand" : "always"}
+    frameloop={compiledWorld!==assets.world||!props.active ? "never" : props.paused ? "demand" : "always"}
     gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
     onCreated={({ gl }) => { gl.outputColorSpace = THREE.SRGBColorSpace; gl.toneMapping = THREE.ACESFilmicToneMapping; gl.toneMappingExposure = 1.15; }}>
     <LiveWorld {...props} onPixelRatio={setPixelRatio} onReady={worldReady} world={assets.world} />

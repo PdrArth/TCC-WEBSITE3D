@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {lakeSpillway} from './lake-dynamics.mjs';
 
 /** Intersect the actual polygon along a ray, rather than assuming an elliptical shore. */
 export function bankAnchor(x,z,environment) {
@@ -16,6 +17,7 @@ export function bankAnchor(x,z,environment) {
 /** Preserve every authored pebble shape, translating each connected rock onto the bank. */
 export function groundShoreStones(scene,environment) {
   scene.updateMatrixWorld(true); let grounded=0;
+  const outlet=lakeSpillway(environment),tangent=[outlet.direction[1],-outlet.direction[0]];
   scene.traverse(mesh=>{
     if(!mesh.isMesh||mesh.userData.shoreGrounded)return;
     const materials=Array.isArray(mesh.material)?mesh.material:[mesh.material];
@@ -33,7 +35,12 @@ export function groundShoreStones(scene,environment) {
     for(const {indices,box} of groups.values()){
       const center=box.getCenter(new THREE.Vector3()),[cx,cz]=environment.water.center;
       if(Math.hypot((center.x-cx)/environment.water.radii[0],(center.z-cz)/environment.water.radii[1])<.90||box.max.y>.8)continue;
-      const anchor=bankAnchor(center.x,center.z,environment);if(!anchor)continue;
+      let anchor=bankAnchor(center.x,center.z,environment);if(!anchor)continue;
+      const dx=anchor.x-outlet.position[0],dz=anchor.z-outlet.position[2],across=dx*tangent[0]+dz*tangent[1],along=dx*outlet.direction[0]+dz*outlet.direction[1];
+      if(along>-.8&&along<2.4&&Math.abs(across)<outlet.width*.62) {
+        const shoulder=(across<0?-1:1)*(outlet.width*.64+.25+Math.abs(across)*.30);
+        anchor=bankAnchor(outlet.position[0]+tangent[0]*shoulder,outlet.position[2]+tangent[1]*shoulder,environment)??anchor;
+      }
       const offset=new THREE.Vector3(anchor.x-center.x,anchor.y-.065-box.min.y,anchor.z-center.z);
       for(const i of indices){v.fromBufferAttribute(position,i).applyMatrix4(mesh.matrixWorld).add(offset).applyMatrix4(inverse);position.setXYZ(i,v.x,v.y,v.z);}grounded++;
     }

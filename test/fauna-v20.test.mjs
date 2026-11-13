@@ -32,7 +32,7 @@ test("v20 fauna counts, colors and sizes retain fixed instanced draw budgets", a
   const scenery=await readFile(new URL("../src/components/island-experience/scenery.tsx",import.meta.url),"utf8");
   assert.equal((atmosphere.match(/<instancedMesh name="bird_/g)??[]).length,3);
   assert.equal((scenery.match(/<instancedMesh name="lake_fish_/g)??[]).length,2);
-  assert.match(atmosphere,/scale = 1\.4\*/);
+  assert.match(atmosphere,/scale = 1\.6\*/);
 });
 
 test("v20 fish routes are seeded, prepared once and sampled without changing route buffers", () => {
@@ -139,8 +139,8 @@ test("v20 adverse weather and night keep every bird visible at a fixed refuge wi
       assert.ok(Object.values(pose).every(Number.isFinite));
       assert.deepEqual([pose.x,pose.y,pose.z],refuge.position);
       assert.equal(pose.mode,0);assert.equal(pose.flap,.16);assert.equal(pose.fold,.84);
-      const scale=1.4*(.9+index%3*.09);
-      assert.ok(pose.y+.105-.072*scale>=refuge.position[1]-.01,"bird feet stay on the porch floor, rather than sinking through it");
+      const scale=1.6*(.9+index%3*.09);
+      assert.ok(pose.y+.12-.072*scale>=refuge.position[1]-.01,"bird feet stay on the porch floor, rather than sinking through it");
     }
   }
 });

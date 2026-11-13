@@ -5,6 +5,7 @@ export const discoveryCatalog = [
   {id:'butterflies',name:'Borboletas',group:'Fauna',description:'Borboletas visitam os canteiros em períodos de tempo aberto.'},
   {id:'ducks',name:'Patinhos',group:'Fauna',description:'Patinhos nadam pelo lago e descansam perto das margens.'},
   {id:'turtles',name:'Tartarugas',group:'Fauna',description:'Tartarugas caminham devagar e descansam perto da água.'},
+  {id:'crabs',name:'Caranguejos',group:'Fauna',description:'Dois caranguejos percorrem as margens de lado, movendo as pernas e as pinças.'},
   {id:'fireflies',name:'Vagalumes de verão',group:'Fauna',description:'Pontos de luz aparecem em noites tranquilas de verão.'},
   {id:'rainbow',name:'Arco-íris depois da chuva',group:'Fenômenos',description:'Um arco colorido surge quando o céu abre durante o dia, depois da chuva.'},
   {id:'meteor',name:'Estrela cadente',group:'Fenômenos',description:'Uma passagem breve de luz cruza algumas noites de céu limpo.'},

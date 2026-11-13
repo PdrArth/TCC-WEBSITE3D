@@ -894,6 +894,12 @@ export function ResearchReading({ updates, newsState, initialSection, onThemeCha
 
   return (
     <div ref={rootRef} className="research-content rc-reading" data-reading-section={activeSection}>
+      <header className="research-reading-cover">
+        <p>Trabalho de Conclusão de Curso · Leitura temática</p>
+        <h2>Do código à supervisão.</h2>
+        <p className="research-reading-subtitle">Inteligência artificial generativa e a transformação do papel do desenvolvedor.</p>
+        <a href="/texto-completo">Ler o trabalho completo <span aria-hidden="true">↗</span></a>
+      </header>
       <header className="rc-reading-header">
         <label className="garden-chapter-select">Tema do caderno<select value={activeSection} onChange={event => selectSection(event.target.value as ReadingSection)}>{readingNavigation.map((item, index) => <option value={item.id} key={item.id}>{index + 1}. {item.label}</option>)}<option value="fontes">Método e fontes</option></select></label>
         <nav className="rc-reading-nav" aria-label="Temas do caderno">
@@ -934,11 +940,6 @@ export function ResearchReading({ updates, newsState, initialSection, onThemeCha
             <h2 id="rc-current-theme-title">{editorialSections[activeSection].title}</h2>
             <p className="rc-reading-deck">{editorialSections[activeSection].lead}</p>
           </header>
-          <figure className="rc-theme-scene">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`/experience/editorial/v9/${activeSection}.webp`} alt={`Maquete da ilha ${activeThemeIndex + 1}: ${currentLabel}`} width={1200} height={780} loading="lazy" />
-            <figcaption><span>Ilustração editorial · modelagem própria</span>{editorialSections[activeSection].imageCaption}<small>Imagem de apoio conceitual; não representa evidência dos estudos.</small></figcaption>
-          </figure>
           <ThemeVisual pavilionId={activeSection} />
           <div className="rc-theme-copy">
             {editorialSections[activeSection].paragraphs.map((paragraph) => (

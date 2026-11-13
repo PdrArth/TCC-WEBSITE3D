@@ -40,7 +40,7 @@ type MaterialRecord = {
 };
 type GardenBinding = {
   records: MaterialRecord[];
-  pivots: { object: THREE.Object3D; rotation: THREE.Euler; flower: boolean }[];
+  pivots: { object: THREE.Object3D; rotation: THREE.Euler; phase: number }[];
   anchors: { x: number; z: number; top: number; island: string }[];
   groundHeight: number;
   restore: () => void;
@@ -122,6 +122,7 @@ function createUniforms(environment: WorldEnvironmentManifest) {
     scenicWaterHeight: { value: environment.water.height }, scenicWaterScale: { value: 1 }, scenicWind: { value: .2 },
     scenicWaterRise: { value: 0 }, scenicWaveAmplitude: { value: .012 }, scenicWaveSpeed: { value: .76 },
     scenicSpillway: { value: new THREE.Vector4(outlet.position[0], outlet.position[2], ...outlet.direction) },
+    scenicSpillWidth: { value: outlet.width },
     scenicWaterCenter: { value: new THREE.Vector2(...environment.water.center) },
     scenicWaterRadii: { value: new THREE.Vector2(...environment.water.radii) },
     scenicLand: { value: groundPositions },
@@ -148,6 +149,7 @@ uniform float scenicWaterRise;
 uniform float scenicWaveAmplitude;
 uniform float scenicWaveSpeed;
 uniform vec4 scenicSpillway;
+uniform float scenicSpillWidth;
 uniform vec2 scenicWaterCenter;
 uniform vec2 scenicWaterRadii;
 uniform vec3 scenicLand[8];
@@ -192,7 +194,7 @@ function installSurfaceShader(material: THREE.MeshStandardMaterial, uniforms: Sc
       vec2 fromOutlet = bankPoint.xz - scenicSpillway.xy;
       float across = dot(fromOutlet, vec2(scenicSpillway.w,-scenicSpillway.z));
       float along = dot(fromOutlet, scenicSpillway.zw);
-      float channel = (1.0 - smoothstep(.72,1.28,abs(across))) * smoothstep(-.4,-.02,along) * (1.0 - smoothstep(1.7,2.0,along));
+      float channel = (1.0 - smoothstep(scenicSpillWidth*.47,scenicSpillWidth*.58,abs(across))) * smoothstep(-.55,-.02,along) * (1.0 - smoothstep(1.7,2.0,along));
       float lower = max(0.0, bankPoint.y - (scenicWaterHeight + .055)) * channel;
       vec3 bankUp = vec3(modelMatrix[0].y,modelMatrix[1].y,modelMatrix[2].y);
       transformed -= bankUp * lower / max(.001,dot(bankUp,bankUp));
@@ -275,7 +277,10 @@ function bindGarden(world: THREE.Object3D, uniforms: ScenicUniforms, season: Sea
     const owner = foliageOwner(object);
     if (owner && !pivotNames.has(owner.name)) {
       pivotNames.add(owner.name);
-      pivots.push({ object: owner, rotation: owner.rotation.clone(), flower: owner.name.startsWith("ambient_flowers_") });
+      // Leaves and flowers of the same plant share a pivot phase, so blooms stay attached.
+      const plant=owner.name.replace(/^ambient_(leaves|flowers)_/, '');
+      const phase=Array.from(plant).reduce((value,char)=>(value*31+char.charCodeAt(0))%1009,0)*.013;
+      pivots.push({ object: owner, rotation: owner.rotation.clone(), phase });
       if (owner.name.startsWith("ambient_leaves_") && vegetationGroup(owner.name) !== "understory" && vegetationGroup(owner.name) !== "evergreen") {
         const bounds = new THREE.Box3().setFromObject(owner);
         const center = new THREE.Vector3(); owner.getWorldPosition(center);
@@ -424,8 +429,8 @@ export default function Scenery({ world, season, reducedMotion, moving = true, w
       pending ||= Math.abs(record.density.value - density) > .002 || Math.abs(material.color.r - record.target.r) + Math.abs(material.color.g - record.target.g) + Math.abs(material.color.b - record.target.b) > .002;
     }
     const wind = Math.min(.055, .007 + Math.max(0, windSpeed) * .0014 + state.wind * .018) * (reducedMotion ? .35 : 1);
-    for (const { object, rotation, flower } of binding.pivots) {
-      const sway = (Math.sin(time * (flower ? 1.15 : .7) + object.id * 1.61) + Math.sin(time * .23 + object.id) * .28) * wind;
+    for (const { object, rotation, phase } of binding.pivots) {
+      const sway = (Math.sin(time * .7 + phase) + Math.sin(time * .23 + phase) * .28) * wind;
       object.rotation.set(rotation.x + sway * .4, rotation.y + sway * .26, rotation.z + sway);
     }
     if (fallen.current) {

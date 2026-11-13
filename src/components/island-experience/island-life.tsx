@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable react-hooks/immutability -- R3F simulation poses and Three.js objects are updated inside the frame loop, outside React rendering. */
+
 import { useEffect, useLayoutEffect, useMemo, useRef, type MutableRefObject } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
@@ -124,12 +126,12 @@ const residentColors: Record<ResidentKind, string> = { skin: "#d7a67e", coat: "#
 
 export default function IslandLife({ runtime,onSpatialSound,interactionBlocked=false,companion, environment: suppliedEnvironment, layout: providedLayout, preparedGeometry, environmentState, moving = true, reducedMotion = false, quality = "high", intro = false }: IslandLifeProps) {
   const { gl, invalidate,camera } = useThree();
-  const ownGreeting=useRef(createGreeting()),greetingPose=useRef<GreetingPose>({active:false,heading:0,still:0,wave:0,sway:0,look:0,lookPitch:0}),previousBite=useRef(false),residentHit=useRef<THREE.Mesh>(null);
+  const ownGreeting=useMemo(()=>createGreeting(),[]),greetingPose=useRef<GreetingPose>({active:false,heading:0,still:0,wave:0,sway:0,look:0,lookPitch:0}),previousBite=useRef(false),residentHit=useRef<THREE.Mesh>(null);
   const residentScreen=useMemo(()=>new THREE.Vector3(),[]);
   const environment = useMemo(() => suppliedEnvironment ?? createEnvironmentManifest(), [suppliedEnvironment]);
   const layout = useMemo(() => providedLayout ?? createIslandLifeLayout(environment), [providedLayout, environment]);
-  const batches = useMemo(() => restoreLifeGeometry(preparedGeometry, layout) ?? createLifeGeometry(layout), [preparedGeometry, layout]); const ownState = useMemo(() => createResidentState(layout,Math.floor(Math.random()*0x100000000)), [layout]);
-  const state=runtime?.resident??ownState,greeting=useMemo(()=>({current:runtime?.greeting??ownGreeting.current}),[runtime]);
+  const batches = useMemo(() => restoreLifeGeometry(preparedGeometry, layout) ?? createLifeGeometry(layout), [preparedGeometry, layout]); const ownState = useMemo(() => createResidentState(layout), [layout]);
+  const state=runtime?.resident??ownState,greeting=useMemo(()=>({current:runtime?.greeting??ownGreeting}),[runtime,ownGreeting]);
   const rig = useMemo(() => createRig(layout.resident.scale), [layout.resident.scale]);
   const residentMeshes = useRef<Partial<Record<ResidentKind, THREE.InstancedMesh>>>({});
   const windowMaterial = useRef<THREE.MeshStandardMaterial>(null), roofMaterial = useRef<THREE.MeshStandardMaterial>(null);
@@ -246,7 +248,7 @@ export default function IslandLife({ runtime,onSpatialSound,interactionBlocked=f
   useEffect(() => () => headHairGeometry.dispose(), [headHairGeometry]);
 
   useFrame((_, delta) => {
-    greetingPose.current=advanceResidentWithGreeting(state,greeting.current,pose,delta,{...context(),panelOpen:interactionBlocked},layout,{distance:Math.hypot(camera.position.x-state.position[0],camera.position.y-state.position[1],camera.position.z-state.position[2]),cameraHeading:Math.atan2(camera.position.x-state.position[0],camera.position.z-state.position[2]),cameraPitch:Math.atan2(camera.position.y-state.position[1]-layout.resident.height*.85,Math.hypot(camera.position.x-state.position[0],camera.position.z-state.position[2]))});
+    greetingPose.current=advanceResidentWithGreeting(state,greeting.current,pose,delta,context(),layout,{distance:Math.hypot(camera.position.x-state.position[0],camera.position.y-state.position[1],camera.position.z-state.position[2]),cameraHeading:Math.atan2(camera.position.x-state.position[0],camera.position.z-state.position[2]),cameraPitch:Math.atan2(camera.position.y-state.position[1]-layout.resident.height*.85,Math.hypot(camera.position.x-state.position[0],camera.position.z-state.position[2]))});
     if(moving&&pose.fishingBite&&!previousBite.current&&pose.fishingTarget)onSpatialSound?.('fishing',pose.fishingTarget);
     previousBite.current=pose.fishingBite;updateArticulation();
     const scenic = environmentState?.current, night = scenic?.night ?? 0, cover = scenic?.snow ?? 0, wetness = scenic?.wetness ?? 0;

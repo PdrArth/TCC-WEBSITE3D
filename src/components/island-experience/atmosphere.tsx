@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable react-hooks/immutability -- Shared MutableRefObject actors feed the Three.js audio simulation without React renders. */
+
 import { useEffect, useMemo, useRef, type MutableRefObject } from "react";
 import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
@@ -47,7 +49,7 @@ function softTexture(cloud = false) {
   return new THREE.CanvasTexture(canvas);
 }
 
-function Birds({ actors, companion, weather, phase, timeOfDay, environment, environmentState, birdPerches, birdShelters, quality, active, moving, reducedMotion, onInteract }: Pick<AtmosphereProps,"actors"|"companion"|"weather"|"phase"|"timeOfDay"|"environment"|"environmentState"|"birdPerches"|"birdShelters"|"quality"|"active"|"moving"|"reducedMotion"|"onInteract">) {
+function Birds({ actors, companion, weather, phase, timeOfDay, environment, environmentState, birdPerches, birdShelters, quality, active, moving, onInteract }: Pick<AtmosphereProps,"actors"|"companion"|"weather"|"phase"|"timeOfDay"|"environment"|"environmentState"|"birdPerches"|"birdShelters"|"quality"|"active"|"moving"|"reducedMotion"|"onInteract">) {
   const { invalidate, gl } = useThree();
   const wings = useRef<THREE.InstancedMesh>(null), bodies = useRef<THREE.InstancedMesh>(null), details = useRef<THREE.InstancedMesh>(null);
   const elapsed = useRef(0), startled = useRef(0), cadence = useRef(new FrameCadence());
@@ -67,7 +69,7 @@ function Birds({ actors, companion, weather, phase, timeOfDay, environment, envi
   },[actors,count,birdColors]);
   useFrame((_,delta) => {
     if (!active || !wings.current || !bodies.current || !details.current) return;
-    const dt = moving ? environmentSeconds(cadence.current.sample(delta).elapsed,reducedMotion) : 0;
+    const dt = moving ? Math.min(.1,cadence.current.sample(delta).elapsed) : 0;
     elapsed.current += dt; startled.current = Math.max(0,startled.current-dt*.42);
     const liveWeather = environmentState?.current.weather ?? weather;
     const hour = environmentState?.current.hour ?? timeOfDay;
@@ -79,14 +81,14 @@ function Birds({ actors, companion, weather, phase, timeOfDay, environment, envi
       const state=flock.current[index] ??= createBirdState(index,perches,shelters,!mayFly);
       const pose=advanceBird(state,dt,mayFly,perches,shelters,companion?.current,startled.current);
       if(state.flight)flying++;
-      const scale = 1.4*(.9+index%3*.09), width = index%3===1 ? 1.1 : 1, length = index%3===2 ? .9 : 1;
-      dummy.position.set(pose.x,pose.y+.105,pose.z);
-      dummy.rotation.set(0,pose.heading,pose.bank); dummy.scale.set(scale*width,scale,scale*length); dummy.updateMatrix();
+      const scale = 1.6*(.9+index%3*.09), width = index%3===1 ? 1.1 : 1, length = index%3===2 ? .9 : 1;
+      dummy.position.set(pose.x,pose.y+.12,pose.z);
+      dummy.rotation.set(pose.peck,pose.heading+pose.look,pose.bank); dummy.scale.set(scale*width,scale*(1+pose.breath),scale*length); dummy.updateMatrix();
       bodies.current.setMatrixAt(index,dummy.matrix); details.current.setMatrixAt(index,dummy.matrix);
       const soundPosition=actors?.current.birds[index];if(soundPosition){soundPosition[0]=pose.x;soundPosition[1]=pose.y;soundPosition[2]=pose.z;}
       for (let side = 0; side < 2; side++) {
         const sign = side === 0 ? 1 : -1;
-        dummy.rotation.set(0,pose.heading,pose.bank); dummy.rotateY(sign*pose.fold*1.2); dummy.rotateZ(sign*pose.flap*(1-pose.fold*.9));
+        dummy.rotation.set(pose.peck,pose.heading+pose.look,pose.bank); dummy.rotateY(sign*pose.fold*1.2); dummy.rotateZ(sign*pose.flap*(1-pose.fold*.9));
         dummy.scale.set(sign*scale*width,scale,scale*length); dummy.updateMatrix(); wings.current.setMatrixAt(index*2+side,dummy.matrix);
 
       }

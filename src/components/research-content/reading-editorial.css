@@ -1,0 +1,29 @@
+/* The reader has its own editorial hierarchy, separate from the island summaries. */
+#island-experience .island-header .island-research-link {
+  padding:10px 18px; border-radius:7px; background:#294b41; color:#fffdf7!important; font-weight:600; gap:9px;
+}
+#island-experience .island-header .island-research-link:hover { background:#183a31; }
+#island-experience.is-reading .island-reading { background:#fffdf8; }
+#island-experience.is-reading .island-reading-toolbar { padding:18px 0; margin-bottom:0; border-bottom:1px solid #d5d8cc; }
+#island-experience .research-reading-cover { padding:clamp(30px,5vw,70px) 0 36px; border-bottom:3px solid #294b41; margin-bottom:24px; }
+#island-experience .research-reading-cover>p:first-child { font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.12em; margin:0 0 20px; }
+#island-experience .research-reading-cover h2 { max-width:15ch; margin:0 0 24px; color:#1d392e; font-family:Georgia,'Times New Roman',serif; font-size:clamp(42px,6vw,82px); line-height:1.02; font-weight:400; letter-spacing:-.035em; }
+#island-experience .research-reading-cover .research-reading-subtitle { max-width:48ch; font-size:clamp(20px,2vw,28px); line-height:1.4; color:#4e5f56; margin:0 0 22px; }
+#island-experience .research-reading-cover a { display:inline-flex; align-items:center; gap:18px; padding:10px 0; font-size:16px; font-weight:600; color:#294b41; text-decoration:underline; text-underline-offset:5px; }
+#island-experience [data-reader-layout=v10] .rc-reading-header { background:transparent; padding:0 0 18px; border:0; border-bottom:1px solid #d5d8cc; border-radius:0; }
+#island-experience [data-reader-layout=v10] .rc-reading-nav a { border-radius:3px; box-shadow:none; }
+#island-experience [data-reader-layout=v10] .rc-theme-heading { margin:42px 0 36px; padding:0 0 24px; border-bottom:1px solid #d5d8cc; }
+#island-experience [data-reader-layout=v10] .rc-theme-heading h2 { max-width:26ch; font-family:Georgia,'Times New Roman',serif; font-size:clamp(32px,4vw,54px); font-weight:400; line-height:1.12; }
+#island-experience [data-reader-layout=v10] .rc-essay.rc-reading-section p { max-width:72ch; }
+#island-experience [data-reader-layout=v10] .rc-theme-copy { max-width:1040px; }
+#island-experience [data-reader-layout=v10] .rc-theme-copy .rc-pavilion-paragraph { padding:0 0 20px; border-bottom:1px solid #e1e2d8; }
+@media(max-width:600px) {
+  #island-experience .island-header .island-research-link { padding:8px 10px; font-size:13px; gap:5px; }
+  #island-experience .research-reading-cover { padding:26px 0; }
+  #island-experience [data-reader-layout=v10] .rc-reading-header { margin-bottom:24px; }
+}
+@media(max-width:400px) {
+  #island-experience .island-header nav { gap:4px; }
+  #island-experience .island-header nav>a[href="/tcc-pedro-arthur.pdf"] { display:none; }
+  #island-experience .island-header .island-research-link { padding:8px; font-size:12px; }
+}

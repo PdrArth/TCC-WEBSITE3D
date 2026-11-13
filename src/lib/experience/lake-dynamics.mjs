@@ -31,5 +31,5 @@ export function lakeSpillway(environment) {
   const center = environment.water.center;
   const point = environment.water.shoreline.reduce((best, p) => (p[0] - center[0]) * .28 + (p[1] - center[1]) * .96 > (best[0] - center[0]) * .28 + (best[1] - center[1]) * .96 ? p : best);
   const dx = point[0] - center[0], dz = point[1] - center[1], radius = Math.hypot(dx, dz);
-  return { position: [point[0], environment.water.height + .055, point[1]], direction: [dx / radius, dz / radius], yaw: Math.atan2(dx, dz), width: 2.1, length: 1.65, drop: 1.12 };
+  return { position: [point[0], environment.water.height + .055, point[1]], direction: [dx / radius, dz / radius], yaw: Math.atan2(dx, dz), width: 5.2, length: 1.65, drop: 2.8 };
 }

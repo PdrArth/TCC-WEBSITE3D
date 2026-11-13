@@ -22,9 +22,9 @@ O percurso começa na pergunta do trabalho, passa pela evolução das ferramenta
 
 Entre uma leitura e outra, o cenário continua vivo: o horário avança, o clima muda, um morador percorre as pontes e os animais ocupam o lago e as ilhas. A experiência pode ser explorada com a câmera ou acessada diretamente pela leitura, sem depender da navegação em 3D.
 
-Patinhos e tartarugas também habitam o jardim. Em **Vida e descobertas**, o visitante pode pedir uma atividade ao morador, alimentar os peixes, consultar o caderno de encontros e iniciar uma visita guiada no próprio ritmo. As sete ilhas, os onze climas, o modo automático e as quatro estações permanecem disponíveis.
+Patinhos, tartarugas e caranguejos também habitam o jardim. As aves pousam nas copas e no ninho; árvores mais cheias acompanham as estações. Em **Vida e descobertas**, o visitante pode pedir uma atividade ao morador, alimentar os peixes, consultar o caderno de encontros e iniciar uma visita guiada no próprio ritmo. As sete ilhas, os onze climas, o modo automático e as quatro estações permanecem disponíveis.
 
-A [exploração em texto](https://tcc-pdrarth.vercel.app/explorar) oferece as ilhas e suas interações sem exigir WebGL. O [TCC completo em HTML](https://tcc-pdrarth.vercel.app/texto-completo) inclui capítulos, referências, tabela e descrições dos quatro diagramas. Preferências de contraste, cores, leitura, movimento e legendas ficam no navegador; som e tradução automática em Libras são opcionais. Os recursos e os limites verificados estão na [página de acessibilidade](https://tcc-pdrarth.vercel.app/acessibilidade) e no [registro da implementação](docs/validation/garden-accessibility-20261109.md).
+A [exploração em texto](https://tcc-pdrarth.vercel.app/explorar) continua disponível por endereço direto. O [TCC completo em HTML](https://tcc-pdrarth.vercel.app/texto-completo) inclui capítulos, referências, tabela e descrições dos quatro diagramas. O painel de acessibilidade e o controle de pausa foram retirados a pedido do autor; suas preferências antigas não controlam mais a cena. Animais continuam se movimentando durante os ajustes do ambiente. O botão **Ler a pesquisa** abre uma leitura editorial separada das sínteses das ilhas. Veja o [registro desta revisão](docs/validation/garden-refresh-20261113.md).
 
 ## A pesquisa por trás do cenário
 

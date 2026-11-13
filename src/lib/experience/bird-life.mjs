@@ -1,11 +1,10 @@
 const clamp=v=>Math.max(0,Math.min(1,v));
-const distance=(a,b)=>Math.hypot(...a.map((v,i)=>v-b[i]));
 const point=pose=>[pose.x,pose.y,pose.z];
 const angle=(a,b)=>Math.atan2(Math.sin(b-a),Math.cos(b-a));
 
 export function createBirdState(index,perches,shelters,sheltered=false){
   const origin=(sheltered?shelters:perches)[index%(sheltered?shelters:perches).length].position;
-  return {index,pose:{x:origin[0],y:origin[1],z:origin[2],heading:index*.8,bank:0,flap:.16,fold:.84,mode:0},
+  return {index,pose:{x:origin[0],y:origin[1],z:origin[2],heading:index*.8,bank:0,flap:.16,fold:.84,mode:0,look:0,breath:0,peck:0},
     clock:0,rest:0,wait:.8+index*.53,perch:index%perches.length,cycle:0,sheltered,requested:sheltered,reaction:0,flight:null,shoulder:false,companionCooldown:0};
 }
 
@@ -30,6 +29,7 @@ function launch(state,target,kind){
 export function advanceBird(state,seconds,mayFly,perches,shelters,companion=null,startled=0){
   const dt=Math.max(0,Math.min(.1,Number.isFinite(seconds)?seconds:0));if(!dt)return state.pose;
   const p=state.pose;state.clock+=dt;state.companionCooldown=Math.max(0,state.companionCooldown-dt);
+  p.look=0;p.peck=0;p.breath=Math.sin(state.clock*3.1+state.index)*.008;
   const shelter=!mayFly;
   if(shelter!==state.requested){state.requested=shelter;state.reaction=.35+(state.index%6)*.22;}
   if(state.reaction>0){state.reaction=Math.max(0,state.reaction-dt);if(state.reaction===0){
@@ -56,7 +56,11 @@ export function advanceBird(state,seconds,mayFly,perches,shelters,companion=null
       if(++flight.index>=flight.segments.length){state.sheltered=flight.kind==='shelter';state.shoulder=flight.kind==='shoulder';state.flight=null;state.rest=0;state.wait=3+state.index%4*1.1;}
     }
   }else{
-    state.rest+=dt;p.mode=0;p.fold=.84;p.flap=.16;p.bank*=Math.exp(-7*dt);
+    state.rest+=dt;p.mode=0;p.bank*=Math.exp(-7*dt);
+    const stretchCycle=(state.clock+state.index*3.7)%17,stretch=stretchCycle>14?Math.sin((stretchCycle-14)/3*Math.PI)**2:0;
+    p.fold=.84-stretch*.32;p.flap=.16+stretch*.65;
+    p.look=Math.sin(state.clock*.72+state.index*1.3)*.18;
+    p.peck=Math.max(0,Math.sin(state.clock*.54+state.index*2.1)-.83)*.70;
     if(state.shoulder&&companion?.available){[p.x,p.y,p.z]=companion.position;p.heading+=angle(p.heading,companion.heading)*(1-Math.exp(-4*dt));}
     else if(mayFly&&state.reaction===0){
       if(state.index===0&&companion?.available&&state.companionCooldown===0){launch(state,companion.position,'shoulder');state.companionCooldown=50;}
