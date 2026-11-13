@@ -15,10 +15,35 @@ export function createTreeHabitat(world) {
     crowns.push(crown);
   });
   const nesting=crowns.find(crown=>crown.name==='ambient_leaves_pesquisa_jabuticabeira')??crowns[0];
-  const nest=nesting?new THREE.Vector3(nesting.center[0]+nesting.radius*.90,nesting.center[1]-.12,nesting.center[2]+nesting.radius*.82).applyMatrix4(nesting.object.matrixWorld).toArray():null;
-  const perches=crowns.map(crown=>({island:crown.island,position:new THREE.Vector3(crown.center[0]+crown.radius*.20,crown.center[1]+crown.height*.56,crown.center[2]+crown.radius*.12).applyMatrix4(crown.object.matrixWorld).toArray()}));
-  if(nest)perches.unshift({island:nesting.island,position:[nest[0],nest[1]+.11,nest[2]]});
-  return {crowns,nest,perches};
+  const nestLocal=nesting?new THREE.Vector3(nesting.center[0]+nesting.radius*.90,nesting.center[1]-.12,nesting.center[2]+nesting.radius*.82):null;
+  const nest=nestLocal?nestLocal.clone().applyMatrix4(nesting.object.matrixWorld).toArray():null;
+  const anchors=crowns.map(crown=>{
+    const local=new THREE.Vector3(crown.center[0]+crown.radius*.20,crown.center[1]+crown.height*.56,crown.center[2]+crown.radius*.12);
+    return {object:crown.object,local,perch:{island:crown.island,position:local.clone().applyMatrix4(crown.object.matrixWorld).toArray()}};
+  });
+  const nestMatrix=new THREE.Matrix4(),nestAnchor=nest?{object:nesting.object,frame:nesting.object.matrixWorld.clone().invert().multiply(new THREE.Matrix4().makeTranslation(...nest))}:null;
+  if(nest){
+    const position=[nest[0],nest[1]+.11,nest[2]],local=new THREE.Vector3(...position).applyMatrix4(nesting.object.matrixWorld.clone().invert());
+    anchors.unshift({object:nesting.object,local,perch:{island:nesting.island,position,nest:true}});
+  }
+  const habitat={crowns,nest,perches:anchors.map(anchor=>anchor.perch),anchors,nestAnchor,nestMatrix,scratch:new THREE.Vector3()};
+  updateTreeHabitat(habitat);
+  return habitat;
+}
+
+/** Keep the branch, nest and resting birds on the same moving tree, without replacing perch references. */
+export function updateTreeHabitat(habitat){
+  for(const crown of habitat.crowns)crown.object.updateWorldMatrix(true,false);
+  for(const anchor of habitat.anchors){
+    const point=habitat.scratch.copy(anchor.local).applyMatrix4(anchor.object.matrixWorld),position=anchor.perch.position;
+    position[0]=point.x;position[1]=point.y;position[2]=point.z;
+  }
+  if(habitat.nest&&habitat.nestAnchor){
+    habitat.nestMatrix.multiplyMatrices(habitat.nestAnchor.object.matrixWorld,habitat.nestAnchor.frame);
+    const point=habitat.scratch.setFromMatrixPosition(habitat.nestMatrix);
+    habitat.nest[0]=point.x;habitat.nest[1]=point.y;habitat.nest[2]=point.z;
+  }
+  return habitat;
 }
 
 /** Reattach each authored jabuticaba to the actual bark in either GLB quality. */

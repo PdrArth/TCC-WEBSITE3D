@@ -11,6 +11,8 @@ import { createEnvironmentManifest, type EnvironmentState } from "@/lib/experien
 import type { Weather, WeatherPhase } from "@/lib/experience/weather.mjs";
 import { seasonInfo, type Season } from "@/lib/experience/seasons.mjs";
 import { advanceBird, createBirdState, type BirdState, type BirdCompanion } from "@/lib/experience/bird-life.mjs";
+import {advanceNest,type NestState} from '@/lib/experience/nesting.mjs';
+import type {BirdPerch} from '@/lib/experience/bird-life.mjs';
 import { faunaCount, rainDropScale, weatherVisualProfile, atmospherePalette, advanceHail, createHailField, createRainImpacts, createRainSprayGeometry, advanceRainImpacts, writeRainImpactPose, writeCloudAnchor, environmentSeconds, createBirdGeometry, advanceSnow, createSnowField, birdFlightShare, createRainField, lightningTargets as defaultLightningTargets, ThunderClock, writeBranchedLightning, type LightPalette } from "./scene-motion.mjs";
 
 import type {ScenicActors} from '@/lib/experience/scene-signals';
@@ -19,8 +21,9 @@ type AtmosphereProps = {
   allowFlashes?:boolean;
   actors?: MutableRefObject<ScenicActors>;
   companion?: MutableRefObject<BirdCompanion>;
+  nesting?: MutableRefObject<NestState>;
   weather: Weather; phase?: WeatherPhase; timeOfDay?: number; windSpeed?: number; precipitation?: number; snowfall?: number;
-  strikeTargets?: [number,number,number][]; birdPerches?: { position: [number,number,number]; island: string }[]; birdShelters?: { position: [number,number,number]; island: string }[];
+  strikeTargets?: [number,number,number][]; birdPerches?: BirdPerch[]; birdShelters?: BirdPerch[];
   environment?: WorldEnvironmentManifest; environmentState?: MutableRefObject<EnvironmentState>;
   season: Season; quality: "high" | "low"; active: boolean; moving: boolean; reducedMotion: boolean;
   onInteract?: () => void; onThunder?: () => void;
@@ -49,7 +52,7 @@ function softTexture(cloud = false) {
   return new THREE.CanvasTexture(canvas);
 }
 
-function Birds({ actors, companion, weather, phase, timeOfDay, environment, environmentState, birdPerches, birdShelters, quality, active, moving, onInteract }: Pick<AtmosphereProps,"actors"|"companion"|"weather"|"phase"|"timeOfDay"|"environment"|"environmentState"|"birdPerches"|"birdShelters"|"quality"|"active"|"moving"|"reducedMotion"|"onInteract">) {
+function Birds({ actors, companion, nesting, weather, phase, timeOfDay, environment, environmentState, birdPerches, birdShelters, quality, active, moving, onInteract }: Pick<AtmosphereProps,"actors"|"companion"|"nesting"|"weather"|"phase"|"timeOfDay"|"environment"|"environmentState"|"birdPerches"|"birdShelters"|"quality"|"active"|"moving"|"reducedMotion"|"onInteract">) {
   const { invalidate, gl } = useThree();
   const wings = useRef<THREE.InstancedMesh>(null), bodies = useRef<THREE.InstancedMesh>(null), details = useRef<THREE.InstancedMesh>(null);
   const elapsed = useRef(0), startled = useRef(0), cadence = useRef(new FrameCadence());
@@ -57,7 +60,7 @@ function Birds({ actors, companion, weather, phase, timeOfDay, environment, envi
   const flock = useRef<BirdState[]>([]);
   const dummy = useMemo(() => new THREE.Object3D(),[]);
   const geometry = useMemo(() => createBirdGeometry(),[]);
-  const perches = useMemo(() => birdPerches && birdPerches.length>1 ? birdPerches : (environment ?? defaultEnvironment).land.map((land,index) => ({position:[land.center[0] + Math.sin(index) * 1.8,2.5,land.center[1] + Math.cos(index) * 1.5] as [number,number,number],island:land.id})),[birdPerches,environment]);
+  const perches = useMemo<BirdPerch[]>(() => birdPerches && birdPerches.length>1 ? birdPerches : (environment ?? defaultEnvironment).land.map((land,index) => ({position:[land.center[0] + Math.sin(index) * 1.8,2.5,land.center[1] + Math.cos(index) * 1.5] as [number,number,number],island:land.id})),[birdPerches,environment]);
   const birdColors = useMemo(() => ["#826b4b","#71878c","#b6a686"].map(color => new THREE.Color(color)),[]);
   useEffect(() => () => { Object.values(geometry).forEach(part => part.dispose()); },[geometry]);
   useEffect(() => { cadence.current.reset(); },[moving,active]);
@@ -95,6 +98,10 @@ function Birds({ actors, companion, weather, phase, timeOfDay, environment, envi
       if (index === 0) { gl.domElement.setAttribute("data-world-bird-position",[pose.x,pose.y,pose.z].map(v=>v.toFixed(3)).join(",")); gl.domElement.setAttribute("data-world-bird-mode",String(pose.mode)); }
     }
     gl.domElement.setAttribute("data-world-bird-shoulder",String(flock.current.some(bird=>bird.shoulder)));
+    if(nesting){
+      advanceNest(nesting.current,dt,flock.current.some(bird=>!bird.flight&&!bird.sheltered&&!bird.shoulder&&perches[bird.perch]?.nest));
+      gl.domElement.setAttribute('data-garden-bird-eggs',String(nesting.current.eggs));
+    }
     bodies.current.instanceMatrix.needsUpdate = true; details.current.instanceMatrix.needsUpdate = true; wings.current.instanceMatrix.needsUpdate = true;
 
 
@@ -159,7 +166,7 @@ function Clouds({weather,active,moving,reducedMotion,windSpeed=7,palette}:Pick<A
 }
 
 /* eslint-disable react-hooks/immutability -- R3F owns mutable scene objects and GPU buffers outside React state. */
-export default function Atmosphere({allowFlashes=false,actors,companion,weather,phase,windSpeed,precipitation,snowfall,birdPerches,birdShelters,strikeTargets,timeOfDay,environment=defaultEnvironment,environmentState,season,quality,active,moving,reducedMotion,onInteract,onThunder}:AtmosphereProps) {
+export default function Atmosphere({allowFlashes=false,actors,companion,nesting,weather,phase,windSpeed,precipitation,snowfall,birdPerches,birdShelters,strikeTargets,timeOfDay,environment=defaultEnvironment,environmentState,season,quality,active,moving,reducedMotion,onInteract,onThunder}:AtmosphereProps) {
   const {gl,scene,camera,size,invalidate} = useThree();
   const lightningTargets = strikeTargets?.length ? strikeTargets : defaultLightningTargets;
   const hemisphere = useRef<THREE.HemisphereLight>(null), sun = useRef<THREE.DirectionalLight>(null), fill = useRef<THREE.DirectionalLight>(null);
@@ -337,7 +344,7 @@ export default function Atmosphere({allowFlashes=false,actors,companion,weather,
     <directionalLight ref={sun} position={[-8,16,10]} intensity={3.3} color="#fff0d2" castShadow shadow-mapSize={quality==="high"?[2048,2048]:[1024,1024]} shadow-camera-left={-27} shadow-camera-right={27} shadow-camera-top={27} shadow-camera-bottom={-27} shadow-camera-far={85} shadow-radius={2.5} shadow-normalBias={.025} shadow-bias={-.0001}/>
     <directionalLight ref={fill} position={[10,6,-8]} intensity={.65} color="#e1edf0"/>
     <Clouds weather={weather} active={active} moving={moving} windSpeed={windSpeed} palette={palette} reducedMotion={reducedMotion}/>
-    <Birds actors={actors} companion={companion} weather={weather} phase={phase} timeOfDay={timeOfDay} environment={environment} environmentState={environmentState} birdPerches={birdPerches} birdShelters={birdShelters} quality={quality} active={active} moving={moving} reducedMotion={reducedMotion} onInteract={onInteract}/>
+    <Birds actors={actors} companion={companion} nesting={nesting} weather={weather} phase={phase} timeOfDay={timeOfDay} environment={environment} environmentState={environmentState} birdPerches={birdPerches} birdShelters={birdShelters} quality={quality} active={active} moving={moving} reducedMotion={reducedMotion} onInteract={onInteract}/>
     <lineSegments ref={rain} geometry={rainGeometry} frustumCulled={false} raycast={()=>{}}><lineBasicMaterial color="#96b3c0" transparent opacity={0} depthWrite={false}/></lineSegments>
     <instancedMesh ref={drops} args={[undefined,undefined,rainField.speeds.length]} frustumCulled={false} raycast={()=>{}}><sphereGeometry args={[1,4,3]}/><meshBasicMaterial color="#698b9c" transparent opacity={0} depthWrite={false} toneMapped={false}/></instancedMesh>
     <instancedMesh name="water_rain_ripples" ref={ripples} args={[rippleGeometry,rippleMaterial,impacts.ages.length]} renderOrder={4} frustumCulled={false} raycast={()=>{}}/>

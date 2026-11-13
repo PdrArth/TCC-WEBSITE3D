@@ -1,108 +1,93 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {surfaceAt} from '../src/lib/experience/environment.mjs';
-import {createPondVisitors,createPondVisitorState,advancePondVisitors,writeDuckPose,writeTurtlePose,writeCrabPose,duckSegmentIsClear,turtleGroundIsClear} from '../src/lib/experience/pond-visitors.mjs';
+import * as THREE from 'three';
+import {decodeSourceWorld} from '../scripts/world/prepare-runtime-world.mjs';
+import {createPondVisitors,createPondVisitorState,advancePondVisitors,writeDuckPose,writeTurtlePose,writeCrabPose,duckSegmentIsClear,pondRoutePointIsClear,turtleGroundIsClear} from '../src/lib/experience/pond-visitors.mjs';
 const environment=JSON.parse(await readFile(new URL('../public/experience/world/manifest-v20.json',import.meta.url),'utf8')).environment;
 const calm={weather:'clear',hour:13,ice:0,wind:.2,active:true,moving:true};
 const run=(state,prepared,seconds,context=calm,fps=60)=>{for(let frame=0;frame<Math.round(seconds*fps);frame++)advancePondVisitors(state,1/fps,context,prepared);return state;};
+const writers={ducks:writeDuckPose,turtles:writeTurtlePose,crabs:writeCrabPose};
 
-test('duck loops use open water with body clearance and cannot swim under any pedestrian bridge',()=>{
-  const visitors=createPondVisitors(environment,'high');assert.equal(visitors.ducks.length,4);assert.equal(visitors.turtles.length,2);
-  for(const route of visitors.ducks) {
-    assert.ok(route.length>4);
-    for(let i=0;i<route.points.length;i++)assert.ok(duckSegmentIsClear(route.points[i],route.points[(i+1)%route.points.length],environment),'every visible chord needs body and bridge clearance');
+test('each visitor has a continuous shore-to-water route, clear of buildings and pedestrian bridges',()=>{
+  for(const quality of ['high','low']) {
+    const prepared=createPondVisitors(environment,quality);
+    assert.equal(prepared.ducks.length,quality==='high'?4:3);assert.equal(prepared.turtles.length,2);assert.equal(prepared.crabs.length,2);
+    for(const species of Object.keys(writers))for(const route of prepared[species]) {
+      const island=environment.land.find(island=>island.id===route.island),clearance=species==='ducks'?.40:species==='turtles'?.30:.36;
+      assert.ok(route.length>4);
+      assert.ok(turtleGroundIsClear(route.points[64],island,environment,clearance),'rest stops support the whole body');
+      const openWater={...environment,land:environment.land.filter(item=>item!==island)};
+      for(let i=0;i<route.points.length;i++) {
+        assert.ok(pondRoutePointIsClear(route.points[i],island,environment,clearance));
+        assert.ok(duckSegmentIsClear(route.points[i],route.points[(i+1)%route.points.length],openWater,clearance));
+      }
+    }
+    assert.ok(prepared.turtles.every(route=>route.scale<=.76),'turtles are smaller than the old 1.08/1.18 scale');
   }
-  const bridge=environment.bridges.find(bridge=>Math.hypot(bridge.to[0]-bridge.from[0],bridge.to[1]-bridge.from[1])>2),middle=bridge.from.map((v,i)=>(v+bridge.to[i])/2);
+  const bridge=environment.bridges[0],middle=bridge.from.map((v,i)=>(v+bridge.to[i])/2);
   assert.equal(duckSegmentIsClear(middle,middle,environment),false);
-  const low=createPondVisitors(environment,'low');assert.equal(low.ducks.length,3);assert.equal(low.turtles.length,2);
 });
 
-test('one turtle crawls on the shore while another swims in safe open water',()=>{
-  const visitors=createPondVisitors(environment,'high'),state=createPondVisitorState(visitors);let walked=false,rested=false,swam=false;
-  assert.deepEqual(visitors.turtles.map(route=>route.kind),['land','water']);
-  for(const route of visitors.turtles) {
-    const island=environment.land.find(island=>island.id===route.island);
-    if(route.kind==='land')for(let i=0;i<=100;i++){const t=i/100,a=route.points[0],b=route.points[1];assert.ok(turtleGroundIsClear([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t],island,environment));}
-    else for(let i=0;i<route.points.length;i++)assert.ok(duckSegmentIsClear(route.points[i],route.points[(i+1)%route.points.length],environment,.75));
-  }
-  for(let frame=0;frame<60*80;frame++) {
-    advancePondVisitors(state,1/60,calm,visitors);
-    for(let i=0;i<visitors.turtles.length;i++) {
-      const pose=writeTurtlePose({},i,state,visitors,calm),surface=surfaceAt(pose.x,pose.z,environment);
-      if(visitors.turtles[i].kind==='land'){assert.equal(surface.kind,'land');assert.ok(Math.abs(pose.y-surface.height-.085)<1e-8);}
-      else{assert.equal(surface.kind,'water');assert.ok(Math.abs(pose.y-surface.height)<.03);}
-      walked||=pose.mode==='crawling';rested||=pose.mode==='resting';swam||=pose.mode==='swimming';
+test('every duck, turtle and crab crosses water and land independently, without jumping at the bank',()=>{
+  const prepared=createPondVisitors(environment,'high'),state=createPondVisitorState(prepared),seen={},previous={};
+  for(const species of Object.keys(writers)){seen[species]=prepared[species].map(()=>new Set());previous[species]=prepared[species].map((_,i)=>writers[species]({},i,state,prepared,calm));}
+  for(let frame=0;frame<60*85;frame++) {
+    const context={...calm,weather:frame<1500?'clear':'rain',wind:frame<1500?.2:1,waterLevel:.03};
+    advancePondVisitors(state,1/60,context,prepared);
+    for(const species of Object.keys(writers))for(let i=0;i<prepared[species].length;i++) {
+      const pose=writers[species]({},i,state,prepared,context),before=previous[species][i];
+      assert.ok(Object.values(pose).filter(v=>typeof v==='number').every(Number.isFinite));
+      assert.ok(Math.hypot(pose.x-before.x,pose.z-before.z)<.75/60);
+      if(frame>0)assert.ok(Math.abs(pose.y-before.y)<.018,'the body climbs out smoothly instead of snapping to ground height');
+      if(pose.land>.99)seen[species][i].add('land');if(pose.land<.01)seen[species][i].add('water');
+      previous[species][i]=pose;
     }
   }
-  assert.ok(walked&&rested&&swam,'turtles begin moving and rest briefly between short crawls');
+  for(const species of Object.keys(writers))for(const habitats of seen[species])assert.deepEqual([...habitats].sort(),['land','water']);
+  assert.ok(state.nest.eggs>=1,'the parent reaches its land nest and lays an egg');
 });
 
-test('weather changes send visitors to their prepared resting points without a jump or unsafe shortcut',()=>{
-  const prepared=createPondVisitors(environment,'high'),state=createPondVisitorState(prepared);run(state,prepared,16);
-  let ducks=state.ducks.map((_,i)=>writeDuckPose({},i,state,prepared,calm)),turtles=state.turtles.map((_,i)=>writeTurtlePose({},i,state,prepared,calm));
-  const storm={...calm,weather:'storm',ice:.8,wind:1};
-  for(let frame=0;frame<60*60;frame++) {
-    advancePondVisitors(state,1/60,storm,prepared);
-    for(let i=0;i<prepared.ducks.length;i++) {
-      const pose=writeDuckPose({},i,state,prepared,storm),previous=ducks[i];
-      assert.ok(Math.hypot(pose.x-previous.x,pose.z-previous.z)<.9/60+.00001);
-      assert.ok(duckSegmentIsClear([previous.x,previous.z],[pose.x,pose.z],environment));ducks[i]=pose;
+test('rain, storms and strong wind cannot leave ducks parked for the rest of the session',()=>{
+  const prepared=createPondVisitors(environment,'high');
+  for(const weather of ['drizzle','rain','storm','hail','clear']) {
+    const state=createPondVisitorState(prepared),travel=prepared.ducks.map(()=>0),moving=prepared.ducks.map(()=>0);
+    let previous=prepared.ducks.map((_,i)=>writeDuckPose({},i,state,prepared,calm));
+    for(let frame=0;frame<30*60;frame++) {
+      const context={...calm,weather,wind:1};advancePondVisitors(state,1/30,context,prepared);
+      previous=prepared.ducks.map((_,i)=>{const pose=writeDuckPose({},i,state,prepared,context);travel[i]+=Math.hypot(pose.x-previous[i].x,pose.z-previous[i].z);if(state.ducks[i].rest===0)moving[i]++;return pose;});
     }
-    for(let i=0;i<prepared.turtles.length;i++) {
-      const pose=writeTurtlePose({},i,state,prepared,storm),previous=turtles[i];assert.ok(Math.hypot(pose.x-previous.x,pose.z-previous.z)<.28/60+.00001);turtles[i]=pose;
-    }
+    assert.ok(travel.every(length=>length>15),weather);
+    assert.ok(moving.every(frames=>frames>1000),weather+' still allows brief nest visits');
   }
-  assert.ok(state.ducks.every(duck=>duck.mode==='resting'&&duck.tuck>.85));
-  assert.ok(state.turtles.every(turtle=>turtle.mode==='resting'&&turtle.tuck>.69));
-  const positions=state.ducks.map((_,i)=>writeDuckPose({},i,state,prepared,storm));advancePondVisitors(state,1/60,calm,prepared);
-  state.ducks.forEach((_,i)=>{const pose=writeDuckPose({},i,state,prepared,calm);assert.ok(Math.hypot(pose.x-positions[i].x,pose.z-positions[i].z)<.012);});
 });
 
 test('visitor clocks are frame independent and only inactivity or explicit pause freezes them',()=>{
   const prepared=createPondVisitors(environment,'high'),low=createPondVisitorState(prepared),high=createPondVisitorState(prepared);
-  run(low,prepared,45,calm,30);run(high,prepared,45,calm,120);
+  run(low,prepared,90,calm,30);run(high,prepared,90,calm,120);
   assert.ok(Math.abs(low.elapsed-high.elapsed)<1e-8);
-  for(let i=0;i<prepared.ducks.length;i++) {
-    const a=writeDuckPose({},i,low,prepared,calm),b=writeDuckPose({},i,high,prepared,calm);assert.ok(Math.hypot(a.x-b.x,a.z-b.z)<1e-8);
+  for(const species of Object.keys(writers))for(let i=0;i<prepared[species].length;i++) {
+    const a=writers[species]({},i,low,prepared,calm),b=writers[species]({},i,high,prepared,calm);
+    assert.ok(Math.hypot(a.x-b.x,a.z-b.z)<1e-7,species+' route timing');
   }
-  for(let i=0;i<prepared.turtles.length;i++)assert.ok(Math.abs(low.turtles[i].distance-high.turtles[i].distance)<1e-8);
-  for(let i=0;i<prepared.crabs.length;i++)assert.ok(Math.abs(low.crabs[i].distance-high.crabs[i].distance)<1e-8);
   const before=structuredClone(low);
   for(const options of [{active:false},{moving:false},{paused:true}])run(low,prepared,30,{...calm,...options});
   assert.deepEqual(low,before);
   advancePondVisitors(low,NaN,calm,prepared);advancePondVisitors(low,-1,calm,prepared);assert.deepEqual(low,before);
-  run(low,prepared,2,{...calm,reducedMotion:true});assert.ok(low.elapsed>before.elapsed+1.9);assert.notEqual(low.ducks[0].distance,before.ducks[0].distance);
-  const first=writeDuckPose({},0,low,prepared,calm),second=writeDuckPose({},1,low,prepared,calm);
-  assert.ok(Math.hypot(first.x-second.x,first.z-second.z)>2,'independent water areas do not turn into a single-file procession');
+  run(low,prepared,2,{...calm,reducedMotion:true});assert.ok(low.elapsed>before.elapsed+1.9);
+  assert.notDeepEqual(low.ducks,before.ducks);
 });
 
-test('crabs walk sideways on two clear banks with independent pauses and no weather teleport',()=>{
-  const prepared=createPondVisitors(environment,'high'),state=createPondVisitorState(prepared);assert.equal(prepared.crabs.length,2);
-  assert.deepEqual(prepared.crabs.map(route=>route.island),['pesquisa','perspectivas']);
-  for(const route of prepared.crabs) {
-    const island=environment.land.find(island=>island.id===route.island);
-    for(let i=0;i<=100;i++){const t=i/100,a=route.points[0],b=route.points[1];assert.ok(turtleGroundIsClear([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t],island,environment,.52));}
-    const [a,b]=route.points;
-    assert.ok(Math.abs(Math.sin(route.heading-Math.atan2(b[0]-a[0],b[1]-a[1])))>.999,'body faces across its lateral walking direction');
-  }
-  let previous=prepared.crabs.map((_,i)=>writeCrabPose({},i,state,prepared)),walked=false,rested=false;
-  for(let frame=0;frame<60*45;frame++) {
-    const weather=frame<1200?'clear':'storm';advancePondVisitors(state,1/60,{...calm,weather},prepared);
-    previous=prepared.crabs.map((_,i)=>{
-      const pose=writeCrabPose({},i,state,prepared);assert.equal(surfaceAt(pose.x,pose.z,environment).kind,'land');
-      assert.ok(Math.hypot(pose.x-previous[i].x,pose.z-previous[i].z)<.27/60+.00001);
-      walked||=pose.mode==='crawling';rested||=pose.mode==='resting';return pose;
-    });
-  }
-  assert.ok(walked&&rested);
-});
-
-test('normal rain and switching to clear weather keep water animals swimming',()=>{
-  const prepared=createPondVisitors(environment,'low'),state=createPondVisitorState(prepared);
-  for(const weather of ['clear','cloudy','drizzle','rain','fog','clear']) {
-    const before=state.elapsed;run(state,prepared,3,{...calm,weather,reducedMotion:true});
-    assert.ok(state.elapsed>before+2.9);assert.ok(state.ducks.every(duck=>duck.mode==='swimming'));
-    assert.equal(state.turtles[1].mode,'swimming');
+test('land stops sit on the actual island meshes in both quality assets',async()=>{
+  const prepared=createPondVisitors(environment,'high');
+  for(const name of ['archipelago-v9.glb','archipelago-v19-low.glb']) {
+    const {scene}=await decodeSourceWorld(await readFile(new URL('../public/experience/world/'+name,import.meta.url)));
+    scene.updateMatrixWorld(true);const ray=new THREE.Raycaster();
+    for(const species of Object.keys(writers))for(const route of prepared[species]) {
+      const [x,z]=route.points[64];ray.set(new THREE.Vector3(x,route.height+.2,z),new THREE.Vector3(0,-1,0));ray.far=.4;
+      const hit=ray.intersectObject(scene,true)[0];
+      assert.ok(hit&&Math.abs(hit.point.y-route.height)<.012,species+' '+route.island+' needs a real landing');
+    }
+    scene.traverse(mesh=>{if(mesh.isMesh)mesh.geometry.dispose();});
   }
 });

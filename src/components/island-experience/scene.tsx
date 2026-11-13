@@ -23,6 +23,7 @@ import LakeOverflow from "./lake-overflow";
 import { groundShoreStones } from "@/lib/experience/shore-stones.mjs";
 import {createTreeHabitat,attachTrunkFruit} from '@/lib/experience/tree-habitat.mjs';
 import LivingTrees from './living-trees';
+import {createNestState} from '@/lib/experience/nesting.mjs';
 import {createWaterTouches,addWaterTouch} from '@/lib/experience/garden-interactions.mjs';
 import {surfaceAt} from '@/lib/experience/environment.mjs';
 import type {ScenicActors,ScenicAudioFrame,ScenicSound} from '@/lib/experience/scene-signals';
@@ -137,6 +138,7 @@ function LiveWorld({ world, ...props }: IslandSceneProps & { world: GLTF }) {
   const birdPerches=useMemo(()=>[...treeHabitat.perches,...(props.manifest.birdPerches??[])],[treeHabitat,props.manifest]);
   const environmentState = useMemo(()=>({current:props.gardenRuntime?.environment??createEnvironmentState(props.weather??"clear",props.season??"spring",props.clock?.current??props.timeOfDay??13)}),[props.gardenRuntime]);
   const companion = useRef<BirdCompanion>({available:false,position:[0,0,0],heading:0});
+  const nesting=useMemo(()=>({current:createNestState()}),[]);
   const actors=useRef<ScenicActors>({birds:[]});
   const touches=useMemo(()=>({current:props.gardenRuntime?.touches??createWaterTouches()}),[props.gardenRuntime]);
   const feedSpot=useMemo(()=>({current:props.gardenRuntime?.feedSpot??createFeedSpot()}),[props.gardenRuntime]);
@@ -508,10 +510,10 @@ function LiveWorld({ world, ...props }: IslandSceneProps & { world: GLTF }) {
   return <>
     <MobileShadows active={active} moving={animateWorld}/>
     <RareSky state={props.gardenRuntime?.sky} onDiscovery={props.onDiscovery} environmentState={environmentState} active={animateWorld&&!intro} reducedMotion={reducedMotion}/>
-    <Atmosphere allowFlashes={props.allowFlashes} actors={actors} companion={companion} weather={props.weather ?? "clear"} phase={props.phase} timeOfDay={props.timeOfDay} environment={environment} environmentState={environmentState} windSpeed={props.windSpeed} precipitation={props.precipitation} snowfall={props.snowfall} birdPerches={birdPerches} birdShelters={manifest.birdShelters} strikeTargets={strikeTargets} season={season} quality={props.quality} active={active} moving={animateWorld} reducedMotion={reducedMotion} onInteract={!props.intro && !props.interactionBlocked && !panelOpen ? props.onInteract : undefined} onThunder={props.onThunder} />
+    <Atmosphere allowFlashes={props.allowFlashes} actors={actors} companion={companion} nesting={nesting} weather={props.weather ?? "clear"} phase={props.phase} timeOfDay={props.timeOfDay} environment={environment} environmentState={environmentState} windSpeed={props.windSpeed} precipitation={props.precipitation} snowfall={props.snowfall} birdPerches={birdPerches} birdShelters={manifest.birdShelters} strikeTargets={strikeTargets} season={season} quality={props.quality} active={active} moving={animateWorld} reducedMotion={reducedMotion} onInteract={!props.intro && !props.interactionBlocked && !panelOpen ? props.onInteract : undefined} onThunder={props.onThunder} />
     <Scenery feedSpot={feedSpot} world={world.scene} environment={environment} environmentState={environmentState} quality={props.quality} weather={props.weather??"clear"} season={season} moving={animateWorld} windSpeed={props.windSpeed} reducedMotion={reducedMotion} />
     <GardenLife environment={environment} environmentState={environmentState} season={season} reducedMotion={reducedMotion} quality={props.quality} />
-    <LivingTrees habitat={treeHabitat} season={season} environmentState={environmentState}/>
+    <LivingTrees habitat={treeHabitat} season={season} environmentState={environmentState} nesting={nesting}/>
     <LakeOverflow environment={environment} environmentState={environmentState} quality={props.quality} />
     <WaterTouchesView touches={touches} environmentState={environmentState} height={environment.water.height}/>
     <FishFood spot={feedSpot} environmentState={environmentState} height={environment.water.height}/>

@@ -9,6 +9,7 @@ import type { WorldEnvironmentManifest } from "@/lib/experience-contract";
 import { advanceEnvironment, createEnvironmentManifest, createEnvironmentState, type EnvironmentState } from "@/lib/experience/environment.mjs";
 import { FrameCadence } from "@/lib/experience/navigation.mjs";
 import { seasonInfo, vegetationDensity, vegetationGroup, type Season, type VegetationGroup } from "@/lib/experience/seasons.mjs";
+import {foliageSway} from '@/lib/experience/foliage-motion.mjs';
 import type { Weather } from "@/lib/experience/weather.mjs";
 import { createFishRoutes, createFishSchools, faunaCount, environmentSeconds, writeFishPose } from "./scene-motion.mjs";
 import { lakeSpillway, lakeWaveParameters } from "@/lib/experience/lake-dynamics.mjs";
@@ -428,10 +429,10 @@ export default function Scenery({ world, season, reducedMotion, moving = true, w
       record.density.value += (density - record.density.value) * alpha;
       pending ||= Math.abs(record.density.value - density) > .002 || Math.abs(material.color.r - record.target.r) + Math.abs(material.color.g - record.target.g) + Math.abs(material.color.b - record.target.b) > .002;
     }
-    const wind = Math.min(.055, .007 + Math.max(0, windSpeed) * .0014 + state.wind * .018) * (reducedMotion ? .35 : 1);
     for (const { object, rotation, phase } of binding.pivots) {
-      const sway = (Math.sin(time * .7 + phase) + Math.sin(time * .23 + phase) * .28) * wind;
+      const sway = foliageSway(time,state.wind,phase,windSpeed) * (reducedMotion ? .35 : 1);
       object.rotation.set(rotation.x + sway * .4, rotation.y + sway * .26, rotation.z + sway);
+      object.updateMatrixWorld(true);
     }
     if (fallen.current) {
       for (let i = 0; i < litterLayout.length; i++) {

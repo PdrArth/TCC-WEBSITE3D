@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {decodeSourceWorld} from '../scripts/world/prepare-runtime-world.mjs';
-import {createTreeHabitat,attachTrunkFruit} from '../src/lib/experience/tree-habitat.mjs';
+import * as THREE from 'three';
+import {createTreeHabitat,updateTreeHabitat,attachTrunkFruit} from '../src/lib/experience/tree-habitat.mjs';
 import {createBirdState,advanceBird} from '../src/lib/experience/bird-life.mjs';
 
 test('both world assets retain their species, gain nine full crowns and a supported tree nest',async()=>{
@@ -18,6 +19,26 @@ test('both world assets retain their species, gain nine full crowns and a suppor
     for(const [mesh,positions] of untouched)assert.deepEqual(mesh.geometry.attributes.position.array,positions,'trees, plants and buildings stay in their authored locations');
     scene.traverse(mesh=>{if(mesh.isMesh)mesh.geometry.dispose();});
   }
+});
+
+test('the nest and all tree perches remain attached while the authored branches sway',async()=>{
+  const {scene}=await decodeSourceWorld(await readFile(new URL('../public/experience/world/archipelago-v19-low.glb',import.meta.url)));
+  const habitat=createTreeHabitat(scene),nest=habitat.nest,perches=[...habitat.perches],positions=perches.map(perch=>perch.position);
+  const initial=[...nest],rotations=habitat.crowns.map(crown=>crown.object.rotation.clone());
+  assert.equal(perches[0].nest,true);
+  for(const crown of habitat.crowns)crown.object.rotation.z+=.09;
+  updateTreeHabitat(habitat);
+  assert.strictEqual(habitat.nest,nest,'nest coordinates are shared with its consumers');
+  assert.ok(Math.hypot(...nest.map((value,index)=>value-initial[index]))>.04,'the tree nest visibly follows the moving branch');
+  for(let index=0;index<perches.length;index++){
+    const anchor=habitat.anchors[index],expected=anchor.local.clone().applyMatrix4(anchor.object.matrixWorld);
+    assert.strictEqual(habitat.perches[index],perches[index]);assert.strictEqual(perches[index].position,positions[index]);
+    assert.ok(expected.distanceTo(new THREE.Vector3(...perches[index].position))<1e-8,'a resting bird follows the same physical anchor');
+  }
+  assert.ok(new THREE.Vector3().setFromMatrixPosition(habitat.nestMatrix).distanceTo(new THREE.Vector3(...nest))<1e-8);
+  habitat.crowns.forEach((crown,index)=>crown.object.rotation.copy(rotations[index]));updateTreeHabitat(habitat);
+  assert.ok(Math.hypot(...nest.map((value,index)=>value-initial[index]))<1e-8,'wind cycles cannot accumulate drift');
+  scene.traverse(mesh=>{if(mesh.isMesh)mesh.geometry.dispose();});
 });
 
 test('sheltered birds keep looking, breathing and stretching without sliding off their perch',()=>{
