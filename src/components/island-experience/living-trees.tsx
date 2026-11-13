@@ -7,19 +7,20 @@ import {mergeGeometries} from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import {seasonInfo,vegetationDensity,type Season} from '@/lib/experience/seasons.mjs';
 import type {EnvironmentState} from '@/lib/experience/environment.mjs';
 import {updateTreeHabitat,type TreeHabitat} from '@/lib/experience/tree-habitat.mjs';
+import type {NestState} from '@/lib/experience/nesting.mjs';
+import NestEggs from './nest-eggs';
 
 const noRaycast=()=>{};
 
 /** A handful of overlapping, irregular leaf clusters fill the existing broadleaf crowns. */
-export default function LivingTrees({habitat,season,environmentState,nesting}:{habitat:TreeHabitat;season:Season;environmentState:MutableRefObject<EnvironmentState>;nesting?:MutableRefObject<{eggs:number;reveal:number}>}){
+export default function LivingTrees({habitat,season,environmentState,nesting}:{habitat:TreeHabitat;season:Season;environmentState:MutableRefObject<EnvironmentState>;nesting?:MutableRefObject<NestState>}){
   const {gl}=useThree();
   const leaves=useRef<THREE.InstancedMesh>(null),clock=useRef(-Infinity);
-  const nest=useRef<THREE.Group>(null),eggs=useRef<THREE.InstancedMesh>(null);
+  const nest=useRef<THREE.Group>(null);
   const seasonal=useRef<{density:number;color:THREE.Color}[]>([]);
   const pose=useMemo(()=>new THREE.Object3D(),[]),matrix=useMemo(()=>new THREE.Matrix4(),[]);
   const color=useMemo(()=>new THREE.Color(),[]),snow=useMemo(()=>new THREE.Color('#e8ece2'),[]),evergreen=useMemo(()=>new THREE.Color(seasonInfo.summer.palette.dark),[]);
   const geometry=useMemo(()=>new THREE.IcosahedronGeometry(1,1),[]);
-  const eggGeometry=useMemo(()=>new THREE.SphereGeometry(1,10,8),[]);
   const clusters=useMemo(()=>habitat.crowns.flatMap((crown,index)=>Array.from({length:8},(_,i)=>{
     const angle=i*2.39996+crown.seed,outer=i>0;
     return {crown,index,i,x:crown.center[0]+(outer?Math.cos(angle)*crown.radius*.49:0),y:crown.center[1]+(outer?Math.sin(i*1.7)*crown.height*.18:.16),z:crown.center[2]+(outer?Math.sin(angle)*crown.radius*.46:0),size:outer?.57+(i%3)*.035:.76};
@@ -28,14 +29,14 @@ export default function LivingTrees({habitat,season,environmentState,nesting}:{h
     if(!habitat.nest)return null;
     const parts:THREE.BufferGeometry[]=[];
     for(let i=0;i<4;i++){
-      const ring=new THREE.TorusGeometry(.23+i*.017,.035,5,15);ring.rotateX(-Math.PI/2);ring.translate(0,i*.025,0);parts.push(ring);
+      const ring=new THREE.TorusGeometry(.32+i*.017,.035,5,15);ring.rotateX(-Math.PI/2);ring.translate(0,i*.025,0);parts.push(ring);
     }
     const makeTwig=(from:THREE.Vector3,to:THREE.Vector3,radius:number)=>{
       const direction=to.clone().sub(from),part=new THREE.CylinderGeometry(radius*.7,radius,direction.length(),5);
       part.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize()));part.translate(...from.clone().add(to).multiplyScalar(.5).toArray());parts.push(part);
     };
     for(let i=0;i<11;i++){
-      const angle=i*2.39996,at=new THREE.Vector3(Math.cos(angle)*.25,.03+i%3*.026,Math.sin(angle)*.25);
+      const angle=i*2.39996,at=new THREE.Vector3(Math.cos(angle)*.34,.03+i%3*.026,Math.sin(angle)*.34);
       makeTwig(at.clone().add(new THREE.Vector3(-Math.sin(angle)*.14,0,Math.cos(angle)*.14)),at.clone().add(new THREE.Vector3(Math.sin(angle)*.14,.03,-Math.cos(angle)*.14)),.012);
     }
     const crown=habitat.crowns.find(item=>item.name==='ambient_leaves_pesquisa_jabuticabeira')??habitat.crowns[0];
@@ -44,22 +45,12 @@ export default function LivingTrees({habitat,season,environmentState,nesting}:{h
     makeTwig(trunk.clone().lerp(new THREE.Vector3(0,-.05,0),.7),new THREE.Vector3(.25,-.035,.14),.025);
     const merged=mergeGeometries(parts,false);parts.forEach(part=>part.dispose());return merged;
   },[habitat]);
-  useEffect(()=>()=>{geometry.dispose();eggGeometry.dispose();nestGeometry?.dispose();},[geometry,eggGeometry,nestGeometry]);
+  useEffect(()=>()=>{geometry.dispose();nestGeometry?.dispose();},[geometry,nestGeometry]);
   useEffect(()=>{clock.current=-Infinity;seasonal.current=[];},[habitat]);
   useFrame(()=>{
     const state=environmentState.current;
     updateTreeHabitat(habitat);
     if(nest.current){nest.current.matrix.copy(habitat.nestMatrix);nest.current.updateMatrixWorld(true);}
-    if(eggs.current){
-      const count=Math.min(3,Math.max(0,Math.floor(nesting?.current.eggs??0))),reveal=THREE.MathUtils.clamp(nesting?.current.reveal??0,0,1);
-      for(let index=0;index<3;index++){
-        const size=index<count-1?1:index===count-1?reveal:0;
-        pose.position.set(index===0?-.075:index===1?.075:0,.09,index===2?.085:-.025);
-        pose.rotation.set(.14,index*2.1,index%2?.18:-.15);pose.scale.set(.060*size,.087*size,.060*size);pose.updateMatrix();eggs.current.setMatrixAt(index,pose.matrix);
-      }
-      eggs.current.instanceMatrix.needsUpdate=true;
-      gl.domElement.setAttribute('data-garden-bird-eggs',String(count));
-    }
     if(!leaves.current||state.elapsed-clock.current<.05)return;
     const delta=Number.isFinite(clock.current)?Math.max(0,state.elapsed-clock.current):0;
     const alpha=1-Math.exp(-.85*delta);
@@ -92,8 +83,8 @@ export default function LivingTrees({habitat,season,environmentState,nesting}:{h
     <instancedMesh name="garden_full_broadleaf_crowns" ref={leaves} args={[geometry,undefined,clusters.length]} frustumCulled={false} raycast={noRaycast} castShadow receiveShadow><meshStandardMaterial color="#ffffff" roughness={.93} flatShading/></instancedMesh>
     {nestGeometry&&habitat.nest&&<group ref={nest} name="bird_nest_on_research_tree" matrixAutoUpdate={false}>
       <mesh geometry={nestGeometry} raycast={noRaycast} castShadow><meshStandardMaterial color="#88704e" roughness={1}/></mesh>
-      <mesh position={[0,.005,0]} rotation-x={-Math.PI/2} raycast={noRaycast}><circleGeometry args={[.21,16]}/><meshStandardMaterial color="#5c503b" roughness={1} side={THREE.DoubleSide}/></mesh>
-      <instancedMesh ref={eggs} name="bird_nest_eggs" args={[eggGeometry,undefined,3]} frustumCulled={false} raycast={noRaycast} castShadow><meshStandardMaterial color="#d6e3ce" roughness={.92}/></instancedMesh>
+      <mesh position={[0,.005,0]} rotation-x={-Math.PI/2} raycast={noRaycast}><circleGeometry args={[.30,16]}/><meshStandardMaterial color="#5c503b" roughness={1} side={THREE.DoubleSide}/></mesh>
+      {nesting&&<NestEggs state={nesting} variant="bird"/>}
     </group>}
   </group>;
 }

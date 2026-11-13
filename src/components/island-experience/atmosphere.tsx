@@ -11,7 +11,8 @@ import { createEnvironmentManifest, type EnvironmentState } from "@/lib/experien
 import type { Weather, WeatherPhase } from "@/lib/experience/weather.mjs";
 import { seasonInfo, type Season } from "@/lib/experience/seasons.mjs";
 import { advanceBird, createBirdState, type BirdState, type BirdCompanion } from "@/lib/experience/bird-life.mjs";
-import {advanceNest,type NestState} from '@/lib/experience/nesting.mjs';
+import {advanceNest,NEST_CAPACITY,type NestState} from '@/lib/experience/nesting.mjs';
+import {createBirdFamily,advanceBirdFamily,birdFamilyCare} from '@/lib/experience/bird-family.mjs';
 import type {BirdPerch} from '@/lib/experience/bird-life.mjs';
 import { faunaCount, rainDropScale, weatherVisualProfile, atmospherePalette, advanceHail, createHailField, createRainImpacts, createRainSprayGeometry, advanceRainImpacts, writeRainImpactPose, writeCloudAnchor, environmentSeconds, createBirdGeometry, advanceSnow, createSnowField, birdFlightShare, createRainField, lightningTargets as defaultLightningTargets, ThunderClock, writeBranchedLightning, type LightPalette } from "./scene-motion.mjs";
 
@@ -58,6 +59,7 @@ function Birds({ actors, companion, nesting, weather, phase, timeOfDay, environm
   const elapsed = useRef(0), startled = useRef(0), cadence = useRef(new FrameCadence());
   const count = faunaCount("birds",quality);
   const flock = useRef<BirdState[]>([]);
+  const family=useMemo(()=>createBirdFamily(),[]);
   const dummy = useMemo(() => new THREE.Object3D(),[]);
   const geometry = useMemo(() => createBirdGeometry(),[]);
   const perches = useMemo<BirdPerch[]>(() => birdPerches && birdPerches.length>1 ? birdPerches : (environment ?? defaultEnvironment).land.map((land,index) => ({position:[land.center[0] + Math.sin(index) * 1.8,2.5,land.center[1] + Math.cos(index) * 1.5] as [number,number,number],island:land.id})),[birdPerches,environment]);
@@ -67,6 +69,7 @@ function Birds({ actors, companion, nesting, weather, phase, timeOfDay, environm
   useEffect(()=>{
     if(actors)actors.current.birds=Array.from({length:count},()=>[0,0,0]);
     for(let i=0;i<count;i++){bodies.current?.setColorAt(i,birdColors[i%birdColors.length]);for(let side=0;side<2;side++)wings.current?.setColorAt(i*2+side,birdColors[i%birdColors.length]);}
+    for(let i=count;i<count+NEST_CAPACITY;i++){bodies.current?.setColorAt(i,birdColors[2]);for(let side=0;side<2;side++)wings.current?.setColorAt(i*2+side,birdColors[2]);}
     if(bodies.current?.instanceColor)bodies.current.instanceColor.needsUpdate=true;
     if(wings.current?.instanceColor)wings.current.instanceColor.needsUpdate=true;
   },[actors,count,birdColors]);
@@ -77,15 +80,17 @@ function Birds({ actors, companion, nesting, weather, phase, timeOfDay, environm
     const liveWeather = environmentState?.current.weather ?? weather;
     const hour = environmentState?.current.hour ?? timeOfDay;
     const share = birdFlightShare(liveWeather,hour,phaseAt(hour,phase));
+    const shelters=birdShelters?.length?birdShelters:perches;
+    const care=nesting?birdFamilyCare(nesting.current,family,perches):null;
     let flying = 0;
     for (let index = 0; index < count; index++) {
       const mayFly=(index+.5)/count <= share;
-      const shelters=birdShelters?.length?birdShelters:perches;
-      const state=flock.current[index] ??= createBirdState(index,perches,shelters,!mayFly);
-      const pose=advanceBird(state,dt,mayFly,perches,shelters,companion?.current,startled.current);
+      const state=flock.current[index] ??= createBirdState(index,perches,shelters,!mayFly&&!(index===0&&care?.protect));
+      const pose=advanceBird(state,dt,mayFly,perches,shelters,companion?.current,startled.current,care);
       if(state.flight)flying++;
       const scale = 1.6*(.9+index%3*.09), width = index%3===1 ? 1.1 : 1, length = index%3===2 ? .9 : 1;
       dummy.position.set(pose.x,pose.y+.12,pose.z);
+      if(pose.brood){dummy.position.y-=.055;dummy.position.z-=.10;}
       dummy.rotation.set(pose.peck,pose.heading+pose.look,pose.bank); dummy.scale.set(scale*width,scale*(1+pose.breath),scale*length); dummy.updateMatrix();
       bodies.current.setMatrixAt(index,dummy.matrix); details.current.setMatrixAt(index,dummy.matrix);
       const soundPosition=actors?.current.birds[index];if(soundPosition){soundPosition[0]=pose.x;soundPosition[1]=pose.y;soundPosition[2]=pose.z;}
@@ -99,9 +104,29 @@ function Birds({ actors, companion, nesting, weather, phase, timeOfDay, environm
     }
     gl.domElement.setAttribute("data-world-bird-shoulder",String(flock.current.some(bird=>bird.shoulder)));
     if(nesting){
-      advanceNest(nesting.current,dt,flock.current.some(bird=>!bird.flight&&!bird.sheltered&&!bird.shoulder&&perches[bird.perch]?.nest));
+      const parent=flock.current[0],anchor=care&&care.nestIndex>=0?perches[care.nestIndex].position:null;
+      const occupied=!!parent&&!!anchor&&!parent.flight&&!parent.sheltered&&!parent.shoulder&&parent.perch===care?.nestIndex&&Math.hypot(parent.pose.x-anchor[0],parent.pose.y-anchor[1],parent.pose.z-anchor[2])<.22;
+      advanceNest(nesting.current,dt,occupied);
+      advanceBirdFamily(family,nesting.current,dt,share>.5,perches,shelters);
       gl.domElement.setAttribute('data-garden-bird-eggs',String(nesting.current.eggs));
+      gl.domElement.setAttribute('data-garden-bird-chicks',String(nesting.current.young));
+      gl.domElement.setAttribute('data-garden-bird-nest-phase',nesting.current.phase);
+      gl.domElement.setAttribute('data-garden-bird-brooding',String(occupied));
+      gl.domElement.setAttribute('data-garden-bird-growth',family.children.map(child=>child.growth.toFixed(2)).join(','));
     }
+    family.children.forEach((child,index)=>{
+      const slot=count+index,pose=child.bird?.pose,scale=child.visible?child.scale:0;
+      dummy.position.set(pose?.x??0,(pose?.y??0)+.075*scale,pose?.z??0);
+      dummy.rotation.set(pose?.peck??0,(pose?.heading??0)+(pose?.look??0),pose?.bank??0);
+      dummy.scale.set(scale,scale*(1+(pose?.breath??0)),scale);dummy.updateMatrix();
+      bodies.current!.setMatrixAt(slot,dummy.matrix);details.current!.setMatrixAt(slot,dummy.matrix);
+      for(let side=0;side<2;side++){
+        const sign=side===0?1:-1;
+        dummy.rotation.set(pose?.peck??0,(pose?.heading??0)+(pose?.look??0),pose?.bank??0);
+        dummy.rotateY(sign*(pose?.fold??0)*1.2);dummy.rotateZ(sign*(pose?.flap??0)*(1-(pose?.fold??0)*.9));
+        dummy.scale.set(sign*scale,scale,scale);dummy.updateMatrix();wings.current!.setMatrixAt(slot*2+side,dummy.matrix);
+      }
+    });
     bodies.current.instanceMatrix.needsUpdate = true; details.current.instanceMatrix.needsUpdate = true; wings.current.instanceMatrix.needsUpdate = true;
 
 
@@ -115,9 +140,9 @@ function Birds({ actors, companion, nesting, weather, phase, timeOfDay, environm
     onInteract(); invalidate();
   };
   return <group>
-    <instancedMesh name="bird_bodies_and_heads" ref={bodies} args={[geometry.bodies,undefined,count]} frustumCulled={false} onClick={startle}><meshStandardMaterial color="#ffffff" roughness={.88}/></instancedMesh>
-    <instancedMesh name="bird_beaks" ref={details} args={[geometry.beak,undefined,count]} frustumCulled={false} onClick={startle}><meshStandardMaterial color="#474c40" roughness={.8}/></instancedMesh>
-    <instancedMesh name="bird_articulated_wings" ref={wings} args={[geometry.wing,undefined,count*2]} frustumCulled={false} onClick={startle}><meshStandardMaterial color="#ffffff" roughness={.86} side={THREE.DoubleSide}/></instancedMesh>
+    <instancedMesh name="bird_bodies_and_heads" ref={bodies} args={[geometry.bodies,undefined,count+NEST_CAPACITY]} frustumCulled={false} onClick={startle}><meshStandardMaterial color="#ffffff" roughness={.88}/></instancedMesh>
+    <instancedMesh name="bird_beaks" ref={details} args={[geometry.beak,undefined,count+NEST_CAPACITY]} frustumCulled={false} onClick={startle}><meshStandardMaterial color="#474c40" roughness={.8}/></instancedMesh>
+    <instancedMesh name="bird_articulated_wings" ref={wings} args={[geometry.wing,undefined,(count+NEST_CAPACITY)*2]} frustumCulled={false} onClick={startle}><meshStandardMaterial color="#ffffff" roughness={.86} side={THREE.DoubleSide}/></instancedMesh>
   </group>;
 }
 

@@ -1,7 +1,8 @@
 import { fishSegmentIsClear } from '../../components/island-experience/scene-motion.mjs';
 import { surfaceAt } from './environment.mjs';
 import { isIslandWalkingPoint } from './island-life.mjs';
-import { createNestState, advanceNest } from './nesting.mjs';
+import { createNestState, advanceNest, nestNeedsBrooding, youngAppearance, NEST_CAPACITY } from './nesting.mjs';
+import {lakeWaveHeight} from './lake-dynamics.mjs';
 
 const TAU = Math.PI * 2;
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
@@ -129,7 +130,8 @@ function visitorState(route,sideways=false) {
   return {distance,heading:sample.heading+(route.direction<0?Math.PI:0)-(sideways?Math.PI/2:0),rest:0,visits:0,mode:'moving',tuck:0};
 }
 export function createPondVisitorState(prepared) {
-  return {elapsed:0,ducks:prepared.ducks.map(route=>visitorState(route)),turtles:prepared.turtles.map(route=>visitorState(route)),crabs:prepared.crabs.map(route=>visitorState(route,true)),nest:createNestState()};
+  const parent=prepared.ducks.find(route=>route.nest);
+  return {elapsed:0,ducks:prepared.ducks.map(route=>visitorState(route)),turtles:prepared.turtles.map(route=>visitorState(route)),crabs:prepared.crabs.map(route=>visitorState(route,true)),nest:createNestState(),ducklings:Array.from({length:NEST_CAPACITY},()=>({distance:parent?.homeDistance??0,heading:0,rest:0,visits:0,mode:'nestling',tuck:0}))};
 }
 
 /** Weather changes posture and pace; rain/wind never stop the whole pond. */
@@ -141,7 +143,7 @@ export function pondVisitorsNeedShelter(context) {
 function shoreBlend(route,point,prepared) {
   const radius=Math.hypot(point.x-route.land.center[0],point.z-route.land.center[1]);
   const bank=islandBankRadius(route.land,point.x,point.z,prepared.environment);
-  return smooth((bank+.28-radius)/.50);
+  return smooth((bank+.15-radius)/.53);
 }
 
 function advanceVisitor(visitor,route,dt,context,prepared,kind) {
@@ -161,7 +163,7 @@ function advanceVisitor(visitor,route,dt,context,prepared,kind) {
   }
   const sample=sampleLoop(route,visitor.distance,{}),land=shoreBlend(route,sample,prepared);
   visitor.heading=turn(visitor.heading,sample.heading+(route.direction<0?Math.PI:0)+(kind==='crab'?-Math.PI/2:0),dt);
-  visitor.mode=visitor.rest>0?(route.nest?'nesting':'resting'):land>.5||frozen?(kind==='duck'?'walking':'crawling'):kind==='crab'?'wading':'swimming';
+  visitor.mode=visitor.rest>0?(route.nest?'nesting':'resting'):land>.94?(kind==='duck'?'walking':'crawling'):kind==='crab'?'wading':'swimming';
   const tuck=(visitor.rest>0?.45:quiet?.15:context.weather==='storm'?.08:0);
   visitor.tuck+=(tuck-visitor.tuck)*(1-Math.exp(-dt*2));
 }
@@ -170,26 +172,49 @@ export function advancePondVisitors(state,seconds,context,prepared) {
   if(context.active===false||context.moving===false||context.paused===true)return state;
   const dt=Math.min(.1,Math.max(0,Number.isFinite(seconds)?seconds:0));if(!dt)return state;
   state.elapsed+=dt;
+  const parentIndex=prepared.ducks.findIndex(route=>route.nest),parent=state.ducks[parentIndex],route=prepared.ducks[parentIndex];
+  if(parent?.mode==='nesting'&&state.nest.eggs+state.nest.young>0&&nestNeedsBrooding(state.nest,8))parent.rest=Math.max(parent.rest,dt+.1);
   for(const [species,kind] of [['ducks','duck'],['turtles','turtle'],['crabs','crab']])state[species].forEach((visitor,index)=>advanceVisitor(visitor,prepared[species][index],dt,context,prepared,kind));
   advanceNest(state.nest,dt,state.ducks.some((duck,index)=>prepared.ducks[index].nest&&duck.mode==='nesting'));
+  if(parent&&route)state.ducklings.forEach((child,index)=>{
+    const appearance=youngAppearance(state.nest.slots[index]);
+    if(!appearance.visible)return;
+    if(appearance.age<8){child.heading=parent.heading;child.mode='nestling';return;}
+    const target=wrap(parent.distance-route.direction*(.50+index*.42),route.length);
+    const remaining=wrap(target-child.distance+route.length/2,route.length)-route.length/2;
+    const step=Math.sign(remaining)*Math.min(Math.abs(remaining),(.57+appearance.growth*.08)*dt);
+    child.distance=wrap(child.distance+step,route.length);
+    const pose=sampleLoop(route,child.distance,{});
+    if(Math.abs(step)>1e-6)child.heading=turn(child.heading,pose.heading+(step<0?Math.PI:0),dt);
+    child.rest=Math.abs(remaining)<.04?1:0;child.mode=shoreBlend(route,pose,prepared)>.94?'walking':'swimming';
+  });
   return state;
 }
 
-function writeVisitorPose(output,index,state,prepared,context,kind) {
+function writeVisitorPose(output,index,state,prepared,context,kind,override) {
   const species=kind==='duck'?'ducks':kind==='turtle'?'turtles':'crabs',route=prepared[species][index],visitor=state[species][index];
   if(!route||!visitor){output.visible=false;return output;}
-  sampleLoop(route,visitor.distance,output);
+  const live=override?.visitor??visitor,scale=override?.scale??route.scale;
+  sampleLoop(route,live.distance,output);
   const land=shoreBlend(route,output,prepared),time=state.elapsed,quiet=context.moving===false||context.paused===true;
-  const ice=smooth(((context.ice??0)-.25)/.30),support=Math.max(land,ice);
-  const water=prepared.waterHeight+(context.waterLevel??0),ground=islandGroundHeight(route.land,output.x,output.z,prepared.environment);
-  const footHeight=kind==='duck'?.12*route.scale:kind==='turtle'?.075*route.scale:.12*route.scale;
-  const floating=kind==='duck'?-.025:kind==='turtle'?-.018:-.08;
-  output.y=water+(ground-water)*land+floating*(1-support)+footHeight*support;
-  output.y+=Math.sin(time*(kind==='duck'?1.7:1.4)+index*1.9)*.012*(1-support)*(1-visitor.tuck);
-  output.heading=visitor.heading;output.roll=quiet?0:Math.sin(time*5+index)*.055*support*(visitor.rest>0?.1:1);
-  output.tuck=visitor.tuck;output.gait=quiet?0:Math.sin(time*(kind==='crab'?10:kind==='duck'?6:3.8)+index*2.1)*(visitor.rest>0?.025:.35);
-  output.land=land;output.scale=route.scale;output.mode=visitor.mode;output.visible=true;return output;
+  const water=prepared.waterHeight+(context.waterLevel??0)+lakeWaveHeight(output.x,output.z,context.time??time,context.wind??.2,context.ice??0);
+  const ground=islandGroundHeight(route.land,output.x,output.z,prepared.environment);
+  const footHeight=(kind==='duck'?.12:kind==='turtle'?.075:.12)*scale;
+  const floating=kind==='duck'?-.16*scale:kind==='turtle'?-.018:-.08;
+  output.y=water+(ground-water)*land+floating*(1-land)+footHeight*land;
+  output.heading=live.heading;output.roll=quiet?0:Math.sin(time*(land>.9?5:1.5)+index)*(.055*land+.018*(1-land))*(live.rest>0?.1:1);
+  output.tuck=live.tuck;output.gait=quiet?0:Math.sin(time*(kind==='crab'?10:kind==='duck'?6:3.8)+index*2.1)*(live.rest>0?.025:.35);
+  output.land=land;output.walk=smooth((land-.65)/.35);output.growth=override?.growth??1;output.scale=scale;output.mode=live.mode;output.visible=true;return output;
 }
 export function writeDuckPose(output,index,state,prepared,context={}) {return writeVisitorPose(output,index,state,prepared,context,'duck');}
 export function writeTurtlePose(output,index,state,prepared,context={}) {return writeVisitorPose(output,index,state,prepared,context,'turtle');}
 export function writeCrabPose(output,index,state,prepared,context={}) {return writeVisitorPose(output,index,state,prepared,context,'crab');}
+
+export function writeDucklingPose(output,index,state,prepared,context={}) {
+  const appearance=youngAppearance(state.nest.slots[index]),parentIndex=prepared.ducks.findIndex(route=>route.nest);
+  if(!appearance.visible||parentIndex<0){output.visible=false;output.scale=0;return output;}
+  writeVisitorPose(output,parentIndex,state,prepared,context,'duck',{visitor:state.ducklings[index],scale:(.29+appearance.growth*.70)*appearance.reveal,growth:appearance.growth});
+  const nestOffset=1-smooth((appearance.age-8)/6);
+  output.x+=(index===0?-.11:.11)*nestOffset;output.z+=.05*nestOffset;
+  output.y+=.025*nestOffset;return output;
+}

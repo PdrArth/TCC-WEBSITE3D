@@ -4,7 +4,7 @@ const angle=(a,b)=>Math.atan2(Math.sin(b-a),Math.cos(b-a));
 
 export function createBirdState(index,perches,shelters,sheltered=false){
   const origin=(sheltered?shelters:perches)[index%(sheltered?shelters:perches).length].position;
-  return {index,pose:{x:origin[0],y:origin[1],z:origin[2],heading:index*.8,bank:0,flap:.16,fold:.84,mode:0,look:0,breath:0,peck:0},
+  return {index,pose:{x:origin[0],y:origin[1],z:origin[2],heading:index*.8,bank:0,flap:.16,fold:.84,mode:0,look:0,breath:0,peck:0,brood:0},
     clock:0,rest:0,wait:!sheltered&&perches[index%perches.length].nest?7:.8+index*.53,perch:index%perches.length,cycle:0,sheltered,requested:sheltered,reaction:0,flight:null,shoulder:false,companionCooldown:0};
 }
 
@@ -26,11 +26,18 @@ function launch(state,target,kind){
 }
 
 /** Every change starts at the current pose; the bird flies its own curved approach to cover. */
-export function advanceBird(state,seconds,mayFly,perches,shelters,companion=null,startled=0){
+export function advanceBird(state,seconds,mayFly,perches,shelters,companion=null,startled=0,care=null){
   const dt=Math.max(0,Math.min(.1,Number.isFinite(seconds)?seconds:0));if(!dt)return state.pose;
   const p=state.pose;state.clock+=dt;state.companionCooldown=Math.max(0,state.companionCooldown-dt);
-  p.look=0;p.peck=0;p.breath=Math.sin(state.clock*3.1+state.index)*.008;
-  const shelter=!mayFly;
+  p.look=0;p.peck=0;p.breath=Math.sin(state.clock*3.1+state.index)*.008;p.brood=0;
+  const caring=!!care?.protect&&state.index===0&&care.nestIndex>=0;
+  const shelter=!mayFly&&!caring;
+  if(caring){
+    state.requested=false;state.reaction=0;
+    if((state.flight&&state.flight.kind!=='nest')||(!state.flight&&(state.sheltered||state.shoulder||state.perch!==care.nestIndex))){
+      state.perch=care.nestIndex;launch(state,perches[state.perch].position,'nest');
+    }
+  }
   if(shelter!==state.requested){state.requested=shelter;state.reaction=.35+(state.index%6)*.22;}
   if(state.reaction>0){state.reaction=Math.max(0,state.reaction-dt);if(state.reaction===0){
     if(shelter)launch(state,shelters[state.index%shelters.length].position,'shelter');
@@ -53,7 +60,7 @@ export function advanceBird(state,seconds,mayFly,perches,shelters,companion=null
     p.fold=.84*(1-clamp(raw/.10))+.84*clamp((raw-.90)/.10);
     p.flap=p.mode===3?.10:Math.sin(state.clock*(11+state.index*.19))*.58;
     if(segment.time===segment.duration){
-      if(++flight.index>=flight.segments.length){state.sheltered=flight.kind==='shelter';state.shoulder=flight.kind==='shoulder';state.flight=null;state.rest=0;state.wait=flight.kind==='perch'&&perches[state.perch].nest?8:3+state.index%4*1.1;}
+      if(++flight.index>=flight.segments.length){state.sheltered=flight.kind==='shelter';state.shoulder=flight.kind==='shoulder';state.flight=null;state.rest=0;state.wait=(flight.kind==='perch'||flight.kind==='nest')&&perches[state.perch].nest?8:3+state.index%4*1.1;}
     }
   }else{
     state.rest+=dt;p.mode=0;p.bank*=Math.exp(-7*dt);
@@ -61,17 +68,19 @@ export function advanceBird(state,seconds,mayFly,perches,shelters,companion=null
     p.fold=.84-stretch*.32;p.flap=.16+stretch*.65;
     p.look=Math.sin(state.clock*.72+state.index*1.3)*.18;
     p.peck=Math.max(0,Math.sin(state.clock*.54+state.index*2.1)-.83)*.70;
+    if(caring){p.brood=1;p.fold=.58;p.flap=.06+Math.sin(state.clock*1.2)*.025;p.peck=Math.max(0,Math.sin(state.clock*.65))*.08;}
     if(state.shoulder&&companion?.available){[p.x,p.y,p.z]=companion.position;p.heading+=angle(p.heading,companion.heading)*(1-Math.exp(-4*dt));}
     else {
       const anchor=(state.sheltered?shelters[state.index%shelters.length]:perches[state.perch]).position;
       const follow=1-Math.exp(-dt*12);
       p.x+=(anchor[0]-p.x)*follow;p.y+=(anchor[1]-p.y)*follow;p.z+=(anchor[2]-p.z)*follow;
-      if(mayFly&&state.reaction===0){
+      if(mayFly&&state.reaction===0&&!caring){
         const inNest=perches[state.perch].nest;
         if(state.index===0&&companion?.available&&state.companionCooldown===0&&(!inNest||state.rest>=6)){launch(state,companion.position,'shoulder');state.companionCooldown=50;}
         else if(state.rest>=state.wait||startled>.5){
           const nest=perches.findIndex(perch=>perch.nest);
-          state.perch=state.index===1&&state.cycle%3===2&&nest>=0?nest:(state.perch+Math.floor(perches.length/2)+1+state.index%3)%perches.length;
+          state.perch=state.index===1&&state.cycle%3===2&&nest>=0&&!care?.protect?nest:(state.perch+Math.floor(perches.length/2)+1+state.index%3)%perches.length;
+          if(care?.protect&&state.perch===care.nestIndex)state.perch=(state.perch+1)%perches.length;
           launch(state,perches[state.perch].position,'perch');
         }
       }

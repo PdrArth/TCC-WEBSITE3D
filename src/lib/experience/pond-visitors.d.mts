@@ -1,12 +1,12 @@
 import type { WorldEnvironmentManifest } from '../experience-contract';
 import type { Weather } from './weather.mjs';
 import type { NestState } from './nesting.mjs';
-export type PondVisitorContext={weather?:Weather;hour?:number;ice?:number;wind?:number;waterLevel?:number;active?:boolean;moving?:boolean;reducedMotion?:boolean;paused?:boolean};
+export type PondVisitorContext={weather?:Weather;hour?:number;time?:number;ice?:number;wind?:number;waterLevel?:number;active?:boolean;moving?:boolean;reducedMotion?:boolean;paused?:boolean};
 export type PondRoute={kind:'amphibious';island:string;land:WorldEnvironmentManifest['land'][number];height:number;points:[number,number][];cumulative:number[];headings:number[];length:number;homeDistance:number;speed:number;direction:number;phase:number;scale:number;restDuration:number;nest?:boolean};
 export type PreparedPondVisitors={ducks:PondRoute[];turtles:PondRoute[];crabs:PondRoute[];waterHeight:number;environment:WorldEnvironmentManifest};
 export type VisitorState={distance:number;heading:number;rest:number;visits:number;mode:string;tuck:number};
-export type PondVisitorState={elapsed:number;ducks:VisitorState[];turtles:VisitorState[];crabs:VisitorState[];nest:NestState};
-export type PondVisitorPose={x:number;y:number;z:number;heading:number;roll:number;tuck:number;gait:number;scale:number;land:number;mode:string;visible:boolean};
+export type PondVisitorState={elapsed:number;ducks:VisitorState[];ducklings:VisitorState[];turtles:VisitorState[];crabs:VisitorState[];nest:NestState};
+export type PondVisitorPose={x:number;y:number;z:number;heading:number;roll:number;tuck:number;gait:number;scale:number;land:number;walk:number;growth:number;mode:string;visible:boolean};
 export function duckSegmentIsClear(a:[number,number],b:[number,number],environment:WorldEnvironmentManifest,clearance?:number):boolean;
 export function islandBankRadius(island:WorldEnvironmentManifest['land'][number],x:number,z:number,environment:WorldEnvironmentManifest):number;
 export function islandGroundHeight(island:WorldEnvironmentManifest['land'][number],x:number,z:number,environment:WorldEnvironmentManifest):number;
@@ -17,5 +17,6 @@ export function createPondVisitorState(prepared:PreparedPondVisitors):PondVisito
 export function pondVisitorsNeedShelter(context:PondVisitorContext):boolean;
 export function advancePondVisitors(state:PondVisitorState,seconds:number,context:PondVisitorContext,prepared:PreparedPondVisitors):PondVisitorState;
 export function writeDuckPose<T extends Partial<PondVisitorPose>>(output:T,index:number,state:PondVisitorState,prepared:PreparedPondVisitors,context?:PondVisitorContext):T&PondVisitorPose;
+export function writeDucklingPose<T extends Partial<PondVisitorPose>>(output:T,index:number,state:PondVisitorState,prepared:PreparedPondVisitors,context?:PondVisitorContext):T&PondVisitorPose;
 export function writeTurtlePose<T extends Partial<PondVisitorPose>>(output:T,index:number,state:PondVisitorState,prepared:PreparedPondVisitors,context?:PondVisitorContext):T&PondVisitorPose;
 export function writeCrabPose<T extends Partial<PondVisitorPose>>(output:T,index:number,state:PondVisitorState,prepared:PreparedPondVisitors,context?:PondVisitorContext):T&PondVisitorPose;

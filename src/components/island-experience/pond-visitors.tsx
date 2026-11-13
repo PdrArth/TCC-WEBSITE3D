@@ -6,7 +6,8 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import type { WorldEnvironmentManifest } from '@/lib/experience-contract';
 import type { EnvironmentState } from '@/lib/experience/environment.mjs';
-import { createPondVisitors, createPondVisitorState, advancePondVisitors, writeDuckPose, writeTurtlePose, writeCrabPose, type PondVisitorPose, type PondVisitorContext } from '@/lib/experience/pond-visitors.mjs';
+import { createPondVisitors, createPondVisitorState, advancePondVisitors, writeDuckPose, writeDucklingPose, writeTurtlePose, writeCrabPose, type PondVisitorPose, type PondVisitorContext } from '@/lib/experience/pond-visitors.mjs';
+import {NEST_CAPACITY} from '@/lib/experience/nesting.mjs';
 import PondNest from './pond-nest';
 
 type Kind = 'duckBody'|'duckWing'|'duckHead'|'duckBill'|'duckFeet'|'turtleShell'|'turtleBody'|'turtleHead'|'turtleFeet'|'crabBody'|'crabLeg'|'crabClaw';
@@ -16,10 +17,10 @@ type Props = {
   onDiscovery?:(id:'ducks'|'turtles'|'crabs')=>void;
 };
 const noRaycast = () => {};
-const freshPose = ():PondVisitorPose => ({x:0,y:0,z:0,heading:0,roll:0,tuck:0,gait:0,scale:1,land:0,mode:'resting',visible:true});
+const freshPose = ():PondVisitorPose => ({x:0,y:0,z:0,heading:0,roll:0,tuck:0,gait:0,scale:1,land:0,walk:0,growth:1,mode:'resting',visible:true});
 function currentVisitorContext(environmentState:MutableRefObject<EnvironmentState>,active:boolean,moving:boolean,reducedMotion:boolean):PondVisitorContext {
   const environment=environmentState.current;
-  return {weather:environment.weather,hour:environment.hour,ice:environment.ice,wind:environment.wind,waterLevel:environment.waterLevel,active,moving,reducedMotion};
+  return {weather:environment.weather,hour:environment.hour,time:environment.elapsed,ice:environment.ice,wind:environment.wind,waterLevel:environment.waterLevel,active,moving,reducedMotion};
 }
 
 function tint(geometry:THREE.BufferGeometry,color='#ffffff') {
@@ -113,17 +114,18 @@ export default function PondVisitors({environment,environmentState,quality,activ
   const context=useCallback(()=>currentVisitorContext(environmentState,active,moving,reducedMotion),[environmentState,active,moving,reducedMotion]);
   const update=useCallback(()=>{
     const current=context();
-    for(let i=0;i<duckCount;i++) {
-      const pose=writeDuckPose(poses.duck,i,state,prepared,current);
+    for(let i=0;i<duckCount+NEST_CAPACITY;i++) {
+      const pose=i<duckCount?writeDuckPose(poses.duck,i,state,prepared,current):writeDucklingPose(poses.duck,i-duckCount,state,prepared,current);
+      if(!pose.visible)pose.scale=0;
       rig.root.position.set(pose.x,pose.y,pose.z);rig.root.rotation.set(0,pose.heading,pose.roll);rig.root.scale.setScalar(pose.scale);
-      rig.head.position.set(0,.53-pose.tuck*.16+Math.sin(state.elapsed*2+i)*.012,.27-pose.tuck*.16);rig.head.scale.setScalar(1);rig.head.rotation.set(pose.tuck*.22,Math.sin(state.elapsed*.75+i*1.7)*.14,0);
+      rig.head.position.set(0,.53-pose.tuck*.16+Math.sin(state.elapsed*2+i)*.012,.27-pose.tuck*.16);rig.head.scale.setScalar(1+(1-pose.growth)*.20);rig.head.rotation.set(pose.tuck*.22,Math.sin(state.elapsed*.75+i*1.7)*.14,0);
       rig.root.updateMatrixWorld(true);
       meshes.current.duckBody?.setMatrixAt(i,rig.root.matrixWorld);meshes.current.duckWing?.setMatrixAt(i,rig.root.matrixWorld);
       meshes.current.duckHead?.setMatrixAt(i,rig.head.matrixWorld);meshes.current.duckBill?.setMatrixAt(i,rig.head.matrixWorld);
       for(let foot=0;foot<2;foot++) {
         const side=foot?1:-1;
-        rig.foot.position.set(side*.13,Math.max(0,side*pose.gait)*.045*pose.land,side*pose.gait*.15);
-        rig.foot.rotation.set(side*pose.gait*(.3+pose.land*.4),0,0);rig.foot.scale.setScalar(1);rig.foot.updateMatrixWorld(true);
+        rig.foot.position.set(side*.13,Math.max(0,side*pose.gait)*.045*pose.walk,side*pose.gait*.15*pose.walk);
+        rig.foot.rotation.set(side*pose.gait*.7*pose.walk,0,0);rig.foot.scale.setScalar(pose.visible?pose.walk:0);rig.foot.updateMatrixWorld(true);
         meshes.current.duckFeet?.setMatrixAt(i*2+foot,rig.foot.matrixWorld);
       }
     }
@@ -163,6 +165,10 @@ export default function PondVisitors({environment,environmentState,quality,activ
       meshes.current.duckBody?.setColorAt(i,new THREE.Color(bodyColors[i%bodyColors.length]));
       meshes.current.duckHead?.setColorAt(i,new THREE.Color(headColors[i%headColors.length]));
     }
+    for(let i=duckCount;i<duckCount+NEST_CAPACITY;i++){
+      meshes.current.duckBody?.setColorAt(i,new THREE.Color('#e4cc7e'));
+      meshes.current.duckHead?.setColorAt(i,new THREE.Color('#f2db92'));
+    }
     if(meshes.current.duckBody?.instanceColor)meshes.current.duckBody.instanceColor.needsUpdate=true;
     if(meshes.current.duckHead?.instanceColor)meshes.current.duckHead.instanceColor.needsUpdate=true;
     update();
@@ -179,6 +185,10 @@ export default function PondVisitors({environment,environmentState,quality,activ
     gl.domElement.setAttribute('data-garden-duck-modes',state.ducks.slice(0,duckCount).map(duck=>duck.mode).join(','));
     gl.domElement.setAttribute('data-garden-crab-modes',state.crabs.map(crab=>crab.mode).join(','));
     gl.domElement.setAttribute('data-garden-duck-eggs',String(state.nest.eggs));
+    gl.domElement.setAttribute('data-garden-ducklings',String(state.nest.young));
+    gl.domElement.setAttribute('data-garden-duck-nest-phase',state.nest.phase);
+    gl.domElement.setAttribute('data-garden-duck-brooding',String(state.nest.occupied));
+    gl.domElement.setAttribute('data-garden-duckling-growth',state.nest.slots.map(slot=>(Math.min(1,slot.age/180)).toFixed(2)).join(','));
     gl.domElement.setAttribute('data-garden-duck-position',prepared.ducks.slice(0,duckCount).map((_,i)=>{const p=writeDuckPose(poses.duck,i,state,prepared,context());return [p.x,p.y,p.z].map(v=>v.toFixed(2)).join(',');}).join(';'));
     gl.domElement.setAttribute('data-garden-pond-resting',String(state.ducks.filter(duck=>duck.mode==='resting').length+state.turtles.filter(turtle=>turtle.mode==='resting').length));
     gl.domElement.setAttribute('data-garden-pond-time',state.elapsed.toFixed(2));
@@ -194,7 +204,7 @@ export default function PondVisitors({environment,environmentState,quality,activ
       }
     }
   });
-  const count=(kind:Kind)=>kind.startsWith('duck')?duckCount*(kind==='duckFeet'?2:1):kind.startsWith('crab')?prepared.crabs.length*(kind==='crabLeg'?8:kind==='crabClaw'?2:1):prepared.turtles.length*(kind==='turtleFeet'?4:1);
+  const count=(kind:Kind)=>kind.startsWith('duck')?(duckCount+NEST_CAPACITY)*(kind==='duckFeet'?2:1):kind.startsWith('crab')?prepared.crabs.length*(kind==='crabLeg'?8:kind==='crabClaw'?2:1):prepared.turtles.length*(kind==='turtleFeet'?4:1);
   const nest=prepared.ducks.find(route=>route.nest);
   return <group name="pond_visitors">
     <group dispose={null}>{(Object.keys(geometry) as Kind[]).map(kind=><instancedMesh key={kind} name={`pond_${kind}`} ref={mesh=>{if(mesh)meshes.current[kind]=mesh;else delete meshes.current[kind];}} args={[geometry[kind],materials[kind],count(kind)]} frustumCulled={false} receiveShadow raycast={noRaycast}/>)}</group>

@@ -1,17 +1,15 @@
 "use client";
 
-import {useEffect,useMemo,useRef} from 'react';
-import {useFrame} from '@react-three/fiber';
+import {useEffect,useMemo} from 'react';
 import * as THREE from 'three';
 import {mergeGeometries} from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import type {NestState} from '@/lib/experience/nesting.mjs';
+import NestEggs from './nest-eggs';
 
 const noRaycast=()=>{};
 
 /** One small reed nest on the duck's actual land stop, with a finite clutch. */
 export default function PondNest({position,state}:{position:[number,number,number];state:NestState}) {
-  const eggs=useRef<(THREE.Mesh|null)[]>([]);
-  const eggGeometry=useMemo(()=>new THREE.SphereGeometry(.095,10,8).scale(1,1.35,1),[]);
   const geometry=useMemo(()=>{
     const parts:THREE.BufferGeometry[]=[];
     for(let i=0;i<4;i++) {
@@ -24,19 +22,10 @@ export default function PondNest({position,state}:{position:[number,number,numbe
     }
     const merged=mergeGeometries(parts,false);parts.forEach(part=>part.dispose());return merged;
   },[]);
-  useEffect(()=>()=>{geometry?.dispose();eggGeometry.dispose();},[geometry,eggGeometry]);
-  useFrame(()=>{
-    eggs.current.forEach((egg,i)=>{
-      if(!egg)return;
-      const amount=i<state.eggs-1?1:i===state.eggs-1?state.reveal:0;
-      egg.visible=amount>0;egg.scale.setScalar(Math.max(.001,amount));
-    });
-  });
+  useEffect(()=>()=>{geometry?.dispose();},[geometry]);
   return <group name="duck_reed_nest" position={position}>
     {geometry&&<mesh geometry={geometry} raycast={noRaycast} receiveShadow castShadow><meshStandardMaterial color="#b5a06c" roughness={1}/></mesh>}
     <mesh rotation-x={-Math.PI/2} position-y={.018} raycast={noRaycast}><circleGeometry args={[.33,16]}/><meshStandardMaterial color="#7b7250" roughness={1}/></mesh>
-    {[0,1,2].map(i=><mesh key={i} geometry={eggGeometry} ref={mesh=>{eggs.current[i]=mesh;}} position={[Math.cos(i*2.4)*.13,.15,Math.sin(i*2.4)*.13]} rotation-z={(i-1)*.22} visible={false} raycast={noRaycast} castShadow>
-      <meshStandardMaterial color="#f5ebc9" roughness={.85}/>
-    </mesh>)}
+    <NestEggs state={state} variant="duck"/>
   </group>;
 }

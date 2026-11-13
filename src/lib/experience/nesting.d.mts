@@ -1,3 +1,10 @@
-export type NestState = { eggs:number; reveal:number; visit:number; cooldown:number; laidThisVisit:boolean };
+export type NestSlot = {laid:boolean;reveal:number;incubation:number;hatch:number;age:number};
+export type NestState = {elapsed:number;eggs:number;young:number;phase:'empty'|'incubating'|'hatching'|'raising'|'settled';occupied:boolean;visit:number;laying:number;slots:NestSlot[]};
+export const NEST_CAPACITY:2;
+export const INCUBATION_SECONDS:32;
+export const HATCH_SECONDS:4;
+export const GROWTH_SECONDS:180;
 export function createNestState():NestState;
 export function advanceNest(state:NestState,seconds:number,occupied:boolean):NestState;
+export function nestNeedsBrooding(state:NestState|null|undefined,fledgingAge?:number):boolean;
+export function youngAppearance(slot:NestSlot|undefined):{visible:boolean;reveal:number;growth:number;age:number};
